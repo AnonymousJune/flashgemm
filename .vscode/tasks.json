@@ -1,0 +1,61 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc build 1",
+            "command": "gcc",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-O2",
+                "-g",
+                "-fopenmp",
+                "-mavx512f",
+                "-I/home/wangpy/installOpenBLAS/include",
+                "-c",
+                "${fileDirname}/test2.c",
+                "-o",
+                "${fileDirname}/test2.o"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "build 1"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc build 2",
+            "command": "gcc",
+            "args": [
+                "${fileDirname}/test2.o",
+                "/home/wangpy/installOpenBLAS/lib/libopenblas.a",
+                "-lm",
+                "-fopenmp",
+                "-lpthread",
+                "-o",
+                "${fileDirname}/a.out"
+            ],
+            "options": {
+                "cwd": "${fileDirname}",
+                "env": {
+                    "PATH": "/opt/binutils/bin:${env:PATH}" // NOTE!!!,不加的话ld的路经不对
+                }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "build 2"
+        }
+    ],
+    "version": "2.0.0"
+}

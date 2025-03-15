@@ -1,0 +1,960 @@
+.macro	KERNEL12x16_PACK_K1							
+
+   vbroadcastss	8(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm4, %%zmm20 		
+
+   vbroadcastss	12(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm4, %%zmm21 		
+
+   prefetcht0 		256(%%rax)                 		
+
+   vbroadcastss	16(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm4, %%zmm22 		
+
+   vbroadcastss	20(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm4, %%zmm23 		
+
+   vbroadcastss	24(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm4, %%zmm24 		
+
+   vbroadcastss	28(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm4, %%zmm25 		
+
+   vbroadcastss	32(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm4, %%zmm26 		
+
+	leaq  	(%%rbx, %%r8, 4), %%rbx 				 // B
+
+   vbroadcastss	36(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm4, %%zmm27 		
+
+   vbroadcastss	40(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm4, %%zmm28 		
+
+   vbroadcastss	44(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm4, %%zmm29 		
+   vmovups 		(%%rbx), %%zmm6        			
+	addq  			$48, %%rax 						
+
+   vbroadcastss	(%%rax), %%zmm0    				
+   vfmadd231ps		%%zmm2, %%zmm4, %%zmm30 		
+
+   vbroadcastss	4(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm4, %%zmm31 		
+   vmovups 		%%zmm4, (%%rbp)       			
+	addq  			$64, %%rbp 						
+
+.endm 												
+
+.macro	KERNEL12x16_PACK_K2							
+
+   vbroadcastss	8(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm20 		
+
+   vbroadcastss	12(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm21 		
+
+   vbroadcastss	16(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm22 		
+
+   prefetcht0 		256(%%rax)                 		
+
+   vbroadcastss	20(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm23 		
+
+   vbroadcastss	24(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm24 		
+
+   vbroadcastss	28(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm25 		
+
+   vbroadcastss	32(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm26 		
+
+	leaq  	(%%rbx, %%r8, 4), %%rbx 				 // B
+
+   vbroadcastss	36(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm27 		
+
+   prefetcht0 		64(%%rbx)                 		
+
+   vbroadcastss	40(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm28 		
+
+   vbroadcastss	44(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm29 		
+   vmovups 		(%%rbx), %%zmm4        			
+	addq  			$48, %%rax 						
+
+   vbroadcastss	(%%rax), %%zmm0    				
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm30 		
+
+   vbroadcastss	4(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm31 		
+   vmovups 		%%zmm6, (%%rbp)       			
+	addq  			$64, %%rbp 						
+
+.endm 												
+
+.macro	KERNEL12x16_PACK_END_K						
+
+   vbroadcastss	8(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm20 		
+
+   vbroadcastss	12(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm21 		
+
+   vbroadcastss	16(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm22 		
+
+   prefetcht0 		256(%%rax)                 		
+
+   vbroadcastss	20(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm23 		
+
+   vbroadcastss	24(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm24 		
+
+   vbroadcastss	28(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm25 		
+
+   vbroadcastss	32(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm26 		
+
+   vbroadcastss	36(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm27 		
+
+   vbroadcastss	40(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm28 		
+
+   vbroadcastss	44(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm29 		
+	addq  			$48, %%rax 						
+
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm30 		
+   vmovups 		%%zmm6, (%%rbp)       			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm31 		
+
+.endm 												
+
+//-----------------------------------------------------------------------
+
+.macro	KERNEL12x16_K1								
+
+   vbroadcastss	8(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm4, %%zmm20 		
+
+   vbroadcastss	12(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm4, %%zmm21 		
+
+   prefetcht0 		256(%%rax)                 		
+
+   vbroadcastss	16(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm4, %%zmm22 		
+
+   vbroadcastss	20(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm4, %%zmm23 		
+
+   vbroadcastss	24(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm4, %%zmm24 		
+
+   vbroadcastss	28(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm4, %%zmm25 		
+
+   vbroadcastss	32(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm4, %%zmm26 		
+
+	addq  			$64, %%rbx 						 // B
+
+   vbroadcastss	36(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm4, %%zmm27 		
+
+   vbroadcastss	40(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm4, %%zmm28 		
+
+   vbroadcastss	44(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm4, %%zmm29 		
+   vmovups 		(%%rbx), %%zmm6        			
+	addq  			$48, %%rax 						
+
+   vbroadcastss	(%%rax), %%zmm0    				
+   vfmadd231ps		%%zmm2, %%zmm4, %%zmm30 		
+
+   vbroadcastss	4(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm4, %%zmm31 		
+
+.endm 												
+
+.macro	KERNEL12x16_K2								
+
+   vbroadcastss	8(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm20 		
+
+   vbroadcastss	12(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm21 		
+
+   vbroadcastss	16(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm22 		
+
+   prefetcht0 		256(%%rax)                 		
+
+   vbroadcastss	20(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm23 		
+
+   vbroadcastss	24(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm24 		
+
+   vbroadcastss	28(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm25 		
+
+   vbroadcastss	32(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm26 		
+
+	addq 			$64, %%rbx  					
+
+   vbroadcastss	36(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm27 		
+
+   prefetcht0 		64(%%rbx)                 		
+
+   vbroadcastss	40(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm28 		
+
+   vbroadcastss	44(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm29 		
+   vmovups 		(%%rbx), %%zmm4        			
+	addq  			$48, %%rax 						
+
+   vbroadcastss	(%%rax), %%zmm0    				
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm30 		
+
+   vbroadcastss	4(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm31 		
+
+.endm 												
+
+.macro	KERNEL12x16_END_K							
+
+   vbroadcastss	8(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm20 		
+
+   vbroadcastss	12(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm21 		
+
+   vbroadcastss	16(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm22 		
+
+   prefetcht0 		256(%%rax)                 		
+
+   vbroadcastss	20(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm23 		
+
+   vbroadcastss	24(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm24 		
+
+   vbroadcastss	28(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm25 		
+
+   vbroadcastss	32(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm26 		
+
+   vbroadcastss	36(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm27 		
+
+   vbroadcastss	40(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm28 		
+
+   vbroadcastss	44(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm29 		
+   vmovups 		(%%rbx), %%zmm4        			
+	addq  			$48, %%rax 						
+
+   vbroadcastss	(%%rax), %%zmm0    				
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm30 		
+
+   vbroadcastss	4(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm31 		
+
+.endm 												
+
+.macro	ADD_C_12x16									
+
+   vmovups 		(%%r10), %%zmm0        			
+	vaddps 			%%zmm0, %%zmm20, %%zmm20		
+   vmovups 		(%%r11), %%zmm1        			
+	vaddps 			%%zmm1, %%zmm21, %%zmm21		
+   vmovups 		(%%r12), %%zmm2        			
+	vaddps 			%%zmm2, %%zmm22, %%zmm22		
+   vmovups 		(%%r13), %%zmm3        			
+	vaddps 			%%zmm3, %%zmm23, %%zmm23		
+
+	leaq  			(%%r13, %%r8, 4), %%r10 		 // C0
+	leaq 			(%%r10, %%r8, 4), %%r11 		 // C1
+	leaq 			(%%r11, %%r8, 4), %%r12 		 // C2
+	leaq 			(%%r12, %%r8, 4), %%r13 		 // C3
+
+   vmovups 		(%%r10), %%zmm4        			
+	vaddps 			%%zmm4, %%zmm24, %%zmm24		
+   vmovups 		(%%r11), %%zmm5        			
+	vaddps 			%%zmm5, %%zmm25, %%zmm25		
+   vmovups 		(%%r12), %%zmm6        			
+	vaddps 			%%zmm6, %%zmm26, %%zmm26		
+   vmovups 		(%%r13), %%zmm7        			
+	vaddps 			%%zmm7, %%zmm27, %%zmm27		
+
+	leaq  			(%%r13, %%r8, 4), %%r10 		 // C0
+	leaq 			(%%r10, %%r8, 4), %%r11 		 // C1
+	leaq 			(%%r11, %%r8, 4), %%r12 		 // C2
+	leaq 			(%%r12, %%r8, 4), %%r13 		 // C3
+
+   vmovups 		(%%r10), %%zmm0        			
+	vaddps 			%%zmm0, %%zmm28, %%zmm28		
+   vmovups 		(%%r11), %%zmm1        			
+	vaddps 			%%zmm1, %%zmm29, %%zmm29		
+   vmovups 		(%%r12), %%zmm2        			
+	vaddps 			%%zmm2, %%zmm30, %%zmm30		
+   vmovups 		(%%r13), %%zmm3        			
+	vaddps 			%%zmm3, %%zmm31, %%zmm31		
+
+	mov  	%%rcx, %%r10 							 // C0
+	leaq 	(%%r10, %%r8, 4), %%r11 				 // C1
+	leaq 	(%%r11, %%r8, 4), %%r12 				 // C2
+	leaq 	(%%r12, %%r8, 4), %%r13 				 // C3
+
+.endm 												
+
+.macro	SAVE_12x16 									
+
+   vmovups 		%%zmm20, (%%r10)        		
+   vmovups 		%%zmm21, (%%r11)        		
+	subq 			$12, %%rdi 						
+   vmovups 		%%zmm22, (%%r12)        		
+   vmovups 		%%zmm23, (%%r13)        		
+
+	leaq  	(%%r13, %%r8, 4), %%r10 				 // C0
+	leaq 	(%%r10, %%r8, 4), %%r11 				 // C1
+	leaq 	(%%r11, %%r8, 4), %%r12 				 // C2
+	leaq 	(%%r12, %%r8, 4), %%r13 				 // C3
+
+   vmovups 		%%zmm24, (%%r10)        		
+   vmovups 		%%zmm25, (%%r11)        		
+   vmovups 		%%zmm26, (%%r12)        		
+   vmovups 		%%zmm27, (%%r13)        		
+
+	leaq  	(%%r13, %%r8, 4), %%r10 				 // C0
+	leaq 	(%%r10, %%r8, 4), %%r11 				 // C1
+	leaq 	(%%r11, %%r8, 4), %%r12 				 // C2
+	leaq 	(%%r12, %%r8, 4), %%r13 				 // C3
+
+   vmovups 		%%zmm28, (%%r10)        		
+   vmovups 		%%zmm29, (%%r11)        		
+   vmovups 		%%zmm30, (%%r12)        		
+   vmovups 		%%zmm31, (%%r13)        		
+
+	leaq  	(%%r13, %%r8, 4), %%rcx 				 // C0
+
+.endm 												
+
+//-----------------------------------------------------------------------
+
+.macro	KERNEL8x16_K1								
+
+   vbroadcastss	8(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm4, %%zmm24 		
+
+   vbroadcastss	12(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm4, %%zmm25 		
+
+   prefetcht0 		256(%%rax)                 		
+
+   vbroadcastss	16(%%rax), %%zmm8    			
+   vfmadd231ps		%%zmm2, %%zmm4, %%zmm26 		
+
+   vbroadcastss	20(%%rax), %%zmm9    			
+   vfmadd231ps		%%zmm3, %%zmm4, %%zmm27 		
+
+   vbroadcastss	24(%%rax), %%zmm10    			
+   vfmadd231ps		%%zmm8, %%zmm4, %%zmm28 		
+
+   prefetcht0 		64(%%rbx)                 		
+
+   vbroadcastss	28(%%rax), %%zmm11    			
+   vfmadd231ps		%%zmm9, %%zmm4, %%zmm29 		
+	addq  			$64, %%rbx 						 // B
+   vfmadd231ps		%%zmm10, %%zmm4, %%zmm30 		
+
+	addq  			$32, %%rax 						
+   vmovups 		(%%rbx), %%zmm6        			
+   vfmadd231ps		%%zmm11, %%zmm4, %%zmm31 		
+
+   vbroadcastss	(%%rax), %%zmm0    				
+   vbroadcastss	4(%%rax), %%zmm1    			
+
+.endm 												
+
+.macro	KERNEL8x16_K2								
+
+   vbroadcastss	8(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm24 		
+
+   vbroadcastss	12(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm25 		
+
+   prefetcht0 		256(%%rax)                 		
+
+   vbroadcastss	16(%%rax), %%zmm8    			
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm26 		
+
+   vbroadcastss	20(%%rax), %%zmm9    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm27 		
+
+   vbroadcastss	24(%%rax), %%zmm10    			
+   vfmadd231ps		%%zmm8, %%zmm6, %%zmm28 		
+
+   prefetcht0 		64(%%rbx)                 		
+
+   vbroadcastss	28(%%rax), %%zmm11    			
+   vfmadd231ps		%%zmm9, %%zmm6, %%zmm29 		
+	addq  			$64, %%rbx 						 // B
+   vfmadd231ps		%%zmm10, %%zmm6, %%zmm30 		
+
+	addq  			$32, %%rax 						
+   vmovups 		(%%rbx), %%zmm4        			
+   vfmadd231ps		%%zmm11, %%zmm6, %%zmm31 		
+
+   vbroadcastss	(%%rax), %%zmm0    				
+   vbroadcastss	4(%%rax), %%zmm1    			
+
+.endm 												
+
+.macro	KERNEL8x16_END_K							
+
+   vbroadcastss	8(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm24 		
+
+   vbroadcastss	12(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm25 		
+
+   prefetcht0 		256(%%rax)                 		
+
+   vbroadcastss	16(%%rax), %%zmm8    			
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm26 		
+
+   vbroadcastss	20(%%rax), %%zmm9    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm27 		
+
+   vbroadcastss	24(%%rax), %%zmm10    			
+   vfmadd231ps		%%zmm8, %%zmm6, %%zmm28 		
+
+   vbroadcastss	28(%%rax), %%zmm11    			
+   vfmadd231ps		%%zmm9, %%zmm6, %%zmm29 		
+   vfmadd231ps		%%zmm10, %%zmm6, %%zmm30 		
+
+	addq  			$32, %%rax 						
+   vfmadd231ps		%%zmm11, %%zmm6, %%zmm31 		
+
+.endm 												
+
+.macro	ADD_C_8x16									
+
+   vmovups 		(%%r10), %%zmm4        			
+	vaddps 			%%zmm4, %%zmm24, %%zmm24		
+   vmovups 		(%%r11), %%zmm5        			
+	vaddps 			%%zmm5, %%zmm25, %%zmm25		
+   vmovups 		(%%r12), %%zmm6        			
+	vaddps 			%%zmm6, %%zmm26, %%zmm26		
+   vmovups 		(%%r13), %%zmm7        			
+	vaddps 			%%zmm7, %%zmm27, %%zmm27		
+
+	leaq  			(%%r13, %%r8, 4), %%r10 		 // C0
+	leaq 			(%%r10, %%r8, 4), %%r11 		 // C1
+	leaq 			(%%r11, %%r8, 4), %%r12 		 // C2
+	leaq 			(%%r12, %%r8, 4), %%r13 		 // C3
+
+   vmovups 		(%%r10), %%zmm0        			
+	vaddps 			%%zmm0, %%zmm28, %%zmm28		
+   vmovups 		(%%r11), %%zmm1        			
+	vaddps 			%%zmm1, %%zmm29, %%zmm29		
+   vmovups 		(%%r12), %%zmm2        			
+	vaddps 			%%zmm2, %%zmm30, %%zmm30		
+   vmovups 		(%%r13), %%zmm3        			
+	vaddps 			%%zmm3, %%zmm31, %%zmm31		
+
+	mov  	%%rcx, %%r10 							 // C0
+	leaq 	(%%r10, %%r8, 4), %%r11 				 // C1
+	leaq 	(%%r11, %%r8, 4), %%r12 				 // C2
+	leaq 	(%%r12, %%r8, 4), %%r13 				 // C3
+
+.endm 												
+
+.macro	SAVE_8x16 									
+
+   vmovups 		%%zmm24, (%%r10)        		
+   vmovups 		%%zmm25, (%%r11)        		
+	subq 			$8, %%rdi 						
+   vmovups 		%%zmm26, (%%r12)        		
+   vmovups 		%%zmm27, (%%r13)        		
+
+	leaq  	(%%r13, %%r8, 4), %%r10 				 // C0
+	leaq 	(%%r10, %%r8, 4), %%r11 				 // C1
+	leaq 	(%%r11, %%r8, 4), %%r12 				 // C2
+	leaq 	(%%r12, %%r8, 4), %%r13 				 // C3
+
+   vmovups 		%%zmm28, (%%r10)        		
+   vmovups 		%%zmm29, (%%r11)        		
+   vmovups 		%%zmm30, (%%r12)        		
+   vmovups 		%%zmm31, (%%r13)        		
+
+	leaq  	(%%r13, %%r8, 4), %%rcx 				 // C0
+
+.endm 												
+
+//-----------------------------------------------------------------------
+
+.macro	KERNEL4x16_K1								
+
+   vbroadcastss	8(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm4, %%zmm28 		
+
+   vbroadcastss	12(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm4, %%zmm29 		
+	addq  			$16, %%rax 						
+
+   prefetcht0 		256(%%rax)                 		
+	addq  			$64, %%rbx 						 // B
+   vbroadcastss	(%%rax), %%zmm0    				
+   vfmadd231ps		%%zmm2, %%zmm4, %%zmm30 		
+
+   vbroadcastss	4(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm4, %%zmm31 		
+
+   prefetcht0 		64(%%rbx)                 		
+   vmovups 		(%%rbx), %%zmm6        			
+
+.endm 												
+
+.macro	KERNEL4x16_K2								
+
+   vbroadcastss	8(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm28 		
+
+   vbroadcastss	12(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm29 		
+	addq  			$16, %%rax 						
+
+   prefetcht0 		256(%%rax)                 		
+	addq  			$64, %%rbx 						 // B
+   vbroadcastss	(%%rax), %%zmm0    				
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm30 		
+
+   vbroadcastss	4(%%rax), %%zmm1    			
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm31 		
+
+   vmovups 		(%%rbx), %%zmm4        			
+   prefetcht0 		64(%%rbx)                 		
+
+.endm 												
+
+.macro	KERNEL4x16_END_K							
+
+   vbroadcastss	8(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm6, %%zmm28 		
+
+   vbroadcastss	12(%%rax), %%zmm3    			
+   vfmadd231ps		%%zmm1, %%zmm6, %%zmm29 		
+	addq  			$16, %%rax 						
+
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm30 		
+   vfmadd231ps		%%zmm3, %%zmm6, %%zmm31 		
+
+.endm 												
+
+.macro	ADD_C_4x16									
+
+   vmovups 		(%%r10), %%zmm0        			
+	vaddps 			%%zmm0, %%zmm28, %%zmm28		
+   vmovups 		(%%r11), %%zmm1        			
+	vaddps 			%%zmm1, %%zmm29, %%zmm29		
+   vmovups 		(%%r12), %%zmm2        			
+	vaddps 			%%zmm2, %%zmm30, %%zmm30		
+   vmovups 		(%%r13), %%zmm3        			
+	vaddps 			%%zmm3, %%zmm31, %%zmm31		
+
+	mov  	%%rcx, %%r10 							 // C0
+	leaq 	(%%r10, %%r8, 4), %%r11 				 // C1
+	leaq 	(%%r11, %%r8, 4), %%r12 				 // C2
+	leaq 	(%%r12, %%r8, 4), %%r13 				 // C3
+
+.endm 												
+
+.macro	SAVE_4x16 	
+   subq 			$4, %%rdi 						
+
+   vmovups 		%%zmm28, (%%r10)        		
+   vmovups 		%%zmm29, (%%r11)        		
+   vmovups 		%%zmm30, (%%r12)        		
+   vmovups 		%%zmm31, (%%r13)        		
+
+	leaq  	(%%r13, %%r8, 4), %%rcx 				 // C0
+
+.endm 												
+
+//-----------------------------------------------------------------------
+
+.macro	KERNEL1x16_K1
+   prefetcht0 		256(%%rax)
+   addq  			$4, %%rax 
+
+   vbroadcastss	(%%rax), %%zmm2    			
+   vfmadd231ps		%%zmm0, %%zmm4, %%zmm30 				
+							           		
+	addq  			$64, %%rbx 						 // B	
+   vmovups 		   (%%rbx), %%zmm6  
+   prefetcht0 		64(%%rbx)        			
+
+.endm 												
+
+.macro	KERNEL1x16_K2		
+   prefetcht0 		256(%%rax)  						
+	addq  			$4, %%rax
+
+   vbroadcastss	(%%rax), %%zmm0    			
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm30 					
+                  		
+	addq  			$64, %%rbx 						 // B		
+   vmovups 		   (%%rbx), %%zmm4        			
+   prefetcht0 		64(%%rbx)                 		
+
+.endm 												
+
+.macro	KERNEL1x16_END_K									
+   vfmadd231ps		%%zmm2, %%zmm6, %%zmm30 					
+	addq  			$4, %%rax 								
+.endm 												
+
+.macro	ADD_C_1x16											
+   vmovups 		(%%r10), %%zmm2        			
+	vaddps 			%%zmm2, %%zmm30, %%zmm30				
+	mov  	%%rcx, %%r10 							   // C0
+.endm 												
+
+.macro	SAVE_1x16 									
+   vmovups 		%%zmm30, (%%r10)        		
+   subq 			$1, %%rdi        		       		
+	leaq  	(%%r10, %%r8, 4), %%rcx 			// C0
+
+.endm 												
+
+//-----------------------------------------------------------------
+
+SMM_NN_KERNEL12x16:								
+
+   mov 	%[C], %%rcx   	 						
+   mov 	%[A], %%rax   	 						
+   mov 	%[B], %%rbx   	 						
+
+   prefetcht0 		(%%rax)                 		
+
+	mov 	%[K], %%rdx 							 // K
+	mov  	%[LN], %%r8 							
+	mov  	%[Bc], %%r14 							
+	mov  	%[M], %%rdi 							
+	mov 	%[k_tag], %%r15 						
+
+   prefetcht0 		(%%rbx)                 		
+	mov 	%%rbx, %%r9 							 // B
+	mov 	%%rdx, %%rsi 							 // K
+
+BEGIN_PACK12x16:									
+
+	mov 	%%r9, %%rbx 							 // B
+   prefetcht0 		(%%rbx)                 		
+
+	mov  	%%rcx, %%r10 							 // C0
+   prefetcht1 		(%%r10)                 		
+	leaq 	(%%r10, %%r8, 4), %%r11 				 // C1
+   prefetcht1 		(%%r11)                 		
+	leaq 	(%%r11, %%r8, 4), %%r12 				 // C2
+   prefetcht1 		(%%r12)                 		
+	leaq 	(%%r12, %%r8, 4), %%r13 				 // C3
+   prefetcht1 		(%%r13)                 		
+
+	mov 	%%rsi, %%rdx 							 // K
+	mov 	%%r14, %%rbp 							 // Bc
+
+   vmovups		(%%rbx), %%zmm4        				
+	vpxorq 		%%zmm20, %%zmm20, %%zmm20 			
+	vpxorq 		%%zmm21, %%zmm21, %%zmm21 			
+   vbroadcastss	(%%rax), %%zmm0    				
+	vpxorq 		%%zmm22, %%zmm22, %%zmm22 			
+	vpxorq 		%%zmm23, %%zmm23, %%zmm23 			
+   vbroadcastss	4(%%rax), %%zmm1    			
+	vpxorq 		%%zmm24, %%zmm24, %%zmm24 			
+	vpxorq 		%%zmm25, %%zmm25, %%zmm25			
+	vpxorq 		%%zmm26, %%zmm26, %%zmm26 			
+	vpxorq 		%%zmm27, %%zmm27, %%zmm27 			
+	vpxorq 		%%zmm28, %%zmm28, %%zmm28 			
+	vpxorq 		%%zmm29, %%zmm29, %%zmm29			
+	vpxorq 		%%zmm30, %%zmm30, %%zmm30 			
+	vpxorq 		%%zmm31, %%zmm31, %%zmm31 			
+
+	subq 	$8, %%rdx 								
+
+MAIN_PACK_K12x16:									
+
+	KERNEL12x16_PACK_K1 							
+	KERNEL12x16_PACK_K2 							
+	KERNEL12x16_PACK_K1 							
+	KERNEL12x16_PACK_K2 							
+	KERNEL12x16_PACK_K1 							
+	KERNEL12x16_PACK_K2 							
+	KERNEL12x16_PACK_K1 							
+   cmp 	$0, %%rdx           					
+	je 		EDGE_PACK_K12x16 						
+	KERNEL12x16_PACK_K2 							
+
+	subq 	$8, %%rdx 								
+   jmp     MAIN_PACK_K12x16       					
+
+EDGE_PACK_K12x16:									
+
+	KERNEL12x16_PACK_END_K 							
+	jmp  	BEGIN_SAVE_12x16 						
+
+//-----------------------------------------------------------------
+
+BEGIN_M12x16:										
+
+	mov 	%%r14, %%rbx 							 // Bc
+   prefetcht0 		(%%rbx)                 		
+
+	mov  	%%rcx, %%r10 							 // C0
+   prefetcht1 		(%%r10) 
+	leaq 	(%%r10, %%r8, 4), %%r11 			 // C1
+   prefetcht1 		(%%r11) 
+	leaq 	(%%r11, %%r8, 4), %%r12 			 // C2
+   prefetcht1 		(%%r12) 
+	leaq 	(%%r12, %%r8, 4), %%r13 			 // C3
+   prefetcht1 		(%%r13) 
+
+	mov 	%%rsi, %%rdx 							 // K									
+
+   vmovups		(%%rbx), %%zmm4        				
+	vpxorq 		%%zmm20, %%zmm20, %%zmm20 			
+	vpxorq 		%%zmm21, %%zmm21, %%zmm21 			
+	vpxorq 		%%zmm22, %%zmm22, %%zmm22 			
+   vbroadcastss	(%%rax), %%zmm0    				
+	vpxorq 		%%zmm23, %%zmm23, %%zmm23 			
+	vpxorq 		%%zmm24, %%zmm24, %%zmm24 			
+   vbroadcastss	4(%%rax), %%zmm1    			
+	vpxorq 		%%zmm25, %%zmm25, %%zmm25			
+	vpxorq 		%%zmm26, %%zmm26, %%zmm26 			
+	vpxorq 		%%zmm27, %%zmm27, %%zmm27 			
+	vpxorq 		%%zmm28, %%zmm28, %%zmm28 			
+	vpxorq 		%%zmm29, %%zmm29, %%zmm29			
+	vpxorq 		%%zmm30, %%zmm30, %%zmm30 			
+	vpxorq 		%%zmm31, %%zmm31, %%zmm31 			
+
+	subq 	$8, %%rdx 								
+
+MAIN_K12x16:										
+
+	KERNEL12x16_K1 									
+	KERNEL12x16_K2 									
+	KERNEL12x16_K1 									
+	KERNEL12x16_K2 									
+	KERNEL12x16_K1 									
+	KERNEL12x16_K2 									
+	KERNEL12x16_K1 									
+   cmp 	$0, %%rdx           					
+	je 		EDGE_K12x16 							
+	KERNEL12x16_K2 									
+
+	subq 	$8, %%rdx 								
+   jmp     MAIN_K12x16       						
+
+EDGE_K12x16:										
+
+	KERNEL12x16_END_K 								
+
+BEGIN_SAVE_12x16:									
+	cmp 	$0, %%r15								
+	je  	SAVE_C12x16 							
+	ADD_C_12x16 									
+
+SAVE_C12x16: 										
+	SAVE_12x16 										
+
+	cmpq  	$12, %%rdi 								
+	jnb 	BEGIN_M12x16                 // 不小于（或等于）则跳转 							
+
+//------------------------------------------------------------------
+
+BEGIN_M8_N16:										
+   cmpq  	$8, %%rdi  								 // M % 8
+	jb   	BEGIN_M4_N16 	                      //小于则跳转
+
+	mov 	%%r14, %%rbx 							    // Bc
+   prefetcht0 		(%%rbx)                 		
+
+	mov  	%%rcx, %%r10 							    // C0
+   prefetcht1 		(%%r10)                 		
+	leaq 	(%%r10, %%r8, 4), %%r11 				 // C1
+   prefetcht1 		(%%r11)                 		
+	leaq 	(%%r11, %%r8, 4), %%r12 				 // C2
+   prefetcht1 		(%%r12)                 		
+	leaq 	(%%r12, %%r8, 4), %%r13 				 // C3
+   prefetcht1 		(%%r13)                 		
+
+	mov 	%%rsi, %%rdx 							 // K
+   vmovups		(%%rbx), %%zmm4        				
+	vpxorq 		%%zmm24, %%zmm24, %%zmm24 			
+	vpxorq 		%%zmm25, %%zmm25, %%zmm25			
+   vbroadcastss	(%%rax), %%zmm0    				
+	vpxorq 		%%zmm26, %%zmm26, %%zmm26 			
+	vpxorq 		%%zmm27, %%zmm27, %%zmm27 			
+   vbroadcastss	4(%%rax), %%zmm1    			
+	vpxorq 		%%zmm28, %%zmm28, %%zmm28 			
+	vpxorq 		%%zmm29, %%zmm29, %%zmm29			
+	vpxorq 		%%zmm30, %%zmm30, %%zmm30 			
+	vpxorq 		%%zmm31, %%zmm31, %%zmm31 			
+
+	subq 	$8, %%rdx 								
+
+MAIN_K_M8_N16:										
+
+	KERNEL8x16_K1 									
+	KERNEL8x16_K2 									
+	KERNEL8x16_K1 									
+	KERNEL8x16_K2 									
+	KERNEL8x16_K1 									
+	KERNEL8x16_K2 									
+	KERNEL8x16_K1 									
+   cmp 	$0, %%rdx           					
+	je 		EDGE_K_M8_N16 							
+	KERNEL8x16_K2 									
+
+	subq 	$8, %%rdx 								
+   jmp     MAIN_K_M8_N16       					
+
+EDGE_K_M8_N16:										
+
+	KERNEL8x16_END_K 								
+
+	cmp 	$0, %%r15								
+	je  	SAVE_C_8x16 							
+	ADD_C_8x16 										
+
+SAVE_C_8x16: 										
+	SAVE_8x16 										
+
+//----------------------------------------------------------------
+
+BEGIN_M4_N16:										
+
+	cmpq  	$4, %%rdi  								 // M % 4
+	jb   	BEGIN_M1_N16 								
+
+	mov 	%%r14, %%rbx 							 // Bc
+   prefetcht0 		(%%rbx)                 		
+
+	mov  	%%rcx, %%r10 							 // C0
+   prefetcht1 		(%%r10)                 		
+	leaq 	(%%r10, %%r8, 4), %%r11 				 // C1
+   prefetcht1 		(%%r11)                 		
+	leaq 	(%%r11, %%r8, 4), %%r12 				 // C2
+   prefetcht1 		(%%r12)                 		
+	leaq 	(%%r12, %%r8, 4), %%r13 				 // C3
+   prefetcht1 		(%%r13)                 		
+
+	mov 	%%rsi, %%rdx 							 // K
+
+   vmovups		(%%rbx), %%zmm4        				
+   vbroadcastss	(%%rax), %%zmm0    				
+	vpxorq 		%%zmm28, %%zmm28, %%zmm28 			
+	vpxorq 		%%zmm29, %%zmm29, %%zmm29			
+   vbroadcastss	4(%%rax), %%zmm1    			
+	vpxorq 		%%zmm30, %%zmm30, %%zmm30 			
+	vpxorq 		%%zmm31, %%zmm31, %%zmm31 			
+
+	subq 	$8, %%rdx 								
+
+MAIN_K_M4_N16:										
+
+	KERNEL4x16_K1 									
+	KERNEL4x16_K2 									
+	KERNEL4x16_K1 									
+	KERNEL4x16_K2 									
+	KERNEL4x16_K1 									
+	KERNEL4x16_K2 									
+	KERNEL4x16_K1 									
+   cmp 	$0, %%rdx           					
+	je 		EDGE_K_M4_N16 							
+	KERNEL4x16_K2 									
+
+	subq 	$8, %%rdx 								
+   jmp     MAIN_K_M4_N16       					
+
+EDGE_K_M4_N16:										
+
+	KERNEL4x16_END_K 								
+
+	cmp 	$0, %%r15								
+	je  	SAVE_C_4x16 							
+	ADD_C_4x16 										
+
+SAVE_C_4x16: 										
+	SAVE_4x16 										
+
+//----------------------------------------------------------------
+
+BEGIN_M1_N16:										
+	cmpq  	$1, %%rdi  							 // M % 1
+	jb   	END_M_N16 								
+
+	mov 	%%r14, %%rbx 							 // Bc
+   prefetcht0 		(%%rbx)                 		
+
+	mov  	%%rcx, %%r10 							 // C0
+   prefetcht1 		(%%r10)                 		              		                 		
+
+	mov 	%%rsi, %%rdx 							 // K
+
+   vmovups		(%%rbx), %%zmm4        				
+   vbroadcastss	(%%rax), %%zmm0    		 // A0				
+	vpxorq 		%%zmm30, %%zmm30, %%zmm30 						
+
+	subq 	$8, %%rdx 									
+
+MAIN_K_M1_N16:										
+	KERNEL1x16_K1 									
+	KERNEL1x16_K2 									
+	KERNEL1x16_K1 									
+	KERNEL1x16_K2 									
+	KERNEL1x16_K1 									
+	KERNEL1x16_K2 									
+	KERNEL1x16_K1 									
+   cmp 	$0, %%rdx           					
+	je 		EDGE_K_M1_N16 							
+	KERNEL1x16_K2 									
+
+	subq 	$8, %%rdx 								
+   jmp     MAIN_K_M1_N16   					
+
+EDGE_K_M1_N16:										
+	KERNEL1x16_END_K 								
+
+	cmp 	$0, %%r15								
+	je  	SAVE_C_1x16 							
+	ADD_C_1x16 
+									
+SAVE_C_1x16: 										
+	SAVE_1x16 	
+   cmpq  	$1, %%rdi 
+	jnb 	BEGIN_M1_N16 					//不小于（或等于）则跳转								
+
+//-----------------------------------------------------------------
+
+
+END_M_N16:											
+

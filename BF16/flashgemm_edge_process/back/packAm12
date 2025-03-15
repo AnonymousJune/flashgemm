@@ -1,0 +1,278 @@
+  movl %[LK], %%r8d    
+  movl %[LK], %%r15d    
+
+  mov %[Ac], %%r9    
+  movl %[K], %%r10d   
+  mov %[A], %%r11    
+  mov %[A], %%r12    
+  mov %[A], %%r13    
+  mov %[A], %%r14    
+
+  mov %[A], %%rbx    
+  mov %[A], %%rcx    
+  mov %[A], %%rdx    
+  mov %[A], %%rdi    
+
+  shr $4, %%r10       
+  shl $2, %%r8       
+  shl $3, %%r15       
+  add %%r8, %%r14     
+  add %%r8, %%rdi     
+  add %%r8, %%r12     
+  add %%r8, %%rcx     
+  add %%r15, %%r13     
+  add %%r15, %%rdx     
+  shl $2, %%r8       
+  add %%r15, %%r14     
+  add %%r15, %%rdi     
+  add %%r8, %%rbx     
+  add %%r8, %%rcx     
+  add %%r8, %%rdx     
+  add %%r8, %%rdi     
+
+  shl $1, %%r15       
+
+  vmovups (%%r11), %%zmm2         // 512/16=32个K
+  vmovups (%%r12), %%zmm3       
+  vmovups (%%r13), %%zmm4       
+  vmovups (%%r14), %%zmm5       
+
+  sub $64, %%r15              
+
+  vmovups (%%rbx), %%zmm6       
+  vmovups (%%rcx), %%zmm7       
+  vmovups (%%rdx), %%zmm8       
+  vmovups (%%rdi), %%zmm9       
+
+  mov %%r15, %%rsi              
+
+  jmp NPACK_12                   
+
+NPACK_Pre_12:              
+  add $64, %%r11      
+  add $64, %%r12      
+  add $64, %%r13      
+  add $64, %%r14      
+  sub %%rsi, %%rbx      
+  sub %%rsi, %%rcx      
+  sub %%rsi, %%rdx      
+  sub %%rsi, %%rdi      
+
+  add $768, %%r9      
+
+  vmovups (%%r11), %%zmm2       
+  vmovups (%%r12), %%zmm3       
+  vmovups (%%r13), %%zmm4       
+  vmovups (%%r14), %%zmm5       
+  vmovups (%%rbx), %%zmm6       
+  vmovups (%%rcx), %%zmm7       
+  vmovups (%%rdx), %%zmm8       
+  vmovups (%%rdi), %%zmm9       
+
+NPACK_12:                 
+
+  movl    $0xaa, %%eax       
+  movl    $0xcc, %%r15d         
+
+  kmovd   %%eax, %%k1            
+  kmovd   %%r15d, %%k2             
+
+  vunpcklps %%zmm3, %%zmm2, %%zmm0    
+  vunpcklps %%zmm7, %%zmm6, %%zmm1    
+
+  movl    $0x33, %%eax           
+
+  vunpcklps %%zmm5, %%zmm4, %%zmm26    
+  vunpcklps %%zmm9, %%zmm8, %%zmm27    
+
+  kmovd   %%eax, %%k3             
+
+  vpermq  $0x80, %%zmm26, %%zmm0%{%%k1%}      
+  vmovups %%zmm0, %%zmm28     
+  vpermq  $0x80, %%zmm27, %%zmm1%{%%k1%}      
+  vmovups %%zmm1, %%zmm29     
+
+  movl    $0x33, %%r15d           
+
+  vpermq  $0x40, %%zmm1, %%zmm0%{%%k2%}      
+  vpermq  $0x0e, %%zmm28, %%zmm29%{%%k3%}        
+
+  vmovups %%ymm0, (%%r9)         
+  vextractf64x4 $0x1, %%zmm0,  %%ymm30      
+  vmovups %%ymm30, 384(%%r9)            
+
+  vmovups %%ymm29, 192(%%r9)         
+  vextractf64x4 $0x1, %%zmm29,  %%ymm31      
+  vmovups %%ymm31, 576(%%r9)            
+
+  movl    $0x55, %%eax       
+  movl    $0xcc, %%r15d         
+
+  kmovd   %%eax, %%k1            
+  kmovd   %%r15d, %%k2             
+
+  vunpcklps %%zmm3, %%zmm2, %%zmm0    
+  vunpcklps %%zmm7, %%zmm6, %%zmm1    
+
+  movl    $0x33, %%eax           
+
+  vunpcklps %%zmm5, %%zmm4, %%zmm26    
+  vunpcklps %%zmm9, %%zmm8, %%zmm27    
+
+  kmovd   %%eax, %%k3             
+
+  vpermq  $0x31, %%zmm0, %%zmm26%{%%k1%}      
+  vmovups %%zmm26, %%zmm28     
+  vpermq  $0x31, %%zmm1, %%zmm27%{%%k1%}      
+  vmovups %%zmm27, %%zmm29     
+
+  vpermq  $0x40, %%zmm27, %%zmm26%{%%k2%}      
+  vpermq  $0x0e, %%zmm28, %%zmm29%{%%k3%}        
+
+  vmovups %%ymm26, 48(%%r9)         
+  vextractf64x4  $0x1,%%zmm26, %%ymm30      
+  vmovups %%ymm30, 432(%%r9)            
+
+  vmovups %%ymm29, 240(%%r9)         
+  vextractf64x4 $0x1, %%zmm29,  %%ymm31      
+  vmovups %%ymm31, 624(%%r9)            
+
+  movl    $0xaa, %%eax       
+  movl    $0xcc, %%r15d         
+
+  kmovd   %%eax, %%k1            
+  kmovd   %%r15d, %%k2             
+
+  vunpckhps %%zmm3, %%zmm2, %%zmm0    
+  vunpckhps %%zmm7, %%zmm6, %%zmm1    
+
+  movl    $0x33, %%eax           
+
+  vunpckhps %%zmm5, %%zmm4, %%zmm26    
+  vunpckhps %%zmm9, %%zmm8, %%zmm27    
+
+  kmovd   %%eax, %%k3             
+
+  vpermq   $0x80, %%zmm26, %%zmm0%{%%k1%}      
+  vmovups %%zmm0, %%zmm28     
+  vpermq   $0x80, %%zmm27, %%zmm1%{%%k1%}      
+  vmovups %%zmm1, %%zmm29     
+
+  vpermq  $0x40, %%zmm1, %%zmm0%{%%k2%}      
+  vpermq  $0x0e, %%zmm28, %%zmm29%{%%k3%}        
+
+  vmovups %%ymm0, 96(%%r9)         
+  vextractf64x4 $0x1, %%zmm0,  %%ymm30      
+  vmovups %%ymm30, 480(%%r9)            
+
+  vmovups %%ymm29, 288(%%r9)         
+  vextractf64x4 $0x1, %%zmm29,  %%ymm31      
+  vmovups %%ymm31, 672(%%r9)            
+
+  movl    $0x55, %%eax       
+  movl    $0xcc, %%r15d         
+
+  kmovd   %%eax, %%k1            
+  kmovd   %%r15d, %%k2             
+
+  vunpckhps %%zmm3, %%zmm2, %%zmm0    
+  vunpckhps %%zmm7, %%zmm6, %%zmm1    
+
+  movl    $0x33, %%eax           
+
+  vunpckhps %%zmm5, %%zmm4, %%zmm26    
+  vunpckhps %%zmm9, %%zmm8, %%zmm27    
+
+  kmovd   %%eax, %%k3             
+
+  vpermq  $0x31, %%zmm0, %%zmm26%{%%k1%}      
+  vmovups %%zmm26, %%zmm28     
+  vpermq  $0x31, %%zmm1, %%zmm27%{%%k1%}      
+  vmovups %%zmm27, %%zmm29     
+
+  vpermq  $0x40, %%zmm27, %%zmm26%{%%k2%}      
+  vpermq  $0x0e, %%zmm28, %%zmm29%{%%k3%}        
+
+  vmovups %%ymm26, 144(%%r9)         
+  vextractf64x4  $0x1,%%zmm26, %%ymm30      
+  vmovups %%ymm30, 528(%%r9)            
+
+  vmovups %%ymm29, 336(%%r9)         
+  vextractf64x4 $0x1, %%zmm29,  %%ymm31      
+  vmovups %%ymm31, 720(%%r9)            
+
+  add %%r8, %%rbx     
+  add %%r8, %%rcx     
+  add %%r8, %%rdx     
+  add %%r8, %%rdi     
+
+  vmovups (%%rbx), %%zmm2       
+  vmovups (%%rcx), %%zmm3       
+  vmovups (%%rdx), %%zmm4       
+  vmovups (%%rdi), %%zmm5       
+
+  movl    $0xaa, %%eax       
+  kmovd   %%eax, %%k1            
+  vunpcklps %%zmm3, %%zmm2, %%zmm0    
+  vunpcklps %%zmm5, %%zmm4, %%zmm26    
+
+  vpermq   $0x80, %%zmm26, %%zmm0%{%%k1%}      
+  vmovups %%xmm0, 32(%%r9)         
+  vextractf32x4  $0x1, %%zmm0, %%xmm28      
+  vextractf32x4  $0x2, %%zmm0, %%xmm29      
+  vextractf32x4  $0x3, %%zmm0, %%xmm30      
+
+  vmovups %%xmm28, 224(%%r9)         
+  vmovups %%xmm29, 416(%%r9)         
+  vmovups %%xmm30, 608(%%r9)         
+
+  movl    $0x55, %%eax       
+  kmovd   %%eax, %%k1            
+
+  vunpcklps %%zmm3, %%zmm2, %%zmm0    
+  vunpcklps %%zmm5, %%zmm4, %%zmm26    
+
+  vpermq  $0x31, %%zmm0, %%zmm26%{%%k1%}      
+  vmovups %%xmm26, 80(%%r9)         
+  vextractf32x4  $0x1, %%zmm26, %%xmm28      
+  vextractf32x4  $0x2, %%zmm26, %%xmm29      
+  vextractf32x4  $0x3, %%zmm26, %%xmm30      
+
+  vmovups %%xmm28, 272(%%r9)         
+  vmovups %%xmm29, 464(%%r9)         
+  vmovups %%xmm30, 656(%%r9)         
+
+  movl    $0xaa, %%eax       
+  kmovd   %%eax, %%k1            
+  vunpckhps %%zmm3, %%zmm2, %%zmm0    
+  vunpckhps %%zmm5, %%zmm4, %%zmm26    
+  vpermq   $0x80, %%zmm26, %%zmm0%{%%k1%}      
+  vmovups %%xmm0, 128(%%r9)         
+  vextractf32x4  $0x1, %%zmm0, %%xmm28      
+  vextractf32x4  $0x2, %%zmm0, %%xmm29      
+  vextractf32x4  $0x3, %%zmm0, %%xmm30      
+
+  vmovups %%xmm28, 320(%%r9)         
+  vmovups %%xmm29, 512(%%r9)         
+  vmovups %%xmm30, 704(%%r9)         
+
+  movl    $0x55, %%eax       
+  kmovd   %%eax, %%k1            
+
+  vunpckhps %%zmm3, %%zmm2, %%zmm0    
+  vunpckhps %%zmm5, %%zmm4, %%zmm26    
+
+  vpermq  $0x31, %%zmm0, %%zmm26%{%%k1%}      
+  vmovups %%xmm26, 176(%%r9)         
+  vextractf32x4  $0x1, %%zmm26, %%xmm28      
+  vextractf32x4  $0x2, %%zmm26, %%xmm29      
+  vextractf32x4  $0x3, %%zmm26, %%xmm30      
+  sub    $1, %%r10       
+  vmovups %%xmm28, 368(%%r9)         
+  vmovups %%xmm29, 560(%%r9)         
+  vmovups %%xmm30, 752(%%r9)         
+
+  je  NPACK_END_12           
+  jmp NPACK_Pre_12           
+
+NPACK_END_12:                         

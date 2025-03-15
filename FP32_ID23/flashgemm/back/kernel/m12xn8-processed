@@ -1,0 +1,962 @@
+".macro    KERNEL12x8_PACK_K1                                \n"
+
+"   vbroadcastss    8(%%rax), %%ymm2                         \n"
+"   vfmadd231ps        %%ymm0, %%ymm4, %%ymm20               \n"
+
+"   vbroadcastss    12(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm4, %%ymm21               \n"
+
+"   prefetcht0         256(%%rax)                            \n"
+
+"   vbroadcastss    16(%%rax), %%ymm0                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm4, %%ymm22               \n"
+
+"   vbroadcastss    20(%%rax), %%ymm1                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm4, %%ymm23               \n"
+
+"   vbroadcastss    24(%%rax), %%ymm2                        \n"
+"   vfmadd231ps        %%ymm0, %%ymm4, %%ymm24               \n"
+
+"   vbroadcastss    28(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm4, %%ymm25               \n"
+
+"   vbroadcastss    32(%%rax), %%ymm0                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm4, %%ymm26               \n"
+
+"    leaq      (%%rbx, %%r8, 4), %%rbx                       \n"// B
+
+"   vbroadcastss    36(%%rax), %%ymm1                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm4, %%ymm27               \n"
+
+"   vbroadcastss    40(%%rax), %%ymm2                        \n"
+"   vfmadd231ps        %%ymm0, %%ymm4, %%ymm28               \n"
+
+"   vbroadcastss    44(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm4, %%ymm29               \n"
+"   vmovups         (%%rbx), %%ymm6                          \n"
+"    addq              $48, %%rax                            \n"
+
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"   vfmadd231ps        %%ymm2, %%ymm4, %%ymm30               \n"
+
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+"   vfmadd231ps        %%ymm3, %%ymm4, %%ymm31               \n"
+"   vmovups         %%ymm4, (%%rbp)                          \n"
+"    addq              $32, %%rbp                            \n"//64->32                         
+
+".endm                                                       \n"
+
+".macro    KERNEL12x8_PACK_K2                                \n"
+
+"   vbroadcastss    8(%%rax), %%ymm2                         \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm20               \n"
+
+"   vbroadcastss    12(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm21               \n"
+
+"   vbroadcastss    16(%%rax), %%ymm0                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm22               \n"
+
+"   prefetcht0         256(%%rax)                            \n"
+
+"   vbroadcastss    20(%%rax), %%ymm1                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm23               \n"
+
+"   vbroadcastss    24(%%rax), %%ymm2                        \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm24               \n"
+
+"   vbroadcastss    28(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm25               \n"
+
+"   vbroadcastss    32(%%rax), %%ymm0                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm26               \n"
+
+"    leaq      (%%rbx, %%r8, 4), %%rbx                       \n"// B
+
+"   vbroadcastss    36(%%rax), %%ymm1                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm27               \n"
+
+"   prefetcht0         32(%%rbx)                             \n"//                  
+
+"   vbroadcastss    40(%%rax), %%ymm2                        \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm28               \n"
+
+"   vbroadcastss    44(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm29               \n"
+"   vmovups         (%%rbx), %%ymm4                          \n"
+"    addq              $48, %%rax                            \n"
+
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm30               \n"
+
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm31               \n"
+"   vmovups         %%ymm6, (%%rbp)                          \n"
+"    addq              $32, %%rbp                            \n"//64->32                         
+
+".endm                                                       \n"
+
+".macro    KERNEL12x8_PACK_END_K                             \n"
+
+"   vbroadcastss    8(%%rax), %%ymm2                         \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm20               \n"
+
+"   vbroadcastss    12(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm21               \n"
+
+"   vbroadcastss    16(%%rax), %%ymm0                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm22               \n"
+
+"   prefetcht0         256(%%rax)                            \n"
+
+"   vbroadcastss    20(%%rax), %%ymm1                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm23               \n"
+
+"   vbroadcastss    24(%%rax), %%ymm2                        \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm24               \n"
+
+"   vbroadcastss    28(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm25               \n"
+
+"   vbroadcastss    32(%%rax), %%ymm0                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm26               \n"
+
+"   vbroadcastss    36(%%rax), %%ymm1                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm27               \n"
+
+"   vbroadcastss    40(%%rax), %%ymm2                        \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm28               \n"
+
+"   vbroadcastss    44(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm29               \n"
+"    addq              $48, %%rax                            \n"
+
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm30               \n"
+"   vmovups         %%ymm6, (%%rbp)                          \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm31               \n"
+
+".endm                                                       \n"
+
+//-----------------------------------------------------------------------
+
+".macro    KERNEL12x8_K1                                     \n"
+
+"   vbroadcastss    8(%%rax), %%ymm2                         \n"
+"   vfmadd231ps        %%ymm0, %%ymm4, %%ymm20               \n"
+
+"   vbroadcastss    12(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm4, %%ymm21               \n"
+
+"   prefetcht0         256(%%rax)                            \n"
+
+"   vbroadcastss    16(%%rax), %%ymm0                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm4, %%ymm22               \n"
+
+"   vbroadcastss    20(%%rax), %%ymm1                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm4, %%ymm23               \n"
+
+"   vbroadcastss    24(%%rax), %%ymm2                        \n"
+"   vfmadd231ps        %%ymm0, %%ymm4, %%ymm24               \n"
+
+"   vbroadcastss    28(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm4, %%ymm25               \n"
+
+"   vbroadcastss    32(%%rax), %%ymm0                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm4, %%ymm26               \n"
+
+"    addq              $32, %%rbx                            \n"// B
+
+"   vbroadcastss    36(%%rax), %%ymm1                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm4, %%ymm27               \n"
+
+"   vbroadcastss    40(%%rax), %%ymm2                        \n"
+"   vfmadd231ps        %%ymm0, %%ymm4, %%ymm28               \n"
+
+"   vbroadcastss    44(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm4, %%ymm29               \n"
+"   vmovups         (%%rbx), %%ymm6                          \n"
+"    addq              $48, %%rax                            \n"
+
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"   vfmadd231ps        %%ymm2, %%ymm4, %%ymm30               \n"
+
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+"   vfmadd231ps        %%ymm3, %%ymm4, %%ymm31               \n"
+
+".endm                                                       \n"
+
+".macro    KERNEL12x8_K2                                     \n"
+
+"   vbroadcastss    8(%%rax), %%ymm2                         \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm20               \n"
+
+"   vbroadcastss    12(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm21               \n"
+
+"   vbroadcastss    16(%%rax), %%ymm0                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm22               \n"
+
+"   prefetcht0         256(%%rax)                            \n"
+
+"   vbroadcastss    20(%%rax), %%ymm1                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm23               \n"
+
+"   vbroadcastss    24(%%rax), %%ymm2                        \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm24               \n"
+
+"   vbroadcastss    28(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm25               \n"
+
+"   vbroadcastss    32(%%rax), %%ymm0                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm26               \n"
+
+"    addq             $32, %%rbx                             \n"//                
+
+"   vbroadcastss    36(%%rax), %%ymm1                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm27               \n"
+
+"   prefetcht0         32(%%rbx)                             \n"//                       
+
+"   vbroadcastss    40(%%rax), %%ymm2                        \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm28               \n"
+
+"   vbroadcastss    44(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm29               \n"
+"   vmovups         (%%rbx), %%ymm4                          \n"
+"    addq              $48, %%rax                            \n"
+
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm30               \n"
+
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm31               \n"
+
+".endm                                                       \n"
+
+".macro    KERNEL12x8_END_K                                  \n"
+
+"   vbroadcastss    8(%%rax), %%ymm2                         \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm20               \n"
+
+"   vbroadcastss    12(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm21               \n"
+
+"   vbroadcastss    16(%%rax), %%ymm0                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm22               \n"
+
+"   prefetcht0         256(%%rax)                            \n"
+
+"   vbroadcastss    20(%%rax), %%ymm1                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm23               \n"
+
+"   vbroadcastss    24(%%rax), %%ymm2                        \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm24               \n"
+
+"   vbroadcastss    28(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm25               \n"
+
+"   vbroadcastss    32(%%rax), %%ymm0                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm26               \n"
+
+"   vbroadcastss    36(%%rax), %%ymm1                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm27               \n"
+
+"   vbroadcastss    40(%%rax), %%ymm2                        \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm28               \n"
+
+"   vbroadcastss    44(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm29               \n"
+"   vmovups         (%%rbx), %%ymm4                          \n"
+"    addq              $48, %%rax                            \n"
+
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm30               \n"
+
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm31               \n"
+
+".endm                                                       \n"
+
+".macro    ADD_C_12x8                                        \n"
+
+"   vmovups         (%%r10), %%ymm0                          \n"
+"    vaddps             %%ymm0, %%ymm20, %%ymm20             \n"
+"   vmovups         (%%r11), %%ymm1                          \n"
+"    vaddps             %%ymm1, %%ymm21, %%ymm21             \n"
+"   vmovups         (%%r12), %%ymm2                          \n"
+"    vaddps             %%ymm2, %%ymm22, %%ymm22             \n"
+"   vmovups         (%%r13), %%ymm3                          \n"
+"    vaddps             %%ymm3, %%ymm23, %%ymm23             \n"
+
+"    leaq              (%%r13, %%r8, 4), %%r10               \n"// C0
+"    leaq             (%%r10, %%r8, 4), %%r11                \n"// C1
+"    leaq             (%%r11, %%r8, 4), %%r12                \n"// C2
+"    leaq             (%%r12, %%r8, 4), %%r13                \n"// C3
+
+"   vmovups         (%%r10), %%ymm4                          \n"
+"    vaddps             %%ymm4, %%ymm24, %%ymm24             \n"
+"   vmovups         (%%r11), %%ymm5                          \n"
+"    vaddps             %%ymm5, %%ymm25, %%ymm25             \n"
+"   vmovups         (%%r12), %%ymm6                          \n"
+"    vaddps             %%ymm6, %%ymm26, %%ymm26             \n"
+"   vmovups         (%%r13), %%ymm7                          \n"
+"    vaddps             %%ymm7, %%ymm27, %%ymm27             \n"
+
+"    leaq              (%%r13, %%r8, 4), %%r10               \n"// C0
+"    leaq             (%%r10, %%r8, 4), %%r11                \n"// C1
+"    leaq             (%%r11, %%r8, 4), %%r12                \n"// C2
+"    leaq             (%%r12, %%r8, 4), %%r13                \n"// C3
+
+"   vmovups         (%%r10), %%ymm0                          \n"
+"    vaddps             %%ymm0, %%ymm28, %%ymm28             \n"
+"   vmovups         (%%r11), %%ymm1                          \n"
+"    vaddps             %%ymm1, %%ymm29, %%ymm29             \n"
+"   vmovups         (%%r12), %%ymm2                          \n"
+"    vaddps             %%ymm2, %%ymm30, %%ymm30             \n"
+"   vmovups         (%%r13), %%ymm3                          \n"
+"    vaddps             %%ymm3, %%ymm31, %%ymm31             \n"
+
+"    mov      %%rcx, %%r10                                   \n"// C0
+"    leaq     (%%r10, %%r8, 4), %%r11                        \n"// C1
+"    leaq     (%%r11, %%r8, 4), %%r12                        \n"// C2
+"    leaq     (%%r12, %%r8, 4), %%r13                        \n"// C3
+
+".endm                                                       \n"
+
+".macro    SAVE_12x8                                         \n"
+
+"   vmovups         %%ymm20, (%%r10)                         \n"
+"   vmovups         %%ymm21, (%%r11)                         \n"
+"    subq             $12, %%rdi                             \n"
+"   vmovups         %%ymm22, (%%r12)                         \n"
+"   vmovups         %%ymm23, (%%r13)                         \n"
+
+"    leaq      (%%r13, %%r8, 4), %%r10                       \n"// C0
+"    leaq     (%%r10, %%r8, 4), %%r11                        \n"// C1
+"    leaq     (%%r11, %%r8, 4), %%r12                        \n"// C2
+"    leaq     (%%r12, %%r8, 4), %%r13                        \n"// C3
+
+"   vmovups         %%ymm24, (%%r10)                         \n"
+"   vmovups         %%ymm25, (%%r11)                         \n"
+"   vmovups         %%ymm26, (%%r12)                         \n"
+"   vmovups         %%ymm27, (%%r13)                         \n"
+
+"    leaq      (%%r13, %%r8, 4), %%r10                       \n"// C0
+"    leaq     (%%r10, %%r8, 4), %%r11                        \n"// C1
+"    leaq     (%%r11, %%r8, 4), %%r12                        \n"// C2
+"    leaq     (%%r12, %%r8, 4), %%r13                        \n"// C3
+
+"   vmovups         %%ymm28, (%%r10)                         \n"
+"   vmovups         %%ymm29, (%%r11)                         \n"
+"   vmovups         %%ymm30, (%%r12)                         \n"
+"   vmovups         %%ymm31, (%%r13)                         \n"
+
+"    leaq      (%%r13, %%r8, 4), %%rcx                       \n"// C0
+
+".endm                                                       \n"
+
+//-----------------------------------------------------------------------
+
+".macro    KERNEL8x8_K1                                      \n"
+
+"   vbroadcastss    8(%%rax), %%ymm2                         \n"
+"   vfmadd231ps        %%ymm0, %%ymm4, %%ymm24               \n"
+
+"   vbroadcastss    12(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm4, %%ymm25               \n"
+
+"   prefetcht0         256(%%rax)                            \n"
+
+"   vbroadcastss    16(%%rax), %%ymm8                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm4, %%ymm26               \n"
+
+"   vbroadcastss    20(%%rax), %%ymm9                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm4, %%ymm27               \n"
+
+"   vbroadcastss    24(%%rax), %%ymm10                       \n"
+"   vfmadd231ps        %%ymm8, %%ymm4, %%ymm28               \n"
+
+"   prefetcht0         32(%%rbx)                             \n"//                        
+
+"   vbroadcastss    28(%%rax), %%ymm11                       \n"
+"   vfmadd231ps        %%ymm9, %%ymm4, %%ymm29               \n"
+"    addq              $32, %%rbx                            \n"//
+"   vfmadd231ps        %%ymm10, %%ymm4, %%ymm30              \n"
+
+"    addq              $32, %%rax                            \n"
+"   vmovups         (%%rbx), %%ymm6                          \n"
+"   vfmadd231ps        %%ymm11, %%ymm4, %%ymm31              \n"
+
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+
+".endm                                                       \n"
+
+".macro    KERNEL8x8_K2                                      \n"
+
+"   vbroadcastss    8(%%rax), %%ymm2                         \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm24               \n"
+
+"   vbroadcastss    12(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm25               \n"
+
+"   prefetcht0         256(%%rax)                            \n"
+
+"   vbroadcastss    16(%%rax), %%ymm8                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm26               \n"
+
+"   vbroadcastss    20(%%rax), %%ymm9                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm27               \n"
+
+"   vbroadcastss    24(%%rax), %%ymm10                       \n"
+"   vfmadd231ps        %%ymm8, %%ymm6, %%ymm28               \n"
+
+"   prefetcht0         32(%%rbx)                             \n"//           
+
+"   vbroadcastss    28(%%rax), %%ymm11                       \n"
+"   vfmadd231ps        %%ymm9, %%ymm6, %%ymm29               \n"
+"    addq              $32, %%rbx                            \n"// B
+"   vfmadd231ps        %%ymm10, %%ymm6, %%ymm30              \n"
+
+"    addq              $32, %%rax                            \n"
+"   vmovups         (%%rbx), %%ymm4                          \n"
+"   vfmadd231ps        %%ymm11, %%ymm6, %%ymm31              \n"
+
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+
+".endm                                                       \n"
+
+".macro    KERNEL8x8_END_K                                   \n"
+
+"   vbroadcastss    8(%%rax), %%ymm2                         \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm24               \n"
+
+"   vbroadcastss    12(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm25               \n"
+
+"   prefetcht0         256(%%rax)                            \n"
+
+"   vbroadcastss    16(%%rax), %%ymm8                        \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm26               \n"
+
+"   vbroadcastss    20(%%rax), %%ymm9                        \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm27               \n"
+
+"   vbroadcastss    24(%%rax), %%ymm10                       \n"
+"   vfmadd231ps        %%ymm8, %%ymm6, %%ymm28               \n"
+
+"   vbroadcastss    28(%%rax), %%ymm11                       \n"
+"   vfmadd231ps        %%ymm9, %%ymm6, %%ymm29               \n"
+"   vfmadd231ps        %%ymm10, %%ymm6, %%ymm30              \n"
+
+"    addq              $32, %%rax                            \n"
+"   vfmadd231ps        %%ymm11, %%ymm6, %%ymm31              \n"
+
+".endm                                                       \n"
+
+".macro    ADD_C_8x8                                         \n"
+
+"   vmovups         (%%r10), %%ymm4                          \n"
+"    vaddps             %%ymm4, %%ymm24, %%ymm24             \n"
+"   vmovups         (%%r11), %%ymm5                          \n"
+"    vaddps             %%ymm5, %%ymm25, %%ymm25             \n"
+"   vmovups         (%%r12), %%ymm6                          \n"
+"    vaddps             %%ymm6, %%ymm26, %%ymm26             \n"
+"   vmovups         (%%r13), %%ymm7                          \n"
+"    vaddps             %%ymm7, %%ymm27, %%ymm27             \n"
+
+"    leaq              (%%r13, %%r8, 4), %%r10               \n"// C0
+"    leaq             (%%r10, %%r8, 4), %%r11                \n"// C1
+"    leaq             (%%r11, %%r8, 4), %%r12                \n"// C2
+"    leaq             (%%r12, %%r8, 4), %%r13                \n"// C3
+
+"   vmovups         (%%r10), %%ymm0                          \n"
+"    vaddps             %%ymm0, %%ymm28, %%ymm28             \n"
+"   vmovups         (%%r11), %%ymm1                          \n"
+"    vaddps             %%ymm1, %%ymm29, %%ymm29             \n"
+"   vmovups         (%%r12), %%ymm2                          \n"
+"    vaddps             %%ymm2, %%ymm30, %%ymm30             \n"
+"   vmovups         (%%r13), %%ymm3                          \n"
+"    vaddps             %%ymm3, %%ymm31, %%ymm31             \n"
+
+"    mov      %%rcx, %%r10                                   \n"// C0
+"    leaq     (%%r10, %%r8, 4), %%r11                        \n"// C1
+"    leaq     (%%r11, %%r8, 4), %%r12                        \n"// C2
+"    leaq     (%%r12, %%r8, 4), %%r13                        \n"// C3
+
+".endm                                                       \n"
+
+".macro    SAVE_8x8                                          \n"
+
+"   vmovups         %%ymm24, (%%r10)                         \n"
+"   vmovups         %%ymm25, (%%r11)                         \n"
+"    subq             $8, %%rdi                              \n"
+"   vmovups         %%ymm26, (%%r12)                         \n"
+"   vmovups         %%ymm27, (%%r13)                         \n"
+
+"    leaq      (%%r13, %%r8, 4), %%r10                       \n"// C0
+"    leaq     (%%r10, %%r8, 4), %%r11                        \n"// C1
+"    leaq     (%%r11, %%r8, 4), %%r12                        \n"// C2
+"    leaq     (%%r12, %%r8, 4), %%r13                        \n"// C3
+
+"   vmovups         %%ymm28, (%%r10)                         \n"
+"   vmovups         %%ymm29, (%%r11)                         \n"
+"   vmovups         %%ymm30, (%%r12)                         \n"
+"   vmovups         %%ymm31, (%%r13)                         \n"
+
+"    leaq      (%%r13, %%r8, 4), %%rcx                       \n"// C0
+
+".endm                                                       \n"
+
+//-----------------------------------------------------------------------
+
+".macro    KERNEL4x8_K1                                      \n"
+
+"   vbroadcastss    8(%%rax), %%ymm2                         \n"
+"   vfmadd231ps        %%ymm0, %%ymm4, %%ymm28               \n"
+
+"   vbroadcastss    12(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm4, %%ymm29               \n"
+"    addq              $16, %%rax                            \n"
+
+"   prefetcht0         256(%%rax)                            \n"
+"    addq              $32, %%rbx                            \n"// B
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"   vfmadd231ps        %%ymm2, %%ymm4, %%ymm30               \n"
+
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+"   vfmadd231ps        %%ymm3, %%ymm4, %%ymm31               \n"
+
+"   prefetcht0         32(%%rbx)                             \n"
+"   vmovups         (%%rbx), %%ymm6                          \n"
+
+".endm                                                       \n"
+
+".macro    KERNEL4x8_K2                                      \n"
+
+"   vbroadcastss    8(%%rax), %%ymm2                         \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm28               \n"
+
+"   vbroadcastss    12(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm29               \n"
+"    addq              $16, %%rax                            \n"
+
+"   prefetcht0         256(%%rax)                            \n"
+"    addq              $32, %%rbx                            \n"// B
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm30               \n"
+
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm31               \n"
+
+"   vmovups         (%%rbx), %%ymm4                          \n"
+"   prefetcht0         32(%%rbx)                             \n"
+
+".endm                                                       \n"
+
+".macro    KERNEL4x8_END_K                                   \n"
+
+"   vbroadcastss    8(%%rax), %%ymm2                         \n"
+"   vfmadd231ps        %%ymm0, %%ymm6, %%ymm28               \n"
+
+"   vbroadcastss    12(%%rax), %%ymm3                        \n"
+"   vfmadd231ps        %%ymm1, %%ymm6, %%ymm29               \n"
+"    addq              $16, %%rax                            \n"
+
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm30               \n"
+"   vfmadd231ps        %%ymm3, %%ymm6, %%ymm31               \n"
+
+".endm                                                       \n"
+
+".macro    ADD_C_4x8                                         \n"
+
+"   vmovups         (%%r10), %%ymm0                          \n"
+"    vaddps             %%ymm0, %%ymm28, %%ymm28             \n"
+"   vmovups         (%%r11), %%ymm1                          \n"
+"    vaddps             %%ymm1, %%ymm29, %%ymm29             \n"
+"   vmovups         (%%r12), %%ymm2                          \n"
+"    vaddps             %%ymm2, %%ymm30, %%ymm30             \n"
+"   vmovups         (%%r13), %%ymm3                          \n"
+"    vaddps             %%ymm3, %%ymm31, %%ymm31             \n"
+
+"    mov      %%rcx, %%r10                                   \n"// C0
+"    leaq     (%%r10, %%r8, 4), %%r11                        \n"// C1
+"    leaq     (%%r11, %%r8, 4), %%r12                        \n"// C2
+"    leaq     (%%r12, %%r8, 4), %%r13                        \n"// C3
+
+".endm                                                       \n"
+
+".macro    SAVE_4x8                                          \n"
+"   subq             $4, %%rdi                               \n"
+
+"   vmovups         %%ymm28, (%%r10)                         \n"
+"   vmovups         %%ymm29, (%%r11)                         \n"
+"   vmovups         %%ymm30, (%%r12)                         \n"
+"   vmovups         %%ymm31, (%%r13)                         \n"
+
+"    leaq      (%%r13, %%r8, 4), %%rcx                       \n"// C0
+
+".endm                                                       \n"
+
+
+//-----------------------------------------------------------------
+
+".macro    KERNEL1x8_K1                                      \n"
+"   prefetcht0         256(%%rax)                            \n"
+"   addq              $4, %%rax                              \n"
+
+"   vbroadcastss    (%%rax), %%ymm2                          \n"
+"   vfmadd231ps        %%ymm0, %%ymm4, %%ymm30               \n"
+							           		
+"    addq              $32, %%rbx                            \n"// B    
+"   vmovups            (%%rbx), %%ymm6                       \n"
+"   prefetcht0         32(%%rbx)                             \n"
+
+".endm                                                       \n"
+
+".macro    KERNEL1x8_K2                                      \n"
+"   prefetcht0         256(%%rax)                            \n"
+"    addq              $4, %%rax                             \n"
+
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm30               \n"
+                  		
+"    addq              $32, %%rbx                            \n"// B        
+"   vmovups            (%%rbx), %%ymm4                       \n"
+"   prefetcht0         32(%%rbx)                             \n"
+
+".endm                                                       \n"
+
+".macro    KERNEL1x8_END_K                                   \n"
+"   vfmadd231ps        %%ymm2, %%ymm6, %%ymm30               \n"
+"    addq              $4, %%rax                             \n"
+".endm                                                       \n"
+
+".macro    ADD_C_1x8                                         \n"
+"   vmovups         (%%r10), %%ymm2                          \n"
+"    vaddps             %%ymm2, %%ymm30, %%ymm30             \n"
+"    mov      %%rcx, %%r10                                   \n"// C0
+".endm                                                       \n"
+
+".macro    SAVE_1x8                                          \n"
+"   vmovups         %%ymm30, (%%r10)                         \n"
+"   subq             $1, %%rdi                               \n"
+"    leaq      (%%r10, %%r8, 4), %%rcx                       \n"// C0
+
+".endm                                                       \n"
+
+//-----------------------------------------------------------------
+
+"SMM_NN_KERNEL12x8:                                          \n"
+
+"   mov     %[C], %%rcx                                      \n"
+"   mov     %[A], %%rax                                      \n"
+"   mov     %[B], %%rbx                                      \n"
+
+"   prefetcht0         (%%rax)                               \n"
+
+"    mov     %[K], %%rdx                                     \n"// K
+"    mov      %[LN], %%r8                                    \n"
+"    mov      %[Bc], %%r14                                   \n"
+"    mov      %[M], %%rdi                                    \n"
+"    mov     %[k_tag], %%r15                                 \n"
+
+"   prefetcht0         (%%rbx)                               \n"
+"    mov     %%rbx, %%r9                                     \n"// B
+"    mov     %%rdx, %%rsi                                    \n"// K
+
+"BEGIN_PACK12x8:                                             \n"
+
+"    mov     %%r9, %%rbx                                     \n"// B
+"   prefetcht0         (%%rbx)                               \n"
+
+"    mov      %%rcx, %%r10                                   \n"// C0
+"   prefetcht1         (%%r10)                               \n"
+"    leaq     (%%r10, %%r8, 4), %%r11                        \n"// C1
+"   prefetcht1         (%%r11)                               \n"
+"    leaq     (%%r11, %%r8, 4), %%r12                        \n"// C2
+"   prefetcht1         (%%r12)                               \n"
+"    leaq     (%%r12, %%r8, 4), %%r13                        \n"// C3
+"   prefetcht1         (%%r13)                               \n"
+
+"    mov     %%rsi, %%rdx                                    \n"// K
+"    mov     %%r14, %%rbp                                    \n"// Bc
+
+"   vmovups        (%%rbx), %%ymm4                           \n"
+"    vpxorq         %%ymm20, %%ymm20, %%ymm20                \n"
+"    vpxorq         %%ymm21, %%ymm21, %%ymm21                \n"
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"    vpxorq         %%ymm22, %%ymm22, %%ymm22                \n"
+"    vpxorq         %%ymm23, %%ymm23, %%ymm23                \n"
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+"    vpxorq         %%ymm24, %%ymm24, %%ymm24                \n"
+"    vpxorq         %%ymm25, %%ymm25, %%ymm25                \n"
+"    vpxorq         %%ymm26, %%ymm26, %%ymm26                \n"
+"    vpxorq         %%ymm27, %%ymm27, %%ymm27                \n"
+"    vpxorq         %%ymm28, %%ymm28, %%ymm28                \n"
+"    vpxorq         %%ymm29, %%ymm29, %%ymm29                \n"
+"    vpxorq         %%ymm30, %%ymm30, %%ymm30                \n"
+"    vpxorq         %%ymm31, %%ymm31, %%ymm31                \n"
+
+"    subq     $8, %%rdx                                      \n"
+
+"MAIN_PACK_K12x8:                                            \n"
+
+"    KERNEL12x8_PACK_K1                                      \n"
+"    KERNEL12x8_PACK_K2                                      \n"
+"    KERNEL12x8_PACK_K1                                      \n"
+"    KERNEL12x8_PACK_K2                                      \n"
+"    KERNEL12x8_PACK_K1                                      \n"
+"    KERNEL12x8_PACK_K2                                      \n"
+"    KERNEL12x8_PACK_K1                                      \n"
+"   cmp     $0, %%rdx                                        \n"
+"    je         EDGE_PACK_K12x8                              \n"
+"    KERNEL12x8_PACK_K2                                      \n"
+
+"    subq     $8, %%rdx                                      \n"
+"   jmp     MAIN_PACK_K12x8                                  \n"
+
+"EDGE_PACK_K12x8:                                            \n"
+
+"    KERNEL12x8_PACK_END_K                                   \n"
+"    jmp      BEGIN_SAVE_12x8                                \n"
+
+//-----------------------------------------------------------------
+
+"BEGIN_M12x8:                                                \n"
+
+"    mov     %%r14, %%rbx                                    \n"// Bc
+"   prefetcht0         (%%rbx)                               \n"
+
+"    mov      %%rcx, %%r10                                   \n"// C0
+"   prefetcht1         (%%r10)                               \n"
+"    leaq     (%%r10, %%r8, 4), %%r11                        \n"// C1
+"   prefetcht1         (%%r11)                               \n"
+"    leaq     (%%r11, %%r8, 4), %%r12                        \n"// C2
+"   prefetcht1         (%%r12)                               \n"
+"    leaq     (%%r12, %%r8, 4), %%r13                        \n"// C3
+"   prefetcht1         (%%r13)                               \n"
+
+"    mov     %%rsi, %%rdx                                    \n"// K                                    
+
+"   vmovups        (%%rbx), %%ymm4                           \n"
+"    vpxorq         %%ymm20, %%ymm20, %%ymm20                \n"
+"    vpxorq         %%ymm21, %%ymm21, %%ymm21                \n"
+"    vpxorq         %%ymm22, %%ymm22, %%ymm22                \n"
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"    vpxorq         %%ymm23, %%ymm23, %%ymm23                \n"
+"    vpxorq         %%ymm24, %%ymm24, %%ymm24                \n"
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+"    vpxorq         %%ymm25, %%ymm25, %%ymm25                \n"
+"    vpxorq         %%ymm26, %%ymm26, %%ymm26                \n"
+"    vpxorq         %%ymm27, %%ymm27, %%ymm27                \n"
+"    vpxorq         %%ymm28, %%ymm28, %%ymm28                \n"
+"    vpxorq         %%ymm29, %%ymm29, %%ymm29                \n"
+"    vpxorq         %%ymm30, %%ymm30, %%ymm30                \n"
+"    vpxorq         %%ymm31, %%ymm31, %%ymm31                \n"
+
+"    subq     $8, %%rdx                                      \n"
+
+"MAIN_K12x8:                                                 \n"
+
+"    KERNEL12x8_K1                                           \n"
+"    KERNEL12x8_K2                                           \n"
+"    KERNEL12x8_K1                                           \n"
+"    KERNEL12x8_K2                                           \n"
+"    KERNEL12x8_K1                                           \n"
+"    KERNEL12x8_K2                                           \n"
+"    KERNEL12x8_K1                                           \n"
+"   cmp     $0, %%rdx                                        \n"
+"    je         EDGE_K12x8                                   \n"
+"    KERNEL12x8_K2                                           \n"
+
+"    subq     $8, %%rdx                                      \n"
+"   jmp     MAIN_K12x8                                       \n"
+
+"EDGE_K12x8:                                                 \n"
+
+"    KERNEL12x8_END_K                                        \n"
+
+"BEGIN_SAVE_12x8:                                            \n"
+"    cmp     $0, %%r15                                       \n"
+"    je      SAVE_C12x8                                      \n"
+"    ADD_C_12x8                                              \n"
+
+"SAVE_C12x8:                                                 \n"
+"    SAVE_12x8                                               \n"
+
+"    cmpq      $12, %%rdi                                    \n"
+"    jnb     BEGIN_M12x8                                     \n"// 不小于（或等于）则跳转                             
+
+//------------------------------------------------------------------
+
+"BEGIN_M8_N8:                                                \n"
+"   cmpq      $8, %%rdi                                      \n"// M % 8
+"    jb       BEGIN_M4_N8                                    \n"//小于则跳转
+
+"    mov     %%r14, %%rbx                                    \n"// Bc
+"   prefetcht0         (%%rbx)                               \n"
+
+"    mov      %%rcx, %%r10                                   \n"// C0
+"   prefetcht1         (%%r10)                               \n"
+"    leaq     (%%r10, %%r8, 4), %%r11                        \n"// C1
+"   prefetcht1         (%%r11)                               \n"
+"    leaq     (%%r11, %%r8, 4), %%r12                        \n"// C2
+"   prefetcht1         (%%r12)                               \n"
+"    leaq     (%%r12, %%r8, 4), %%r13                        \n"// C3
+"   prefetcht1         (%%r13)                               \n"
+
+"    mov     %%rsi, %%rdx                                    \n"// K
+"   vmovups        (%%rbx), %%ymm4                           \n"
+"    vpxorq         %%ymm24, %%ymm24, %%ymm24                \n"
+"    vpxorq         %%ymm25, %%ymm25, %%ymm25                \n"
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"    vpxorq         %%ymm26, %%ymm26, %%ymm26                \n"
+"    vpxorq         %%ymm27, %%ymm27, %%ymm27                \n"
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+"    vpxorq         %%ymm28, %%ymm28, %%ymm28                \n"
+"    vpxorq         %%ymm29, %%ymm29, %%ymm29                \n"
+"    vpxorq         %%ymm30, %%ymm30, %%ymm30                \n"
+"    vpxorq         %%ymm31, %%ymm31, %%ymm31                \n"
+
+"    subq     $8, %%rdx                                      \n"
+
+"MAIN_K_M8_N8:                                               \n"
+
+"    KERNEL8x8_K1                                            \n"
+"    KERNEL8x8_K2                                            \n"
+"    KERNEL8x8_K1                                            \n"
+"    KERNEL8x8_K2                                            \n"
+"    KERNEL8x8_K1                                            \n"
+"    KERNEL8x8_K2                                            \n"
+"    KERNEL8x8_K1                                            \n"
+"   cmp     $0, %%rdx                                        \n"
+"    je         EDGE_K_M8_N8                                 \n"
+"    KERNEL8x8_K2                                            \n"
+
+"    subq     $8, %%rdx                                      \n"
+"   jmp     MAIN_K_M8_N8                                     \n"
+
+"EDGE_K_M8_N8:                                               \n"
+
+"    KERNEL8x8_END_K                                         \n"
+
+"    cmp     $0, %%r15                                       \n"
+"    je      SAVE_C_8x8                                      \n"
+"    ADD_C_8x8                                               \n"
+
+"SAVE_C_8x8:                                                 \n"
+"    SAVE_8x8                                                \n"
+
+//----------------------------------------------------------------
+
+"BEGIN_M4_N8:                                                \n"
+
+"    cmpq      $4, %%rdi                                     \n"// M % 4
+"    jb       BEGIN_M1_N8                                    \n"
+
+"    mov     %%r14, %%rbx                                    \n"// Bc
+"   prefetcht0         (%%rbx)                               \n"
+
+"    mov      %%rcx, %%r10                                   \n"// C0
+"   prefetcht1         (%%r10)                               \n"
+"    leaq     (%%r10, %%r8, 4), %%r11                        \n"// C1
+"   prefetcht1         (%%r11)                               \n"
+"    leaq     (%%r11, %%r8, 4), %%r12                        \n"// C2
+"   prefetcht1         (%%r12)                               \n"
+"    leaq     (%%r12, %%r8, 4), %%r13                        \n"// C3
+"   prefetcht1         (%%r13)                               \n"
+
+"    mov     %%rsi, %%rdx                                    \n"// K
+
+"   vmovups        (%%rbx), %%ymm4                           \n"
+"   vbroadcastss    (%%rax), %%ymm0                          \n"
+"    vpxorq         %%ymm28, %%ymm28, %%ymm28                \n"
+"    vpxorq         %%ymm29, %%ymm29, %%ymm29                \n"
+"   vbroadcastss    4(%%rax), %%ymm1                         \n"
+"    vpxorq         %%ymm30, %%ymm30, %%ymm30                \n"
+"    vpxorq         %%ymm31, %%ymm31, %%ymm31                \n"
+
+"    subq     $8, %%rdx                                      \n"
+
+"MAIN_K_M4_N8:                                               \n"
+
+"    KERNEL4x8_K1                                            \n"
+"    KERNEL4x8_K2                                            \n"
+"    KERNEL4x8_K1                                            \n"
+"    KERNEL4x8_K2                                            \n"
+"    KERNEL4x8_K1                                            \n"
+"    KERNEL4x8_K2                                            \n"
+"    KERNEL4x8_K1                                            \n"
+"   cmp     $0, %%rdx                                        \n"
+"    je         EDGE_K_M4_N8                                 \n"
+"    KERNEL4x8_K2                                            \n"
+
+"    subq     $8, %%rdx                                      \n"
+"   jmp     MAIN_K_M4_N8                                     \n"
+
+"EDGE_K_M4_N8:                                               \n"
+
+"    KERNEL4x8_END_K                                         \n"
+
+"    cmp     $0, %%r15                                       \n"
+"    je      SAVE_C_4x8                                      \n"
+"    ADD_C_4x8                                               \n"
+
+"SAVE_C_4x8:                                                 \n"
+"    SAVE_4x8                                                \n"
+
+
+//----------------------------------------------------------------
+
+"BEGIN_M1_N8:                                                \n"
+"    cmpq      $1, %%rdi                                     \n"// M % 1
+"    jb       END_M_N8                                       \n"
+
+"    mov     %%r14, %%rbx                                    \n"// Bc
+"   prefetcht0         (%%rbx)                               \n"
+
+"    mov      %%rcx, %%r10                                   \n"// C0
+"   prefetcht1         (%%r10)                               \n"
+
+"    mov     %%rsi, %%rdx                                    \n"// K
+
+"   vmovups        (%%rbx), %%ymm4                           \n"
+"   vbroadcastss    (%%rax), %%ymm0                          \n"// A0                
+"    vpxorq         %%ymm30, %%ymm30, %%ymm30                \n"
+
+"    subq     $8, %%rdx                                      \n"
+
+"MAIN_K_M1_N8:                                               \n"
+"    KERNEL1x8_K1                                            \n"
+"    KERNEL1x8_K2                                            \n"
+"    KERNEL1x8_K1                                            \n"
+"    KERNEL1x8_K2                                            \n"
+"    KERNEL1x8_K1                                            \n"
+"    KERNEL1x8_K2                                            \n"
+"    KERNEL1x8_K1                                            \n"
+"   cmp     $0, %%rdx                                        \n"
+"    je         EDGE_K_M1_N8                                 \n"
+"    KERNEL1x8_K2                                            \n"
+
+"    subq     $8, %%rdx                                      \n"
+"   jmp     MAIN_K_M1_N8                                     \n"
+
+"EDGE_K_M1_N8:                                               \n"
+"    KERNEL1x8_END_K                                         \n"
+
+"    cmp     $0, %%r15                                       \n"
+"    je      SAVE_C_1x8                                      \n"
+"    ADD_C_1x8                                               \n"
+									
+"SAVE_C_1x8:                                                 \n"
+"    SAVE_1x8                                                \n"
+"   cmpq      $1, %%rdi                                      \n"
+"    jnb     BEGIN_M1_N8                                     \n"//不小于（或等于）则跳转                                    
+
+//-----------------------------------------------------------------
+
+
+"END_M_N8:                                                   \n"
+

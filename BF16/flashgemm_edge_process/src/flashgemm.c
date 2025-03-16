@@ -11,7 +11,7 @@ void flashgemm_set_thread_num(int num)
 bool flashgemm_test_dimention(int M, int N, int K)
 {
 	bool flag = true;
-	if (N % 32 != 0)
+	if (N % 16 != 0)
 	{
 		printf("N must be a multiple of 32\n");
 		flag = false;
@@ -32,14 +32,14 @@ void flashgemm_single_bf16bf16f32(float *C, uint16_t *A_bf16, uint16_t *B_bf16, 
 		printf("dimention error\n");
 		return;
 	}
-	if (N > M)
-	{
+	// if (N > M)
+	// {
 		flashgemm_single_bf16bf16f32_MlN(C, A_bf16, B_bf16, M, N, K, beta);
-	}
-	else
-	{
-		flashgemm_single_bf16bf16f32_MgN(C, A_bf16, B_bf16, M, N, K, beta);
-	}
+	// }
+	// else
+	// {
+	// 	flashgemm_single_bf16bf16f32_MgN(C, A_bf16, B_bf16, M, N, K, beta);
+	// }
 }
 
 // M << N
@@ -105,9 +105,6 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 			}
 		}
 
-		// printf("\nAc:\n");
-		// show_matrix_bf16(M, K_Ac, (uint16_t *)Ac);
-
 #pragma omp barrier
 
 		for (kk = 0; kk < K; kk = kk + kc)
@@ -118,7 +115,6 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 				kc_Ac = K_Ac - kk;
 				kc = K - kk;
 			}
-				
 
 			uint16_t *temp_A = (uint16_t *)Ac + kk * M_Ac;
 
@@ -131,7 +127,11 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 				uint16_t *temp_B = B_bf16 + kk * N + id * Nb + j;
 				if (nr == 32)
 				{
-					FLASHGEMM_BF16_KERNELm12xn32xk2(temp_C, temp_A, temp_B, M, Nb, kc, kc_Ac, N, temp_Bc, kk || beta);
+					FLASHGEMM_BF16_KERNELm12xn32(temp_C, temp_A, temp_B, M, Nb, kc, kc_Ac, N, temp_Bc, kk || beta);
+				}
+				if (nr == 16)
+				{
+					FLASHGEMM_BF16_KERNELm12xn16(temp_C, temp_A, temp_B, M, Nb, kc, kc_Ac, N, temp_Bc, kk || beta);
 				}
 			}
 		}

@@ -48,9 +48,9 @@ int main()
 		// long N = MNK[j * 3 + 1];
 		// long K = MNK[j * 3 + 2];
 
-		long M = 12 + 1 * j;
-		long N = 32 + 32 * j;
-		long K = 32 + 2 * j;
+		long M = 12 + 4 * j;
+		long N = 16 + 16 * j;
+		long K = 16 + 16 * j;
 
 		double ops = (double)M * N * K * 1.0e-09 * 2;
 
@@ -68,8 +68,7 @@ int main()
 		random_matrix_f32(M, N, C);
 		memcpy(C_MKL, C, M * N * sizeof(float));
 
-		// printf("\nC init:\n");
-		// show_matrix_fp32(M, N, C);
+		
 
 		// regular_matrix_bf16(K, N, B);
 		// regular_matrix_bf16(M, K, A);
@@ -78,7 +77,11 @@ int main()
 
 		// printf("\nA:\n");
 		// show_matrix_bf16(M, K, A);
-		
+		// printf("\nB:\n");
+		// show_matrix_bf16(K, N, B);
+		// printf("\nC init:\n");
+		// show_matrix_fp32(M, N, C);
+
 		// test result
 		flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
 		cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans, 
@@ -87,6 +90,7 @@ int main()
 		// show_matrix_fp32(M, N, C);
 		// printf("\nC_MKL:\n");
 		// show_matrix_fp32(M, N, C_MKL);
+		
 		bool flag = Check_result(C, C_MKL, M, N);
 		
 		// // warm up

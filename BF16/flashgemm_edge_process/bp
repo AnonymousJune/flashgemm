@@ -1,28 +1,40 @@
-break FLASHGEMM_BF16_KERNELm12xn32xk2
-break BF16_BEGIN_PACK_N32
-break BF16_PACK_MAIN_M12N32
-break BF16_PACK_K_PREFETCH_C_M12N32
-break BF16_PACK_SAVEC_M12N32
-break BF16_BEGIN_M12
-break BF16_MAIN_K_M12N32
-break BF16_K_PREFETCH_C_M12N32
-break BF16_MAIN_K_M12N32_EDGE
-break BF16_BEGIN_SAVE_M12N32
-break BF16_SAVE_C_M12N32
-break BF16_BEGIN_M8
-break BF16_MAIN_K_M8N32
-break BF16_K_PREFETCH_C_M8N32
-break BF16_MAIN_K_M8N32_EDGE
-break BF16_BEGIN_SAVE_M8N32
-break BF16_SAVE_C_M8N32
-break BF16_BEGIN_M4
-break BF16_MAIN_K_M4N32
-break BF16_K_PREFETCH_C_M4N32
-break BF16_MAIN_K_M4N32_EDGE
-break BF16_BEGIN_SAVE_M4N32
-break BF16_SAVE_C_M4N32
-break BF16_END_N32
-display {$zmm0.v32_bfloat16,$zmm1.v32_bfloat16,$zmm2.v32_bfloat16,$zmm3.v32_bfloat16}
-display {$zmm4.v32_bfloat16,$zmm5.v32_bfloat16,$zmm6.v32_bfloat16,$zmm7.v32_bfloat16}
-display {$zmm8.v16_float,$zmm9.v16_float,$zmm10.v16_float,$zmm11.v16_float}
-display {$zmm12.v16_float,$zmm13.v16_float,$zmm14.v16_float,$zmm15.v16_float}
+break BF16_BEGIN_PACK_N16
+break BF16_PACK_MAIN_M12N16K16
+break BF16_PACK_MAIN_M12N16K2
+break BF16_PACK_K_PREFETCH_C_M12N16
+break BF16_PACK_SAVEC_M12N16
+break BF16_BEGIN_M12N16
+break BF16_MAIN_K_M12N16K16
+break BF16_MAIN_M12N16K2
+break BF16_K_PREFETCH_C_M12N16
+break BF16_BEGIN_SAVE_M12N16
+break BF16_SAVE_C_M12N16
+break BF16_BEGIN_M8N16
+break BF16_MAIN_K_M8N16K16
+break BF16_MAIN_M8N16K2
+break BF16_K_PREFETCH_C_M8N16
+break BF16_BEGIN_SAVE_M8N16
+break BF16_SAVE_C_M8N16
+break BF16_BEGIN_M4N16
+break BF16_MAIN_K_M4N16K16
+break BF16_MAIN_M4N16K2
+break BF16_K_PREFETCH_C_M4N16
+break BF16_BEGIN_SAVE_M4N16
+break BF16_SAVE_C_M4N16
+break BF16_END_N16
+# display {$zmm0.v32_bfloat16,$zmm1.v32_bfloat16,$zmm2.v32_bfloat16,$zmm3.v32_bfloat16}
+# display {$zmm4.v32_bfloat16,$zmm5.v32_bfloat16,$zmm6.v32_bfloat16,$zmm7.v32_bfloat16}
+
+
+display $zmm0.v32_bfloat16
+display $zmm1.v32_bfloat16
+display $zmm2.v32_bfloat16
+display $zmm3.v32_bfloat16
+
+display $zmm4.v32_bfloat16
+display $zmm5.v32_bfloat16
+display $zmm6.v32_bfloat16
+display $zmm7.v32_bfloat16
+
+display {$zmm8.v16_float,$zmm10.v16_float,$zmm12.v16_float,$zmm14.v16_float}
+display {$zmm16.v16_float,$zmm13.v18_float,$zmm20.v16_float,$zmm22.v16_float}

@@ -79,6 +79,22 @@ void regular_matrix_bf16(int m, int n, uint16_t *a)
             a[i * n + j] = float_to_bf16(i + j * 0.01);
 }
 
+void regular1_matrix_bf16(int m, int n, uint16_t *a)
+{
+    int i, j;
+    for (i = 0; i < m; i++)
+        for (j = 0; j < n; j++)
+            a[i * n + j] = float_to_bf16(1.0);
+}
+
+void regular2_matrix_bf16(int m, int n, uint16_t *a)
+{
+    int i, j;
+    for (i = 0; i < m; i++)
+        for (j = 0; j < n; j++)
+            a[i * n + j] = float_to_bf16(j);
+}
+
 void random_matrix_f32(int m, int n, float *a)
 {
     int i, j;
@@ -111,7 +127,7 @@ void show_matrix_bf16(long m, long n, uint16_t *a)
 	long i, j;
 	for (i = 0; i < m; i++){
 		for (j = 0; j < n; j++)
-			printf("%-8.2f", bf16_to_float(a[i * n + j]));
+			printf("%-8.4f ", bf16_to_float(a[i * n + j]));
 		printf("\n");
 	}
 		

@@ -830,9 +830,9 @@
 
 //-----------------------------------------------------------------
 
-"BF16_BEGIN_M12:                                             \n"
+"BF16_BEGIN_M12N32:                                          \n"
 "   cmpq    $12, %%rdi                                       \n"
-"   jb      BF16_BEGIN_M8                                    \n"
+"   jb      BF16_BEGIN_M8N32                                 \n"
 
 "   mov     %%r14, %%rbx                                     \n"// Bc
 "   mov     %%rsi, %%rdx                                     \n"// K
@@ -918,13 +918,13 @@
 "   imul     $24, %%r15, %%r11                               \n"// temp use %%r11
 "   add      %%r11, %%r9                                     \n"
 "   movq     %%r9, %%rax                                     \n"
-"   jmp     BF16_BEGIN_M12                                   \n"
+"   jmp     BF16_BEGIN_M12N32                                \n"
 
 //-----------------------------------------------------------------
 
-"BF16_BEGIN_M8:                                              \n"
+"BF16_BEGIN_M8N32:                                           \n"
 "   cmpq    $8, %%rdi                                        \n"
-"   jb      BF16_BEGIN_M4                                    \n"
+"   jb      BF16_BEGIN_M4N32                                 \n"
 
 "   mov     %%r14, %%rbx                                     \n"// Bc
 "   mov     %%rsi, %%rdx                                     \n"// K
@@ -1002,11 +1002,11 @@
 "   imul     $16, %%r15, %%r11                               \n"// temp use %%r11
 "   add      %%r11, %%r9                                     \n"
 "   movq     %%r9, %%rax                                     \n"
-"   jmp      BF16_BEGIN_M8                                   \n"
+"   jmp      BF16_BEGIN_M8N32                                \n"
 
 //-----------------------------------------------------------------
 
-"BF16_BEGIN_M4:                                              \n"
+"BF16_BEGIN_M4N32:                                           \n"
 "   cmpq    $0, %%rdi                                        \n"
 "   je      BF16_END_N32                                     \n"
 
@@ -1087,7 +1087,7 @@
 "   imul     $8, %%r15, %%r11                                \n"// temp use %%r11
 "   add      %%r11, %%r9                                     \n"
 "   movq     %%r9, %%rax                                     \n"
-"   jmp      BF16_BEGIN_M4                                   \n"
+"   jmp      BF16_BEGIN_M4N32                                \n"
 
 "BF16_SAVE_C_M3N32:                                          \n"
 "   vmovups         %%zmm12, (%%r12)                         \n"

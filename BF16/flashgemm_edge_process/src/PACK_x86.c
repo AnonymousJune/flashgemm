@@ -1,10 +1,5 @@
 #include <string.h>
 
-static void NPACK_m1xk(float *A, float *Ac, int K, int LK)
-{
-    memcpy(Ac, A, K * 4);
-}
-
 static void NPACK_m4xk(float *A, float *Ac, int K, int LK)
 {
     asm volatile(
@@ -620,13 +615,11 @@ static void FLASHGEMM_NPACK(float *A, float *Ac, int M, int K, int LK)
 
     if (M == 12)
     {
-        // printf("M = %d,pack m12\n",M);
         NPACK_m12xk(temp_A, temp_Ac, K, LK);
         return;
     }
     if (M >= 8)
     {
-        // printf("M = %d,pack m8\n",M);
         NPACK_m8xk(temp_A, temp_Ac, K, LK);
         temp_A = temp_A + 8 * LK;
         temp_Ac = temp_Ac + 8 * K;
@@ -634,31 +627,15 @@ static void FLASHGEMM_NPACK(float *A, float *Ac, int M, int K, int LK)
     }
     if (M >= 4)
     {
-        // printf("M = %d,pack m4\n",M);
         NPACK_m4xk(temp_A, temp_Ac, K, LK);
         temp_A = temp_A + 4 * LK;
         temp_Ac = temp_Ac + 4 * K;
         M = M - 4;
     }
-    if (M >= 1)
+    if (M >= 1) // Less than 4, pad to 4 in Ac
     {
-        // printf("M = %d,pack m1\n",M);
-        NPACK_m1xk(temp_A, temp_Ac, K, LK);
-        temp_A = temp_A + 1 * LK;
-        temp_Ac = temp_Ac + 1 * K;
-        M = M - 1;
-    }
-    if (M >= 1)
-    {
-        // printf("M = %d,pack m1\n",M);
-        NPACK_m1xk(temp_A, temp_Ac, K, LK);
-        temp_A = temp_A + 1 * LK;
-        temp_Ac = temp_Ac + 1 * K;
-        M = M - 1;
-    }
-    if (M >= 1)
-    {
-        // printf("M = %d,pack m1\n",M);
-        NPACK_m1xk(temp_A, temp_Ac, K, LK);
+        NPACK_m4xk(temp_A, temp_Ac, K, LK);
+        temp_A = temp_A + 4 * LK;
+        temp_Ac = temp_Ac + 4 * K;
     }
 }

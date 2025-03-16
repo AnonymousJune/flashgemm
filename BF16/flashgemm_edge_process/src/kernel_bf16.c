@@ -1006,13 +1006,13 @@ static void FLASHGEMM_BF16_KERNELm12xn32xk2(float *C, uint16_t *A, uint16_t *B, 
 			"   imul     $16, %%r15, %%r11                               \n" // temp use %%r11
 			"   add      %%r11, %%r9                                     \n"
 			"   movq     %%r9, %%rax                                     \n"
-			"   jmp     BF16_END_N32                                     \n"
+			"   jmp      BF16_BEGIN_M8                                   \n"
 
 			//-----------------------------------------------------------------
 
 			"BF16_BEGIN_M4:                                              \n"
-			"   cmpq    $4, %%rdi                                        \n"
-			"   jb      BF16_END_N32                                     \n"
+			"   cmpq    $0, %%rdi                                        \n"
+			"   je      BF16_END_N32                                     \n"
 
 			"   mov     %%r14, %%rbx                                     \n" // Bc
 			"   mov     %%rsi, %%rdx                                     \n" // K
@@ -1081,11 +1081,29 @@ static void FLASHGEMM_BF16_KERNELm12xn32xk2(float *C, uint16_t *A, uint16_t *B, 
 			"   bf16_add_c_m4n32                                         \n"
 
 			"BF16_SAVE_C_M4N32:                                          \n"
+			"   cmpq     $3, %%rdi                                       \n"
+			"   je       BF16_SAVE_C_M3N32                               \n"
+			"   cmpq     $2, %%rdi                                       \n"
+			"   je       BF16_SAVE_C_M2N32                               \n"
+			"   cmpq     $1, %%rdi                                       \n"
+			"   je       BF16_SAVE_C_M1N32                               \n"
 			"   bf16_save_c_m4n32                                        \n"
 			"   imul     $8, %%r15, %%r11                                \n" // temp use %%r11
 			"   add      %%r11, %%r9                                     \n"
 			"   movq     %%r9, %%rax                                     \n"
-			"   jmp     BF16_END_N32                                     \n"
+			"   jmp      BF16_BEGIN_M4                                   \n"
+
+			"BF16_SAVE_C_M3N32:                                          \n"
+			"   vmovups         %%zmm12, (%%r12)                         \n"
+			"   vmovups         %%zmm13, 64(%%r12)                       \n"
+
+			"BF16_SAVE_C_M2N32:                                          \n"
+			"   vmovups         %%zmm10, (%%r11)                         \n"
+			"   vmovups         %%zmm11, 64(%%r11)                       \n"
+
+			"BF16_SAVE_C_M1N32:                                          \n"
+			"   vmovups         %%zmm8, (%%r10)                          \n"
+			"   vmovups         %%zmm9, 64(%%r10)                        \n"
 
 			"BF16_END_N32:                                               \n"
 

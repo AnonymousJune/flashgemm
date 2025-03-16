@@ -11,11 +11,6 @@ void flashgemm_set_thread_num(int num)
 bool flashgemm_test_dimention(int M, int N, int K)
 {
 	bool flag = true;
-	if (M % 4 != 0)
-	{
-		printf("M must be a multiple of 4\n");
-		flag = false;
-	}
 	if (N % 32 != 0)
 	{
 		printf("N must be a multiple of 32\n");
@@ -55,7 +50,8 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 	float *A = (float *)A_bf16;
 	void *ptrA, *ptrB;
 	int K_Ac = ((K + 31) / 32) * 32; // for edge process K%32!=0
-	posix_memalign(&ptrA, 64, M * K_Ac * sizeof(uint16_t));
+	int M_Ac = ((M + 3) / 4) * 4; // for edge process M%4!=0
+	posix_memalign(&ptrA, 64, M_Ac * K_Ac * sizeof(uint16_t));
 	posix_memalign(&ptrB, 64, NUM * GEMM_K * 32 * sizeof(uint16_t));
 	float *Ac = (float *)ptrA;
 	uint16_t *Bc = (uint16_t *)ptrB;
@@ -99,12 +95,12 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 
 			if (Edge_K > 0 && i >= Num_blocks0)
 			{
-				AAc = Ac + start_K * M + start_M * Edge_K; // note
+				AAc = Ac + start_K * M_Ac + start_M * Edge_K; // note
 				FLASHGEMM_NPACK(AA, AAc, size_block_m, Edge_K, K / 2);
 			}
 			else
 			{
-				AAc = Ac + start_K * M + start_M * GEMM_K / 2; // note
+				AAc = Ac + start_K * M_Ac + start_M * GEMM_K / 2; // note
 				FLASHGEMM_NPACK(AA, AAc, size_block_m, GEMM_K / 2, K / 2);
 			}
 		}
@@ -124,7 +120,7 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 			}
 				
 
-			uint16_t *temp_A = (uint16_t *)Ac + kk * M;
+			uint16_t *temp_A = (uint16_t *)Ac + kk * M_Ac;
 
 			for (j = 0; j < Nb; j = j + nr)
 			{

@@ -1127,7 +1127,7 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 				"zmm30", "zmm31", "memory", "xmm0", "xmm1", "xmm2", "xmm3", "xmm6", "xmm7");
 }
 
-static void FLASHGEMM_BF16_KERNELm12xn16(float *C, uint16_t *A, uint16_t *B, long M, long N, long K, long LK, long LN, uint16_t *Bc, long k_tag)
+static void FLASHGEMM_BF16_KERNELm12xn16_edge(float *C, uint16_t *A, uint16_t *B, long M, long N, long K, long LK, long LN, uint16_t *Bc, long k_tag, long nr)
 {
 	asm volatile(
 			".macro bf16_pack_b_n16                                      \n"
@@ -1376,30 +1376,30 @@ static void FLASHGEMM_BF16_KERNELm12xn16(float *C, uint16_t *A, uint16_t *B, lon
 			".endm                                                       \n"
 
 			".macro    bf16_save_c_m12n16                                \n"
-			"   vmovups         %%zmm8, (%%r10)                          \n"
-			"   vmovups         %%zmm10, (%%r11)                         \n"
-			"   vmovups         %%zmm12, (%%r12)                         \n"
-			"   vmovups         %%zmm14, (%%r13)                         \n"
+			"   vmovups         %%zmm8, (%%r10)%{%%k1%}                  \n"
+			"   vmovups         %%zmm10, (%%r11)%{%%k1%}                 \n"
+			"   vmovups         %%zmm12, (%%r12)%{%%k1%}                 \n"
+			"   vmovups         %%zmm14, (%%r13)%{%%k1%}                 \n"
 
 			"   leaq     (%%r13, %%r8, 4), %%r10                         \n" // C0
 			"   leaq     (%%r10, %%r8, 4), %%r11                         \n" // C1
 			"   leaq     (%%r11, %%r8, 4), %%r12                         \n" // C2
 			"   leaq     (%%r12, %%r8, 4), %%r13                         \n" // C3
 
-			"   vmovups         %%zmm16, (%%r10)                         \n"
-			"   vmovups         %%zmm18, (%%r11)                         \n"
-			"   vmovups         %%zmm20, (%%r12)                         \n"
-			"   vmovups         %%zmm22, (%%r13)                         \n"
+			"   vmovups         %%zmm16, (%%r10)%{%%k1%}                 \n"
+			"   vmovups         %%zmm18, (%%r11)%{%%k1%}                 \n"
+			"   vmovups         %%zmm20, (%%r12)%{%%k1%}                 \n"
+			"   vmovups         %%zmm22, (%%r13)%{%%k1%}                 \n"
 
 			"   leaq     (%%r13, %%r8, 4), %%r10                         \n" // C0
 			"   leaq     (%%r10, %%r8, 4), %%r11                         \n" // C1
 			"   leaq     (%%r11, %%r8, 4), %%r12                         \n" // C2
 			"   leaq     (%%r12, %%r8, 4), %%r13                         \n" // C3
 
-			"   vmovups         %%zmm24, (%%r10)                         \n"
-			"   vmovups         %%zmm26, (%%r11)                         \n"
-			"   vmovups         %%zmm28, (%%r12)                         \n"
-			"   vmovups         %%zmm30, (%%r13)                         \n"
+			"   vmovups         %%zmm24, (%%r10)%{%%k1%}                 \n"
+			"   vmovups         %%zmm26, (%%r11)%{%%k1%}                 \n"
+			"   vmovups         %%zmm28, (%%r12)%{%%k1%}                 \n"
+			"   vmovups         %%zmm30, (%%r13)%{%%k1%}                 \n"
 
 			"   subq            $12, %%rdi                               \n"
 			"   leaq      (%%r13, %%r8, 4), %%rcx                        \n" // C0
@@ -1504,20 +1504,20 @@ static void FLASHGEMM_BF16_KERNELm12xn16(float *C, uint16_t *A, uint16_t *B, lon
 			".endm                                                       \n"
 
 			".macro    bf16_save_c_m8n16                                 \n"
-			"   vmovups         %%zmm8, (%%r10)                          \n"
-			"   vmovups         %%zmm10, (%%r11)                         \n"
-			"   vmovups         %%zmm12, (%%r12)                         \n"
-			"   vmovups         %%zmm14, (%%r13)                         \n"
+			"   vmovups         %%zmm8, (%%r10)%{%%k1%}                  \n"
+			"   vmovups         %%zmm10, (%%r11)%{%%k1%}                 \n"
+			"   vmovups         %%zmm12, (%%r12)%{%%k1%}                 \n"
+			"   vmovups         %%zmm14, (%%r13)%{%%k1%}                 \n"
 
 			"   leaq     (%%r13, %%r8, 4), %%r10                         \n" // C0
 			"   leaq     (%%r10, %%r8, 4), %%r11                         \n" // C1
 			"   leaq     (%%r11, %%r8, 4), %%r12                         \n" // C2
 			"   leaq     (%%r12, %%r8, 4), %%r13                         \n" // C3
 
-			"   vmovups         %%zmm16, (%%r10)                         \n"
-			"   vmovups         %%zmm18, (%%r11)                         \n"
-			"   vmovups         %%zmm20, (%%r12)                         \n"
-			"   vmovups         %%zmm22, (%%r13)                         \n"
+			"   vmovups         %%zmm16, (%%r10)%{%%k1%}                 \n"
+			"   vmovups         %%zmm18, (%%r11)%{%%k1%}                 \n"
+			"   vmovups         %%zmm20, (%%r12)%{%%k1%}                 \n"
+			"   vmovups         %%zmm22, (%%r13)%{%%k1%}                 \n"
 
 			"   subq            $8, %%rdi                                \n"
 			"   leaq      (%%r13, %%r8, 4), %%rcx                        \n" // C0
@@ -1601,10 +1601,10 @@ static void FLASHGEMM_BF16_KERNELm12xn16(float *C, uint16_t *A, uint16_t *B, lon
 			".endm                                                       \n"
 
 			".macro    bf16_save_c_m4n16                                 \n"
-			"   vmovups         %%zmm8, (%%r10)                          \n"
-			"   vmovups         %%zmm10, (%%r11)                         \n"
-			"   vmovups         %%zmm12, (%%r12)                         \n"
-			"   vmovups         %%zmm14, (%%r13)                         \n"
+			"   vmovups         %%zmm8, (%%r10)%{%%k1%}                  \n"
+			"   vmovups         %%zmm10, (%%r11)%{%%k1%}                 \n"
+			"   vmovups         %%zmm12, (%%r12)%{%%k1%}                 \n"
+			"   vmovups         %%zmm14, (%%r13)%{%%k1%}                 \n"
 
 			"   subq            $4, %%rdi                                \n"
 			"   leaq      (%%r13, %%r8, 4), %%rcx                        \n" // C0
@@ -1614,6 +1614,12 @@ static void FLASHGEMM_BF16_KERNELm12xn16(float *C, uint16_t *A, uint16_t *B, lon
 			//-----------------------------------------------------------------
 
 			"GEMM_BF16_N16:                                              \n"
+			"   movq   %[nr], %%rcx                                      \n"
+			"   mov     $0x1, %%rax                                      \n"
+			"   shl     %%cl, %%rax                                      \n" // cl is the low 8 bit of rcx
+			"   sub     $0x1, %%rax                                      \n"
+			"   kmovd   %%eax, %%k1                                      \n"
+
 			"   mov     %[C], %%rcx                                      \n"
 			"   mov     %[A], %%rax                                      \n"
 			"   mov     %[B], %%rbx                                      \n"
@@ -1926,13 +1932,13 @@ static void FLASHGEMM_BF16_KERNELm12xn16(float *C, uint16_t *A, uint16_t *B, lon
 			"   jmp      BF16_BEGIN_M4N16                                \n"
 
 			"BF16_SAVE_C_M3N16:                                          \n"
-			"   vmovups         %%zmm12, (%%r12)                         \n"
+			"   vmovups         %%zmm12, (%%r12)%{%%k1%}                 \n"
 
 			"BF16_SAVE_C_M2N16:                                          \n"
-			"   vmovups         %%zmm10, (%%r11)                         \n"
+			"   vmovups         %%zmm10, (%%r11)%{%%k1%}                 \n"
 
 			"BF16_SAVE_C_M1N16:                                          \n"
-			"   vmovups         %%zmm8, (%%r10)                          \n"
+			"   vmovups         %%zmm8, (%%r10)%{%%k1%}                  \n"
 
 			"BF16_END_N16:                                               \n"
 
@@ -1947,7 +1953,8 @@ static void FLASHGEMM_BF16_KERNELm12xn16(float *C, uint16_t *A, uint16_t *B, lon
 			[LK] "m"(LK),
 			[LN] "m"(LN),
 			[Bc] "m"(Bc),
-			[k_tag] "m"(k_tag)
+			[k_tag] "m"(k_tag),
+			[nr] "m"(nr)
 			: "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "rbp", "r8", "r9", "r10", "r11", "r12",
 				"r13", "r14", "r15", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5",
 				"zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",

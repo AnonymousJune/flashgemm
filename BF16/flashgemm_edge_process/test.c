@@ -42,15 +42,15 @@ int main()
 	}
 
 	// int j = 1;
-	for (int j = 0; j < 30; j++)
+	for (int j = 0; j < 60; j++)
 	{
 		// long M = MNK[j * 3];
 		// long N = MNK[j * 3 + 1];
 		// long K = MNK[j * 3 + 2];
 
-		long M = 12 + 4 * j;
-		long N = 16 + 16 * j;
-		long K = 16 + 16 * j;
+		long M = 12 + j;
+		long N = 16 + j;
+		long K = 16 + j * 2;
 
 		double ops = (double)M * N * K * 1.0e-09 * 2;
 

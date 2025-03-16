@@ -11,11 +11,6 @@ void flashgemm_set_thread_num(int num)
 bool flashgemm_test_dimention(int M, int N, int K)
 {
 	bool flag = true;
-	if (N % 16 != 0)
-	{
-		printf("N must be a multiple of 32\n");
-		flag = false;
-	}
 	if (K % 2 != 0)
 	{
 		printf("K must be a multiple of 2\n");
@@ -34,7 +29,7 @@ void flashgemm_single_bf16bf16f32(float *C, uint16_t *A_bf16, uint16_t *B_bf16, 
 	}
 	// if (N > M)
 	// {
-		flashgemm_single_bf16bf16f32_MlN(C, A_bf16, B_bf16, M, N, K, beta);
+	flashgemm_single_bf16bf16f32_MlN(C, A_bf16, B_bf16, M, N, K, beta);
 	// }
 	// else
 	// {
@@ -50,7 +45,7 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 	float *A = (float *)A_bf16;
 	void *ptrA, *ptrB;
 	int K_Ac = ((K + 31) / 32) * 32; // for edge process K%32!=0
-	int M_Ac = ((M + 3) / 4) * 4; // for edge process M%4!=0
+	int M_Ac = ((M + 3) / 4) * 4;		 // for edge process M%4!=0
 	posix_memalign(&ptrA, 64, M_Ac * K_Ac * sizeof(uint16_t));
 	posix_memalign(&ptrB, 64, NUM * GEMM_K * 32 * sizeof(uint16_t));
 	float *Ac = (float *)ptrA;
@@ -111,7 +106,8 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 		{
 			kc = GEMM_K;
 			kc_Ac = GEMM_K;
-			if (K - kk < GEMM_K){
+			if (K - kk < GEMM_K)
+			{
 				kc_Ac = K_Ac - kk;
 				kc = K - kk;
 			}
@@ -129,9 +125,14 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 				{
 					FLASHGEMM_BF16_KERNELm12xn32(temp_C, temp_A, temp_B, M, Nb, kc, kc_Ac, N, temp_Bc, kk || beta);
 				}
-				if (nr == 16)
+				else if (nr > 16 and nr < 32)
 				{
-					FLASHGEMM_BF16_KERNELm12xn16(temp_C, temp_A, temp_B, M, Nb, kc, kc_Ac, N, temp_Bc, kk || beta);
+					FLASHGEMM_BF16_KERNELm12xn16_edge(temp_C, temp_A, temp_B, M, Nb, kc, kc_Ac, N, temp_Bc, kk || beta, 16);
+					FLASHGEMM_BF16_KERNELm12xn16_edge(temp_C + 16, temp_A, temp_B + 16, M, Nb, kc, kc_Ac, N, temp_Bc, kk || beta, nr - 16);
+				}
+				else
+				{
+					FLASHGEMM_BF16_KERNELm12xn16_edge(temp_C, temp_A, temp_B, M, Nb, kc, kc_Ac, N, temp_Bc, kk || beta, nr);
 				}
 			}
 		}

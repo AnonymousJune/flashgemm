@@ -742,11 +742,12 @@ GEMM_BF16_N32:
    mov     %[K], %%rdx                                      
    mov     %[LN], %%r8                                     
    mov     %[Bc], %%r14                                    
-   mov     %[M], %%rdi                                        
-   mov     %[k_tag], %%r15                                  
+   mov     %[M], %%rdi
 
-   prefetcht0         (%%rbx)                               
-   mov     %%rbx, %%r9                                      
+   mov     %[LK], %%r15
+   mov     %%rax, %%r9                                  
+
+   prefetcht0         (%%rbx)                                                                  
    mov     %%rdx, %%rsi                                     
 
 //-----------------------------------------------------------------
@@ -787,9 +788,11 @@ BF16_BEGIN_PACK_N32:
    vpxorq         %%zmm30, %%zmm30, %%zmm30                 
    vpxorq         %%zmm31, %%zmm31, %%zmm31                 
    mov     %%rcx, %%r13
+   cmp     $16, %%rdx
+   jb      BF16_PACK_MAIN_M12N32K2
    subq    $16, %%rdx
 
-BF16_PACK_MAIN_M12N32:                               
+BF16_PACK_MAIN_M12N32K16:                               
    bf16_kernel_m12n32k2_pack
    bf16_kernel_m12n32k2_pack
    bf16_kernel_m12n32k2_pack
@@ -800,16 +803,25 @@ BF16_PACK_MAIN_M12N32:
    cmp     $0, %%rdx                                        
    je      BF16_PACK_SAVEC_M12N32
    bf16_kernel_m12n32k2_pack
+   cmp     $16, %%rdx                                        
+   jb      BF16_PACK_MAIN_M12N32K2
    subq    $16, %%rdx                               
    cmp     $192, %%rdx                      // 192/16 = 12 rows of C data
    jbe     BF16_PACK_K_PREFETCH_C_M12N32    // prefeth C before loop end
-   jmp     BF16_PACK_MAIN_M12N32
+   jmp     BF16_PACK_MAIN_M12N32K16
+
+BF16_PACK_MAIN_M12N32K2:
+   subq    $2, %%rdx
+   cmp     $0, %%rdx
+   je      BF16_PACK_SAVEC_M12N32
+   bf16_kernel_m12n32k2_pack
+   jmp     BF16_PACK_MAIN_M12N32K2
 
 BF16_PACK_K_PREFETCH_C_M12N32:
    prefetcht2         (%%r13)                               
    prefetcht2         64(%%r13)                             
    leaq     (%%r13, %%r8, 4), %%r13
-   jmp BF16_PACK_MAIN_M12N32
+   jmp BF16_PACK_MAIN_M12N32K16
 
 BF16_PACK_SAVEC_M12N32: 
 	bf16_kernel_m12n32k2_pack_end 
@@ -818,9 +830,9 @@ BF16_PACK_SAVEC_M12N32:
 
 //-----------------------------------------------------------------
 
-BF16_BEGIN_M12:
+BF16_BEGIN_M12N32:
    cmpq    $12, %%rdi 
-   jb      BF16_BEGIN_M8
+   jb      BF16_BEGIN_M8N32
 
    mov     %%r14, %%rbx                                      // Bc
    mov     %%rsi, %%rdx                                      // K
@@ -853,9 +865,11 @@ BF16_BEGIN_M12:
    vpxorq         %%zmm30, %%zmm30, %%zmm30                 
    vpxorq         %%zmm31, %%zmm31, %%zmm31                                                       
    mov     %%rcx, %%r13
+   cmp     $16, %%rdx
+   jb      BF16_MAIN_M12N32K2
    subq    $16, %%rdx
 
-BF16_MAIN_K_M12N32:   // loop K+=4
+BF16_MAIN_K_M12N32K16:   // loop K+=4
    bf16_kernel_m12n32k2_1
    bf16_kernel_m12n32k2_2
    bf16_kernel_m12n32k2_1
@@ -863,41 +877,54 @@ BF16_MAIN_K_M12N32:   // loop K+=4
    bf16_kernel_m12n32k2_1
    bf16_kernel_m12n32k2_2
    bf16_kernel_m12n32k2_1
+   bf16_kernel_m12n32k2_2
    cmp     $0, %%rdx                                        
-   je      BF16_MAIN_K_M12N32_EDGE
-   bf16_kernel_m12n32k2_2
+   je      BF16_BEGIN_SAVE_M12N32
+   cmp     $16, %%rdx
+   jb      BF16_MAIN_M12N32K2
    subq  $16, %%rdx                                         
    cmp   $192, %%rdx        // 192/16 = 12 rows of C data                                
    jbe   BF16_K_PREFETCH_C_M12N32                          
-   jmp   BF16_MAIN_K_M12N32
+   jmp   BF16_MAIN_K_M12N32K16
 
 BF16_K_PREFETCH_C_M12N32:                                      
    prefetcht2         (%%r13)                               
    prefetcht2         64(%%r13)                             
    leaq     (%%r13, %%r8, 4), %%r13
-   jmp BF16_MAIN_K_M12N32                                
+   jmp BF16_MAIN_K_M12N32K16                                
 
-BF16_MAIN_K_M12N32_EDGE:
-   bf16_kernel_m12n32k2_end
+BF16_MAIN_M12N32K2:
+   bf16_kernel_m12n32k2_1
+   subq    $2, %%rdx
+   cmp     $0, %%rdx                                        
+   je      BF16_BEGIN_SAVE_M12N32
+   bf16_kernel_m12n32k2_2
+   subq    $2, %%rdx
+   cmp     $0, %%rdx                                        
+   je      BF16_BEGIN_SAVE_M12N32
+   jmp     BF16_MAIN_M12N32K2
 
 BF16_BEGIN_SAVE_M12N32:                                            
    mov      %%rcx, %%r10                                     // C0
    leaq     (%%r10, %%r8, 4), %%r11                          // C1
    leaq     (%%r11, %%r8, 4), %%r12                          // C2
    leaq     (%%r12, %%r8, 4), %%r13                          // C3
-   cmp      $0, %%r15                                       
+   cmp      $0, %[k_tag]                                      
    je       BF16_SAVE_C_M12N32                                     
    bf16_add_c_m12n32                                        
 
 BF16_SAVE_C_M12N32:                                                
    bf16_save_c_m12n32
-   jmp     BF16_BEGIN_M12
+   imul     $24, %%r15, %%r11 // temp use %%r11
+   add      %%r11, %%r9
+   movq     %%r9, %%rax
+   jmp     BF16_BEGIN_M12N32
 
 //-----------------------------------------------------------------
 
-BF16_BEGIN_M8:
+BF16_BEGIN_M8N32:
    cmpq    $8, %%rdi 
-   jb      BF16_BEGIN_M4
+   jb      BF16_BEGIN_M4N32
 
    mov     %%r14, %%rbx                                      // Bc
    mov     %%rsi, %%rdx                                      // K
@@ -922,9 +949,11 @@ BF16_BEGIN_M8:
    vpxorq         %%zmm22, %%zmm22, %%zmm22                 
    vpxorq         %%zmm23, %%zmm23, %%zmm23                                                     
    mov     %%rcx, %%r13
+   cmpq    $16, %%rdx
+   jb      BF16_MAIN_M8N32K2
    subq    $16, %%rdx
 
-BF16_MAIN_K_M8N32:
+BF16_MAIN_K_M8N32K16:
    bf16_kernel_m8n32k2_1
    bf16_kernel_m8n32k2_2
    bf16_kernel_m8n32k2_1
@@ -932,41 +961,54 @@ BF16_MAIN_K_M8N32:
    bf16_kernel_m8n32k2_1
    bf16_kernel_m8n32k2_2
    bf16_kernel_m8n32k2_1
+   bf16_kernel_m8n32k2_2
    cmp     $0, %%rdx                                        
-   je      BF16_MAIN_K_M8N32_EDGE
-   bf16_kernel_m8n32k2_2
+   je      BF16_BEGIN_SAVE_M8N32
+   cmpq    $16, %%rdx
+   jb      BF16_MAIN_M8N32K2
    subq  $16, %%rdx                                         
    cmp   $128, %%rdx        // 128/16 = 8 rows of C data                                
    jbe   BF16_K_PREFETCH_C_M8N32                          
-   jmp   BF16_MAIN_K_M8N32
+   jmp   BF16_MAIN_K_M8N32K16
 
 BF16_K_PREFETCH_C_M8N32:                                      
    prefetcht2         (%%r13)                               
    prefetcht2         64(%%r13)                             
    leaq     (%%r13, %%r8, 4), %%r13
-   jmp BF16_MAIN_K_M8N32                                
+   jmp BF16_MAIN_K_M8N32K16                                
 
-BF16_MAIN_K_M8N32_EDGE:
-   bf16_kernel_m8n32k2_end
+BF16_MAIN_M8N32K2:
+   bf16_kernel_m8n32k2_1
+   subq    $2, %%rdx
+   cmp     $0, %%rdx                                        
+   je      BF16_BEGIN_SAVE_M8N32
+   bf16_kernel_m8n32k2_2
+   subq    $2, %%rdx
+   cmp     $0, %%rdx                                        
+   je      BF16_BEGIN_SAVE_M8N32
+   jmp     BF16_MAIN_M8N32K2
 
 BF16_BEGIN_SAVE_M8N32:                                            
    mov      %%rcx, %%r10                                     // C0
    leaq     (%%r10, %%r8, 4), %%r11                          // C1
    leaq     (%%r11, %%r8, 4), %%r12                          // C2
    leaq     (%%r12, %%r8, 4), %%r13                          // C3
-   cmp      $0, %%r15                                       
+   cmp      $0, %[k_tag]                                      
    je       BF16_SAVE_C_M8N32                                // when beta==0&&kk==0, no need to add     
    bf16_add_c_m8n32                                        
 
 BF16_SAVE_C_M8N32:                                                
    bf16_save_c_m8n32
-   jmp     BF16_END_N32
+   imul     $16, %%r15, %%r11 // temp use %%r11
+   add      %%r11, %%r9
+   movq     %%r9, %%rax
+   jmp      BF16_BEGIN_M8N32
 
 //-----------------------------------------------------------------
 
-BF16_BEGIN_M4:
-   cmpq    $4, %%rdi 
-   jb      BF16_END_N32
+BF16_BEGIN_M4N32:
+   cmpq    $0, %%rdi 
+   je      BF16_END_N32
 
    mov     %%r14, %%rbx                                      // Bc
    mov     %%rsi, %%rdx                                      // K
@@ -986,9 +1028,11 @@ BF16_BEGIN_M4:
    vpxorq         %%zmm15, %%zmm15, %%zmm15
                                                        
    mov     %%rcx, %%r13
+   cmpq    $16, %%rdx
+   jb      BF16_MAIN_M4N32K2
    subq  $16, %%rdx
 
-BF16_MAIN_K_M4N32:   // loop K+=4
+BF16_MAIN_K_M4N32K16:   // loop K+=4
    bf16_kernel_m4n32k2_1
    bf16_kernel_m4n32k2_2
    bf16_kernel_m4n32k2_1
@@ -996,34 +1040,65 @@ BF16_MAIN_K_M4N32:   // loop K+=4
    bf16_kernel_m4n32k2_1
    bf16_kernel_m4n32k2_2
    bf16_kernel_m4n32k2_1
+   bf16_kernel_m4n32k2_2
    cmp     $0, %%rdx                                        
-   je      BF16_MAIN_K_M4N32_EDGE
-   bf16_kernel_m4n32k2_2
+   je      BF16_BEGIN_SAVE_M4N32
+   cmpq    $16, %%rdx
+   jb      BF16_MAIN_M4N32K2
    subq  $16, %%rdx                                         
    cmp   $64, %%rdx        // 64/16 = 4 rows of C data                                
    jbe   BF16_K_PREFETCH_C_M4N32                          
-   jmp   BF16_MAIN_K_M4N32
+   jmp   BF16_MAIN_K_M4N32K16
 
 BF16_K_PREFETCH_C_M4N32:                                      
    prefetcht2         (%%r13)                               
    prefetcht2         64(%%r13)                             
    leaq     (%%r13, %%r8, 4), %%r13
-   jmp BF16_MAIN_K_M4N32                                
+   jmp BF16_MAIN_K_M4N32K16                                
 
-BF16_MAIN_K_M4N32_EDGE:
-   bf16_kernel_m4n32k2_end
+BF16_MAIN_M4N32K2:
+   bf16_kernel_m4n32k2_1
+   subq    $2, %%rdx
+   cmp     $0, %%rdx                                        
+   je      BF16_BEGIN_SAVE_M4N32
+   bf16_kernel_m4n32k2_2
+   subq    $2, %%rdx
+   cmp     $0, %%rdx                                        
+   je      BF16_BEGIN_SAVE_M4N32
+   jmp     BF16_MAIN_M4N32K2
 
 BF16_BEGIN_SAVE_M4N32:                                            
    mov      %%rcx, %%r10                                     // C0
    leaq     (%%r10, %%r8, 4), %%r11                          // C1
    leaq     (%%r11, %%r8, 4), %%r12                          // C2
    leaq     (%%r12, %%r8, 4), %%r13                          // C3
-   cmp      $0, %%r15                                       
+   cmp      $0, %[k_tag]                                      
    je       BF16_SAVE_C_M4N32                                     
-   bf16_add_c_m4n32                                        
+   bf16_add_c_m4n32                                       
 
-BF16_SAVE_C_M4N32:                                                
+BF16_SAVE_C_M4N32:
+   cmpq     $3, %%rdi
+   je       BF16_SAVE_C_M3N32
+   cmpq     $2, %%rdi
+   je       BF16_SAVE_C_M2N32
+   cmpq     $1, %%rdi
+   je       BF16_SAVE_C_M1N32
    bf16_save_c_m4n32
-   jmp     BF16_END_N32
+   imul     $8, %%r15, %%r11 // temp use %%r11
+   add      %%r11, %%r9
+   movq     %%r9, %%rax
+   jmp      BF16_BEGIN_M4N32
+
+BF16_SAVE_C_M3N32:
+   vmovups         %%zmm12, (%%r12)
+   vmovups         %%zmm13, 64(%%r12)                      
+
+BF16_SAVE_C_M2N32:
+   vmovups         %%zmm10, (%%r11)                         
+   vmovups         %%zmm11, 64(%%r11)
+
+BF16_SAVE_C_M1N32:
+   vmovups         %%zmm8, (%%r10)
+   vmovups         %%zmm9, 64(%%r10)
 
 BF16_END_N32:

@@ -1,6 +1,6 @@
-input_file_path = '/home/wangpy/zjw/TEST/BF16/test4/back/m12n32k2'
+input_file_path = '/home/wangpy/zjw/TEST/BF16/flashgemm_edge_process/back/m12n16k2'
 
-output_file_path = '/home/wangpy/zjw/TEST/BF16/test4/back/m12n32k2-processed'
+output_file_path = '/home/wangpy/zjw/TEST/BF16/flashgemm_edge_process/back/m12n16k2-processed'
 
 with open(input_file_path, 'r') as input_file:
     with open(output_file_path, 'w') as output_file:

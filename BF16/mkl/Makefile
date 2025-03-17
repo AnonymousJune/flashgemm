@@ -1,14 +1,13 @@
 # source /home/wangpy/zjw/intel/oneapi/setvars.sh
-# export LD_LIBRARY_PATH=home/wangpy/zjw/oneapi/mkl/2025.0/lib/:$LD_LIBRARY_PATH
 BINARY_NAME = testMKL
 CC			= /home/wangpy/zjw/intel/oneapi/2025.0/bin/dpcpp
-CFLAGS		= -O2 -g
+CFLAGS		= -O2 -g 
 MKLPATH		= /home/wangpy/zjw/oneapi/mkl/2025.0
-LDFLAGS		= -L$(MKLPATH)/lib/intel64
+LDFLAGS		= -L$(MKLPATH)/lib/intel64  -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
 INCFLAGS	= -I$(MKLPATH)/include
 
 
-OTHER_FLGAS  = -qmkl=parallel
+OTHER_FLGAS  =  -DMKL_ILP64  -qmkl-ilp64=parallel
 OTHER_LIBS   = 
 
 SRC			= $(wildcard *.c)

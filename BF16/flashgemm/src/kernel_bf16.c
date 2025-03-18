@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, long M, long N, long K, long LK, long LN, uint16_t *Bc, long k_tag)
+static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, long M, long K, long LK, long LN, uint16_t *Bc, long k_tag)
 {
 	asm volatile(
 			".macro bf16_pack_b_n32                                      \n"
@@ -1113,7 +1113,6 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			[A] "m"(A),
 			[B] "m"(B),
 			[M] "m"(M),
-			[N] "m"(N),
 			[K] "m"(K),
 			[LK] "m"(LK),
 			[LN] "m"(LN),
@@ -1127,7 +1126,7 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 				"zmm30", "zmm31", "memory", "xmm0", "xmm1", "xmm2", "xmm3", "xmm6", "xmm7");
 }
 
-static void FLASHGEMM_BF16_KERNELm12xn16_edge(float *C, uint16_t *A, uint16_t *B, long M, long N, long K, long LK, long LN, uint16_t *Bc, long k_tag, long nr)
+static void FLASHGEMM_BF16_KERNELm12xn16_edge(float *C, uint16_t *A, uint16_t *B, long M, long K, long LK, long LN, uint16_t *Bc, long k_tag, long nr)
 {
 	asm volatile(
 			".macro bf16_pack_b_n16                                      \n"
@@ -1948,7 +1947,6 @@ static void FLASHGEMM_BF16_KERNELm12xn16_edge(float *C, uint16_t *A, uint16_t *B
 			[A] "m"(A),
 			[B] "m"(B),
 			[M] "m"(M),
-			[N] "m"(N),
 			[K] "m"(K),
 			[LK] "m"(LK),
 			[LN] "m"(LN),

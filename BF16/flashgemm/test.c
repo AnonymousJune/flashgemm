@@ -5,11 +5,11 @@
 #include <string.h>
 #include "mkl.h"
 #include "./src/flashgemm.c"
-// #include "utils.h"
+#include "utils.h"
 
 using namespace std;
 #define PEAK_GFLOPS 2.6
-#define NUM 1
+#define NUM 24
 
 int MNK[30] = {
 	32, 12544, 288,
@@ -28,7 +28,7 @@ int main()
 {
 	omp_set_num_threads(NUM);
 	flashgemm_set_thread_num(NUM);
-	mkl_set_num_threads(NUM);
+	// mkl_set_num_threads(NUM);
 
 	int loop = 10, beta = 1;
 	double start, cost;
@@ -48,9 +48,9 @@ int main()
 		long N = MNK[j * 3 + 1];
 		long K = MNK[j * 3 + 2];
 
-		// long M = 12 + j;
-		// long N = 16 + j;
-		// long K = 16 + j * 2;
+		// long M = 12;
+		// long N = 48;
+		// long K = 16;
 
 		double ops = (double)M * N * K * 1.0e-09 * 2;
 

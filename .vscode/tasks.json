@@ -55,6 +55,11 @@
                 "isDefault": true
             },
             "detail": "build 2"
+        },
+        {
+            "label": "load MKL env",
+            "type": "shell",
+            "command": "bash -c 'source /home/wangpy/zjw/intel/oneapi/setvars.sh && env > /tmp/vscode_env'"
         }
     ],
     "version": "2.0.0"

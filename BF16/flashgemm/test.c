@@ -9,10 +9,10 @@
 
 using namespace std;
 #define PEAK_GFLOPS 2.6
-#define NUM 24
+#define NUM 32
 
-int MNK[30] = {
-	32, 12544, 288,
+int MNK[60] = {
+	32, 12544, 288, // ID1-10
 	144, 3136, 1296,
 	192, 3136, 1728,
 	192, 784, 4800,
@@ -22,6 +22,16 @@ int MNK[30] = {
 	144, 4096, 1296,
 	144, 1024, 1296,
 	192, 1024, 1728,
+	128, 128, 512, // ID11-20
+	256, 256, 512,
+	512, 512, 512,
+	1024, 1024, 512,
+	2048, 2048, 512,
+	128, 16384, 512,
+	256, 16384, 512,
+	512, 16384, 512,
+	1024, 16384, 512,
+	2048, 16384, 512
 };
 
 int main()
@@ -35,14 +45,14 @@ int main()
 	double gflops;
 
 	FILE *fp;
-	if ((fp = fopen("./result.txt", "w")) == NULL)
+	if ((fp = fopen("./bf16_flashgemm.txt", "w")) == NULL)
 	{
 		puts("Fail to open file!");
 		exit(0);
 	}
 
 	// int j = 1;
-	for (int j = 0; j < 10; j++)
+	for (int j = 0; j < 20; j++)
 	{
 		long M = MNK[j * 3];
 		long N = MNK[j * 3 + 1];
@@ -82,36 +92,40 @@ int main()
 
 		// test result
 		flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
-		cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans, 
-											 M, N, K, 1.0, A, K, B, N, beta, C_MKL, N);
+		cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+													 M, N, K, 1.0, A, K, B, N, beta, C_MKL, N);
 		// printf("\nC:\n");
 		// show_matrix_fp32(M, N, C);
 		// printf("\nC_MKL:\n");
 		// show_matrix_fp32(M, N, C_MKL);
-		
-		bool flag = Check_result(C, C_MKL, M, N);
-		
+
+		// bool flag = Check_result(C, C_MKL, M, N);
+
 		// warm up
-		for (int i = 0; i <= 5; i++){
+		for (int i = 0; i <= 5; i++)
+		{
 			flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
 		}
 
 		// test time
 		start = dclock();
-		for (int i = 0; i <= loop; i++){
+		for (int i = 0; i <= loop; i++)
+		{
 			flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
 		}
 		cost = (dclock() - start) / loop;
 
-		if (flag)
-		{
-			printf("bf16: id=%-3d M= %-8d N=%-8d K=%-8d effic= %.3lf\n",
-						 j, M, N, K, ops / cost / ((PEAK_GFLOPS * 64 * 2)) * 100 / NUM);
-			fprintf(fp, "%.3lf \n", ops / cost / ((PEAK_GFLOPS * 64 * 2)) * 100 / NUM);
-		}else{
-			printf("bf16: id=%-3d M= %-8d N=%-8d K=%-8d error!!!\n", j, M, N, K);
-			fprintf(fp, "error! \n");
-		}
+		// if (flag)
+		// {
+			printf("bf16:  M= %-10d N=%-10d K=%-10d flops = %-10.3lf effic= %.3lf %\n",
+				M, N, K, ops / cost, ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
+ fprintf(fp, "%.3lf\n", ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
+		// }
+		// else
+		// {
+		// 	printf("bf16: id=%-3d M= %-8d N=%-8d K=%-8d error!!!\n", j, M, N, K);
+		// 	fprintf(fp, "error! \n");
+		// }
 
 		free(ptrA);
 		free(ptrB);

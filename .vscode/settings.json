@@ -3,6 +3,10 @@
   "files.associations": {
     "flashgemm.h": "c",
     "compare": "c",
-    "cstdint": "c"
+    "cstdint": "c",
+    "cblas.h": "c",
+    "stddef.h": "c",
+    "stdlib.h": "c",
+    "utils.h": "c"
   }
 }

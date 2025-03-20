@@ -6,20 +6,30 @@
 #include <math.h>
 #include "utils.h"
 
-#define NUM 24
+#define NUM 32
 #define PEAK_GFLOPS 2.6
 
-int MNK[30] = {
-	32, 12544, 288,
-	144, 3136, 1296,
-	192, 3136, 1728,
-	192, 784, 4800,
-	336, 784, 8400,
-	32, 16384, 288,
-	96, 4096, 864,
-	144, 4096, 1296,
-	144, 1024, 1296,
-	192, 1024, 1728,
+int MNK[60] = {
+		32, 12544, 288, // ID1-10
+		144, 3136, 1296,
+		192, 3136, 1728,
+		192, 784, 4800,
+		336, 784, 8400,
+		32, 16384, 288,
+		96, 4096, 864,
+		144, 4096, 1296,
+		144, 1024, 1296,
+		192, 1024, 1728,
+		128, 128, 512, // ID11-20
+		256, 256, 512,
+		512, 512, 512,
+		1024, 1024, 512,
+		2048, 2048, 512,
+		128, 16384, 512,
+		256, 16384, 512,
+		512, 16384, 512,
+		1024, 16384, 512,
+		2048, 16384, 512
 };
 
 int main()
@@ -38,13 +48,13 @@ int main()
 	int sizea, sizeb, sizec;
 
 	FILE *fp;
-	if ((fp = fopen("./mkl.txt", "w")) == NULL)
+	if ((fp = fopen("./bf16_mkl.txt", "w")) == NULL)
 	{
 		puts("Fail to open file!");
 		exit(0);
 	}
 
-	for (j = 0; j < 10; j++)
+	for (j = 0; j < 20; j++)
 	{
 		M = MNK[j * 3];
 		N = MNK[j * 3 + 1];
@@ -66,23 +76,23 @@ int main()
 		random_matrix_bf16(M, K, A);
 		random_matrix_f32(M, N, C);
 
-		for (i = 0; i < loop; i++)
+		for (i = 0; i < 3; i++)
 		{
 			cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-						M, N, K, alpha, A, K, B, N, beta, C, N);
+														 M, N, K, alpha, A, K, B, N, beta, C, N);
 		}
 
 		start = dclock();
 		for (i = 0; i < loop; i++)
 		{
 			cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-						M, N, K, alpha, A, K, B, N, beta, C, N);
+														 M, N, K, alpha, A, K, B, N, beta, C, N);
 		}
 		cost = (dclock() - start) / loop;
 
 		printf("MKL:  M= %-10d N=%-10d K=%-10d flops = %-10.3lf effic= %.3lf %\n",
-			   M, N, K, ops / cost, ops / cost / (PEAK_GFLOPS*64) * 100 / NUM  );
-		fprintf(fp, "%.3lf\n", ops / cost / (PEAK_GFLOPS*64) * 100 / NUM  );
+					 M, N, K, ops / cost, ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
+		fprintf(fp, "%.3lf\n", ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
 
 		free(A);
 		free(B);

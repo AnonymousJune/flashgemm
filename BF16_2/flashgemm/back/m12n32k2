@@ -308,77 +308,7 @@
 
    vdpbf16ps        %%zmm3, %%zmm6, %%zmm30                 
    vdpbf16ps        %%zmm3, %%zmm7, %%zmm31                 
-.endm  
-
-.macro    bf16_add_c_m12n32                                  
-   vmovups         (%%r10), %%zmm0                          
-   vaddps             %%zmm0, %%zmm8, %%zmm8               
-   vmovups         64(%%r10), %%zmm1                        
-   vaddps             %%zmm1, %%zmm9, %%zmm9               
-   vmovups         (%%r11), %%zmm2                          
-   vaddps             %%zmm2, %%zmm10, %%zmm10             
-   vmovups         64(%%r11), %%zmm3                        
-   vaddps             %%zmm3, %%zmm11, %%zmm11             
-   vmovups         (%%r12), %%zmm4                          
-   vaddps             %%zmm4, %%zmm12, %%zmm12             
-   vmovups         64(%%r12), %%zmm5                        
-   vaddps             %%zmm5, %%zmm13, %%zmm13             
-   vmovups         (%%r13), %%zmm6                          
-   vaddps             %%zmm6, %%zmm14, %%zmm14             
-   vmovups         64(%%r13), %%zmm7                        
-   vaddps             %%zmm7, %%zmm15, %%zmm15             
-
-   leaq          (%%r13, %%r8, 4), %%r10                    // C0
-   leaq             (%%r10, %%r8, 4), %%r11                 // C1
-   leaq             (%%r11, %%r8, 4), %%r12                 // C2
-   leaq             (%%r12, %%r8, 4), %%r13                 // C3
-
-   vmovups         (%%r10), %%zmm0                          
-   vaddps             %%zmm0, %%zmm16, %%zmm16             
-   vmovups         64(%%r10), %%zmm1                        
-   vaddps             %%zmm1, %%zmm17, %%zmm17             
-   vmovups         (%%r11), %%zmm2                          
-   vaddps             %%zmm2, %%zmm18, %%zmm18             
-   vmovups         64(%%r11), %%zmm3                        
-   vaddps             %%zmm3, %%zmm19, %%zmm19             
-
-   vmovups         (%%r12), %%zmm4                          
-   vaddps             %%zmm4, %%zmm20, %%zmm20             
-   vmovups         64(%%r12), %%zmm5                        
-   vaddps             %%zmm5, %%zmm21, %%zmm21             
-   vmovups         (%%r13), %%zmm6                          
-   vaddps             %%zmm6, %%zmm22, %%zmm22             
-   vmovups         64(%%r13), %%zmm7                        
-   vaddps             %%zmm7, %%zmm23, %%zmm23             
-
-   leaq          (%%r13, %%r8, 4), %%r10                    // C0
-   leaq             (%%r10, %%r8, 4), %%r11                 // C1
-   leaq             (%%r11, %%r8, 4), %%r12                 // C2
-   leaq             (%%r12, %%r8, 4), %%r13                 // C3
-
-   vmovups         (%%r10), %%zmm0                          
-   vaddps             %%zmm0, %%zmm24, %%zmm24             
-   vmovups         64(%%r10), %%zmm1                        
-   vaddps             %%zmm1, %%zmm25, %%zmm25             
-   vmovups         (%%r11), %%zmm2                          
-   vaddps             %%zmm2, %%zmm26, %%zmm26             
-   vmovups         64(%%r11), %%zmm3                        
-   vaddps             %%zmm3, %%zmm27, %%zmm27             
-
-   vmovups         (%%r12), %%zmm4                          
-   vaddps             %%zmm4, %%zmm28, %%zmm28             
-   vmovups         64(%%r12), %%zmm5                        
-   vaddps             %%zmm5, %%zmm29, %%zmm29             
-   vmovups         (%%r13), %%zmm6                          
-   vaddps             %%zmm6, %%zmm30, %%zmm30             
-   vmovups         64(%%r13), %%zmm7                        
-   vaddps             %%zmm7, %%zmm31, %%zmm31             
-
-   mov      %%rcx, %%r10                                    // C0
-   leaq     (%%r10, %%r8, 4), %%r11                         // C1
-   leaq     (%%r11, %%r8, 4), %%r12                         // C2
-   leaq     (%%r12, %%r8, 4), %%r13                         // C3
-.endm                                                       
+.endm                                                        
 
 .macro    bf16_save_c_m12n32                                   
    vmovups         %%zmm8, (%%r10)                          
@@ -422,99 +352,40 @@
     leaq      (%%r13, %%r8, 4), %%rcx                        // C0
 .endm                                                       
 
-.macro    bf16_add_c_m12n32_2                                  
-   vmovups           (rcx), %%zmm0                          
-   vaddps             %%zmm0, %%zmm8, %%zmm8               
-   vmovups         64(%%rcx), %%zmm1                        
-   vaddps             %%zmm1, %%zmm9, %%zmm9               
-   vmovups         128(%%rcx), %%zmm2                          
-   vaddps             %%zmm2, %%zmm10, %%zmm10             
-   vmovups         192(%%rcx), %%zmm3                        
-   vaddps             %%zmm3, %%zmm11, %%zmm11             
-   vmovups         256(%%rcx), %%zmm4                          
-   vaddps             %%zmm4, %%zmm12, %%zmm12             
-   vmovups         320(%%rcx), %%zmm5                        
-   vaddps             %%zmm5, %%zmm13, %%zmm13             
-   vmovups         384(%%rcx), %%zmm6                          
-   vaddps             %%zmm6, %%zmm14, %%zmm14             
-   vmovups         448(%%rcx), %%zmm7                        
-   vaddps             %%zmm7, %%zmm15, %%zmm15             
-
-   addq           $512, %%rcx
-
-   vmovups         (%%rcx), %%zmm0                          
-   vaddps             %%zmm0, %%zmm16, %%zmm16             
-   vmovups         64(%%rcx), %%zmm1                        
-   vaddps             %%zmm1, %%zmm17, %%zmm17             
-   vmovups         128(%%rcx), %%zmm2                          
-   vaddps             %%zmm2, %%zmm18, %%zmm18             
-   vmovups         192(%%rcx), %%zmm3                        
-   vaddps             %%zmm3, %%zmm19, %%zmm19             
-   vmovups         256(%%rcx), %%zmm4                          
-   vaddps             %%zmm4, %%zmm20, %%zmm20             
-   vmovups         320(%%rcx), %%zmm5                        
-   vaddps             %%zmm5, %%zmm21, %%zmm21             
-   vmovups         384(%%rcx), %%zmm6                          
-   vaddps             %%zmm6, %%zmm22, %%zmm22             
-   vmovups         448(%%rcx), %%zmm7                        
-   vaddps             %%zmm7, %%zmm23, %%zmm23             
-
-   addq           $512, %%rcx
-
-   vmovups         (%%rcx), %%zmm0                          
-   vaddps             %%zmm0, %%zmm24, %%zmm24             
-   vmovups         64(%%rcx), %%zmm1                        
-   vaddps             %%zmm1, %%zmm25, %%zmm25             
-   vmovups         128(%%rcx), %%zmm2                          
-   vaddps             %%zmm2, %%zmm26, %%zmm26             
-   vmovups         192(%%rcx), %%zmm3                        
-   vaddps             %%zmm3, %%zmm27, %%zmm27             
-   vmovups         256(%%rcx), %%zmm4                          
-   vaddps             %%zmm4, %%zmm28, %%zmm28             
-   vmovups         320(%%rcx), %%zmm5                        
-   vaddps             %%zmm5, %%zmm29, %%zmm29             
-   vmovups         384(%%rcx), %%zmm6                          
-   vaddps             %%zmm6, %%zmm30, %%zmm30             
-   vmovups         448(%%rcx), %%zmm7                        
-   vaddps             %%zmm7, %%zmm31, %%zmm31             
-
-   subq           $1024, %%rcx
-.endm                                                       
-
-.macro    bf16_save_c_m12n32_2                                   
-   vmovups         %%zmm8, (%%rcx)                          
-   vmovups         %%zmm9, 64(%%rcx)                        
-   vmovups         %%zmm10, 128(%%rcx)                         
-   vmovups         %%zmm11, 192(%%rcx)                       
-   vmovups         %%zmm12, 256(%%rcx)                         
-   vmovups         %%zmm13, 320(%%rcx)                       
-   vmovups         %%zmm14, 384(%%rcx)                         
-   vmovups         %%zmm15, 448(%%rcx)                       
+.macro    bf16_save_c_m12n32_2
+   vcvtne2ps2bf16  %%zmm8, %%zmm9, %%zmm0                                   
+   vcvtne2ps2bf16  %%zmm10, %%zmm11, %%zmm1                                   
+   vcvtne2ps2bf16  %%zmm12, %%zmm13, %%zmm2                                   
+   vcvtne2ps2bf16  %%zmm14, %%zmm15, %%zmm3                                   
+   vmovups         %%zmm0, (%%r10)                          
+   vmovups         %%zmm1, 64(%%r10)                        
+   vmovups         %%zmm2, 128(%%r10)                         
+   vmovups         %%zmm3, 192(%%r10)                                              
    
-   addq           $512, %%rcx
+   addq           $256, %%r10
 
-   vmovups         %%zmm16, (%%rcx)                         
-   vmovups         %%zmm17, 64(%%rcx)                       
-   vmovups         %%zmm18, 128(%%rcx)                         
-   vmovups         %%zmm19, 192(%%rcx)                       
-   vmovups         %%zmm20, 256(%%rcx)                         
-   vmovups         %%zmm21, 320(%%rcx)                       
-   vmovups         %%zmm22, 384(%%rcx)                         
-   vmovups         %%zmm23, 448(%%rcx)                       
+   vcvtne2ps2bf16  %%zmm16, %%zmm17, %%zmm4
+   vcvtne2ps2bf16  %%zmm18, %%zmm19, %%zmm5
+   vcvtne2ps2bf16  %%zmm20, %%zmm21, %%zmm6
+   vcvtne2ps2bf16  %%zmm22, %%zmm23, %%zmm7
+   vmovups         %%zmm4, (%%r10)                         
+   vmovups         %%zmm5, 64(%%r10)                       
+   vmovups         %%zmm6, 128(%%r10)                         
+   vmovups         %%zmm7, 192(%%r10)                                            
 
-   addq           $512, %%rcx
+   addq           $256, %%r10
 
-   vmovups         %%zmm24, (%%rcx)                         
-   vmovups         %%zmm25, 64(%%rcx)                       
-   vmovups         %%zmm26, 128(%%rcx)                         
-   vmovups         %%zmm27, 192(%%rcx)
-   vmovups         %%zmm28, 256(%%rcx)                         
-   vmovups         %%zmm29, 320(%%rcx)                       
-   vmovups         %%zmm30, 384(%%rcx)                         
-   vmovups         %%zmm31, 448(%%rcx)                       
+   vcvtne2ps2bf16  %%zmm24, %%zmm25, %%zmm8
+   vcvtne2ps2bf16  %%zmm26, %%zmm27, %%zmm9
+   vcvtne2ps2bf16  %%zmm28, %%zmm29, %%zmm10
+   vcvtne2ps2bf16  %%zmm30, %%zmm31, %%zmm11
+   vmovups         %%zmm8, (%%r10)                         
+   vmovups         %%zmm9, 64(%%r10)                       
+   vmovups         %%zmm10, 128(%%r10)                         
+   vmovups         %%zmm11, 192(%%r10)                       
 
    subq           $12, %%rdi
-   addq           $512, %%rcx
+   addq           $256, %%r10
 .endm  
 
 //-----------------------------------------------------------------
@@ -636,53 +507,6 @@
                        
    vdpbf16ps        %%zmm3, %%zmm6, %%zmm22                 
    vdpbf16ps        %%zmm3, %%zmm7, %%zmm23                 
-.endm 
-
-.macro    bf16_add_c_m8n32                                  
-   vmovups         (%%r10), %%zmm0                          
-   vaddps             %%zmm0, %%zmm8, %%zmm8               
-   vmovups         64(%%r10), %%zmm1                        
-   vaddps             %%zmm1, %%zmm9, %%zmm9               
-   vmovups         (%%r11), %%zmm2                          
-   vaddps             %%zmm2, %%zmm10, %%zmm10             
-   vmovups         64(%%r11), %%zmm3                        
-   vaddps             %%zmm3, %%zmm11, %%zmm11             
-   vmovups         (%%r12), %%zmm4                          
-   vaddps             %%zmm4, %%zmm12, %%zmm12             
-   vmovups         64(%%r12), %%zmm5                        
-   vaddps             %%zmm5, %%zmm13, %%zmm13             
-   vmovups         (%%r13), %%zmm6                          
-   vaddps             %%zmm6, %%zmm14, %%zmm14             
-   vmovups         64(%%r13), %%zmm7                        
-   vaddps             %%zmm7, %%zmm15, %%zmm15             
-
-   leaq          (%%r13, %%r8, 4), %%r10                    // C0
-   leaq             (%%r10, %%r8, 4), %%r11                 // C1
-   leaq             (%%r11, %%r8, 4), %%r12                 // C2
-   leaq             (%%r12, %%r8, 4), %%r13                 // C3
-
-   vmovups         (%%r10), %%zmm0                          
-   vaddps             %%zmm0, %%zmm16, %%zmm16             
-   vmovups         64(%%r10), %%zmm1                        
-   vaddps             %%zmm1, %%zmm17, %%zmm17             
-   vmovups         (%%r11), %%zmm2                          
-   vaddps             %%zmm2, %%zmm18, %%zmm18             
-   vmovups         64(%%r11), %%zmm3                        
-   vaddps             %%zmm3, %%zmm19, %%zmm19             
-
-   vmovups         (%%r12), %%zmm4                          
-   vaddps             %%zmm4, %%zmm20, %%zmm20             
-   vmovups         64(%%r12), %%zmm5                        
-   vaddps             %%zmm5, %%zmm21, %%zmm21             
-   vmovups         (%%r13), %%zmm6                          
-   vaddps             %%zmm6, %%zmm22, %%zmm22             
-   vmovups         64(%%r13), %%zmm7                        
-   vaddps             %%zmm7, %%zmm23, %%zmm23             
-
-   mov               %%rcx, %%r10                           // C0
-   leaq             (%%r10, %%r8, 4), %%r11                 // C1
-   leaq             (%%r11, %%r8, 4), %%r12                 // C2
-   leaq             (%%r12, %%r8, 4), %%r13                 // C3
 .endm                                                       
 
 .macro    bf16_save_c_m8n32                                   
@@ -711,71 +535,31 @@
                        
    subq            $8, %%rdi                                              
    leaq      (%%r13, %%r8, 4), %%rcx                        // C0
-.endm                                                       
+.endm
 
-.macro    bf16_add_c_m8n32_2                                  
-   vmovups         (%%rcx), %%zmm0                          
-   vaddps             %%zmm0, %%zmm8, %%zmm8               
-   vmovups         64(%%rcx), %%zmm1                        
-   vaddps             %%zmm1, %%zmm9, %%zmm9               
-   vmovups         128(%%rcx), %%zmm2                          
-   vaddps             %%zmm2, %%zmm10, %%zmm10             
-   vmovups         192(%%rcx), %%zmm3                        
-   vaddps             %%zmm3, %%zmm11, %%zmm11             
-   vmovups         256(%%rcx), %%zmm4                          
-   vaddps             %%zmm4, %%zmm12, %%zmm12             
-   vmovups         320(%%rcx), %%zmm5                        
-   vaddps             %%zmm5, %%zmm13, %%zmm13             
-   vmovups         384(%%rcx), %%zmm6                          
-   vaddps             %%zmm6, %%zmm14, %%zmm14             
-   vmovups         448(%%rcx), %%zmm7                        
-   vaddps             %%zmm7, %%zmm15, %%zmm15
+.macro    bf16_save_c_m8n32_2
+   vcvtne2ps2bf16  %%zmm8, %%zmm9, %%zmm0                                   
+   vcvtne2ps2bf16  %%zmm10, %%zmm11, %%zmm1                                   
+   vcvtne2ps2bf16  %%zmm12, %%zmm13, %%zmm2                                   
+   vcvtne2ps2bf16  %%zmm14, %%zmm15, %%zmm3                                   
+   vmovups         %%zmm0, (%%r10)                          
+   vmovups         %%zmm1, 64(%%r10)                        
+   vmovups         %%zmm2, 128(%%r10)                         
+   vmovups         %%zmm3, 192(%%r10)                                              
+   
+   addq           $256, %%r10
 
-   addq           $512, %%rcx             
+   vcvtne2ps2bf16  %%zmm16, %%zmm17, %%zmm4
+   vcvtne2ps2bf16  %%zmm18, %%zmm19, %%zmm5
+   vcvtne2ps2bf16  %%zmm20, %%zmm21, %%zmm6
+   vcvtne2ps2bf16  %%zmm22, %%zmm23, %%zmm7
+   vmovups         %%zmm4, (%%r10)                         
+   vmovups         %%zmm5, 64(%%r10)                       
+   vmovups         %%zmm6, 128(%%r10)                         
+   vmovups         %%zmm7, 192(%%r10)  
 
-   vmovups         (%%rcx), %%zmm0                          
-   vaddps             %%zmm0, %%zmm16, %%zmm16             
-   vmovups         64(%%rcx), %%zmm1                        
-   vaddps             %%zmm1, %%zmm17, %%zmm17             
-   vmovups         128(%%rcx), %%zmm2                          
-   vaddps             %%zmm2, %%zmm18, %%zmm18             
-   vmovups         192(%%rcx), %%zmm3                        
-   vaddps             %%zmm3, %%zmm19, %%zmm19             
-   vmovups         256(%%rcx), %%zmm4                          
-   vaddps             %%zmm4, %%zmm20, %%zmm20             
-   vmovups         320(%%rcx), %%zmm5                        
-   vaddps             %%zmm5, %%zmm21, %%zmm21             
-   vmovups         384(%%rcx), %%zmm6                          
-   vaddps             %%zmm6, %%zmm22, %%zmm22             
-   vmovups         448(%%rcx), %%zmm7                        
-   vaddps             %%zmm7, %%zmm23, %%zmm23             
-
-   subq           $512, %%rcx
-.endm                                                       
-
-.macro    bf16_save_c_m8n32_2                                   
-   vmovups         %%zmm8, (%%rcx)                          
-   vmovups         %%zmm9, 64(%%rcx)                        
-   vmovups         %%zmm10, 128(%%rcx)                         
-   vmovups         %%zmm11, 192(%%rcx)                       
-   vmovups         %%zmm12, 256(%%rcx)                         
-   vmovups         %%zmm13, 320(%%rcx)                       
-   vmovups         %%zmm14, 384(%%rcx)                         
-   vmovups         %%zmm15, 448(%%rcx)                       
-
-   addq           $512, %%rcx
-
-   vmovups         %%zmm16, (%%rcx)                         
-   vmovups         %%zmm17, 64(%%rcx)                       
-   vmovups         %%zmm18, 128(%%rcx)                         
-   vmovups         %%zmm19, 192(%%rcx)                       
-   vmovups         %%zmm20, 256(%%rcx)                         
-   vmovups         %%zmm21, 320(%%rcx)                       
-   vmovups         %%zmm22, 384(%%rcx)
-   vmovups         %%zmm23, 448(%%rcx)
-                       
    subq           $8, %%rdi                                              
-   addq           $512, %%rcx                        // C0
+   addq           $256, %%r10
 .endm                                                       
 
 //-----------------------------------------------------------------
@@ -849,26 +633,7 @@
    vbroadcastss     4(%%rax), %%zmm1                        
    vdpbf16ps        %%zmm3, %%zmm6, %%zmm14                 
    vdpbf16ps        %%zmm3, %%zmm7, %%zmm15                 
-.endm 
-
-.macro    bf16_add_c_m4n32                                  
-   vmovups         (%%r10), %%zmm0                          
-   vaddps             %%zmm0, %%zmm8, %%zmm8               
-   vmovups         64(%%r10), %%zmm1                        
-   vaddps             %%zmm1, %%zmm9, %%zmm9               
-   vmovups         (%%r11), %%zmm2                          
-   vaddps             %%zmm2, %%zmm10, %%zmm10             
-   vmovups         64(%%r11), %%zmm3                        
-   vaddps             %%zmm3, %%zmm11, %%zmm11             
-   vmovups         (%%r12), %%zmm4                          
-   vaddps             %%zmm4, %%zmm12, %%zmm12             
-   vmovups         64(%%r12), %%zmm5                        
-   vaddps             %%zmm5, %%zmm13, %%zmm13             
-   vmovups         (%%r13), %%zmm6                          
-   vaddps             %%zmm6, %%zmm14, %%zmm14             
-   vmovups         64(%%r13), %%zmm7                        
-   vaddps             %%zmm7, %%zmm15, %%zmm15             
-.endm                                                       
+.endm
 
 .macro    bf16_save_c_m4n32                                   
    vmovups         %%zmm8, (%%r10)                          
@@ -882,39 +647,20 @@
                        
    subq            $4, %%rdi                                              
    leaq      (%%r13, %%r8, 4), %%rcx                        // C0
-.endm    
-
-.macro    bf16_add_c_m4n32_2                                  
-   vmovups         (%%rcx), %%zmm0                          
-   vaddps             %%zmm0, %%zmm8, %%zmm8               
-   vmovups         64(%%rcx), %%zmm1                        
-   vaddps             %%zmm1, %%zmm9, %%zmm9               
-   vmovups         128(%%rcx), %%zmm2                          
-   vaddps             %%zmm2, %%zmm10, %%zmm10             
-   vmovups         192(%%rcx), %%zmm3                        
-   vaddps             %%zmm3, %%zmm11, %%zmm11             
-   vmovups         256(%%rcx), %%zmm4                          
-   vaddps             %%zmm4, %%zmm12, %%zmm12             
-   vmovups         320(%%rcx), %%zmm5                        
-   vaddps             %%zmm5, %%zmm13, %%zmm13             
-   vmovups         384(%%rcx), %%zmm6                          
-   vaddps             %%zmm6, %%zmm14, %%zmm14             
-   vmovups         448(%%rcx), %%zmm7                        
-   vaddps             %%zmm7, %%zmm15, %%zmm15             
-.endm                                                       
+.endm                                                        
 
 .macro    bf16_save_c_m4n32_2                                   
-   vmovups         %%zmm8, (%%rcx)                          
-   vmovups         %%zmm9, 64(%%rcx)                        
-   vmovups         %%zmm10, 128(%%rcx)                         
-   vmovups         %%zmm11, 192(%%rcx)                       
-   vmovups         %%zmm12, 256(%%rcx)                         
-   vmovups         %%zmm13, 320(%%rcx)                       
-   vmovups         %%zmm14, 384(%%rcx)                         
-   vmovups         %%zmm15, 448(%%rcx)                       
-                       
-   subq            $4, %%rdi                                              
-   addq            $512, %%rcx
+   vcvtne2ps2bf16  %%zmm8, %%zmm9, %%zmm0                                   
+   vcvtne2ps2bf16  %%zmm10, %%zmm11, %%zmm1                                   
+   vcvtne2ps2bf16  %%zmm12, %%zmm13, %%zmm2                                   
+   vcvtne2ps2bf16  %%zmm14, %%zmm15, %%zmm3                                   
+   vmovups         %%zmm0, (%%r10)                          
+   vmovups         %%zmm1, 64(%%r10)                        
+   vmovups         %%zmm2, 128(%%r10)                         
+   vmovups         %%zmm3, 192(%%r10)                                              
+   
+   addq           $256, %%r10
+   subq           $4, %%rdi                                              
 .endm                                                       
 
 //-----------------------------------------------------------------
@@ -922,8 +668,9 @@
 
 GEMM_BF16_N32:                                  
    mov     %[C], %%rcx                                      
+   mov     %[Cc], %%r10                                      
    mov     %[A], %%rax                                      
-   mov     %[B], %%rbx                                      
+   mov     %[B], %%rbx
 
    prefetcht0         (%%rax)                               
 
@@ -935,13 +682,13 @@ GEMM_BF16_N32:
    mov     %[LK], %%r15
    mov     %%rax, %%r9                                  
 
-   prefetcht0         (%%rbx)                                                                  
+   prefetcht0         (%%rbx)
    mov     %%rdx, %%rsi
 
    mov    %[is_start_gemm], %%r12
    mov    %[is_end_gemm], %%r13
-   cmp    $0, %%r12
-   je     BF16_BEGIN_M12N32                                       
+   test    $1, %%r12
+   jz    BF16_BEGIN_M12N32                                       
 
 //-----------------------------------------------------------------
 
@@ -1081,15 +828,12 @@ BF16_MAIN_M12N32K2:
    jmp     BF16_MAIN_M12N32K2
 
 BF16_BEGIN_SAVE_M12N32:
-   cmp      $0, %%r13
-   je       BF16_BEGIN_SAVE_M12N32_2                                         
+   test      $1, %%r13
+   jz       BF16_SAVE_C_M12N32_2                                         
    mov      %%rcx, %%r10                                     // C0
    leaq     (%%r10, %%r8, 4), %%r11                          // C1
    leaq     (%%r11, %%r8, 4), %%r12                          // C2
-   leaq     (%%r12, %%r8, 4), %%r13                          // C3
-   cmp      $0, %[k_tag]                                      
-   je       BF16_SAVE_C_M12N32                                     
-   bf16_add_c_m12n32                                        
+   leaq     (%%r12, %%r8, 4), %%r13                          // C3                                       
 
 BF16_SAVE_C_M12N32:                                                
    bf16_save_c_m12n32
@@ -1097,11 +841,6 @@ BF16_SAVE_C_M12N32:
    add      %%r11, %%r9
    movq     %%r9, %%rax
    jmp     BF16_BEGIN_M12N32
-
-BF16_BEGIN_SAVE_M12N32_2:
-   cmp      $0, %[k_tag]                                      
-   je       BF16_SAVE_C_M12N32_2                                     
-   bf16_add_c_m12n32_2
 
 BF16_SAVE_C_M12N32_2:
    bf16_save_c_m12n32_2
@@ -1170,27 +909,19 @@ BF16_MAIN_M8N32K2:
    jmp     BF16_MAIN_M8N32K2
 
 BF16_BEGIN_SAVE_M8N32:  
-   cmp      $0, %%r13
-   je       BF16_BEGIN_SAVE_M8N32_2                       
+   test      $1, %%r13
+   jz       BF16_SAVE_C_M8N32_2                       
    mov      %%rcx, %%r10                                     // C0
    leaq     (%%r10, %%r8, 4), %%r11                          // C1
    leaq     (%%r11, %%r8, 4), %%r12                          // C2
-   leaq     (%%r12, %%r8, 4), %%r13                          // C3
-   cmp      $0, %[k_tag]                                      
-   je       BF16_SAVE_C_M8N32                                // when beta==0 && kk==0, no need to add     
-   bf16_add_c_m8n32                                        
+   leaq     (%%r12, %%r8, 4), %%r13                          // C3                                      
 
 BF16_SAVE_C_M8N32:                                                
    bf16_save_c_m8n32
    imul     $16, %%r15, %%r11 // temp use %%r11
    add      %%r11, %%r9
    movq     %%r9, %%rax
-   jmp      BF16_BEGIN_M8N32
-
-BF16_BEGIN_SAVE_M8N32_2:                                            
-   cmp      $0, %[k_tag]                                      
-   je       BF16_SAVE_C_M8N32_2                                // when beta==0 && kk==0, no need to add     
-   bf16_add_c_m8n32_2                                        
+   jmp      BF16_BEGIN_M8N32                                    
 
 BF16_SAVE_C_M8N32_2:                                                
    bf16_save_c_m8n32_2
@@ -1250,15 +981,12 @@ BF16_MAIN_M4N32K2:
    jmp     BF16_MAIN_M4N32K2
 
 BF16_BEGIN_SAVE_M4N32: 
-   cmp      $0, %%r13
-   je       BF16_BEGIN_SAVE_M4N32_2                                           
+   test      $1, %%r13
+   jz       BF16_SAVE_C_M4N32_2                                           
    mov      %%rcx, %%r10                                     // C0
    leaq     (%%r10, %%r8, 4), %%r11                          // C1
    leaq     (%%r11, %%r8, 4), %%r12                          // C2
-   leaq     (%%r12, %%r8, 4), %%r13                          // C3
-   cmp      $0, %[k_tag]                                      
-   je       BF16_SAVE_C_M4N32                                     
-   bf16_add_c_m4n32                                       
+   leaq     (%%r12, %%r8, 4), %%r13                          // C3                                     
 
 BF16_SAVE_C_M4N32:
    cmpq     $3, %%rdi
@@ -1284,12 +1012,7 @@ BF16_SAVE_C_M2N32:
 BF16_SAVE_C_M1N32:
    vmovups         %%zmm8, (%%r10)
    vmovups         %%zmm9, 64(%%r10)
-   jmp      BF16_END_N32
-
-BF16_BEGIN_SAVE_M4N32_2:                                            
-   cmp      $0, %[k_tag]                                      
-   je       BF16_SAVE_C_M4N32_2                                     
-   bf16_add_c_m4n32                                       
+   jmp      BF16_END_N32                                      
 
 BF16_SAVE_C_M4N32_2:
    cmpq     $3, %%rdi
@@ -1304,16 +1027,16 @@ BF16_SAVE_C_M4N32_2:
    movq     %%r9, %%rax
    jmp      BF16_BEGIN_M4N32
 
-BF16_SAVE_C_M3N32:
-   vmovups         %%zmm12, 256(%%rcx)
-   vmovups         %%zmm13, 320(%%rcx)                      
+BF16_SAVE_C_M3N32_2:
+   vcvtne2ps2bf16  %%zmm12, %%zmm13, %%zmm2                                   
+   vmovups         %%zmm2, 128(%%r10)                     
 
-BF16_SAVE_C_M2N32:
-   vmovups         %%zmm10, 128(%%rcx)                         
-   vmovups         %%zmm11, 196(%%rcx)
+BF16_SAVE_C_M2N32_2:
+   vcvtne2ps2bf16  %%zmm10, %%zmm11, %%zmm1
+   vmovups         %%zmm1, 64(%%r10)                         
 
-BF16_SAVE_C_M1N32:
-   vmovups         %%zmm8, (%%rcx)
-   vmovups         %%zmm9, 64(%%rcx)
+BF16_SAVE_C_M1N32_2:
+   vcvtne2ps2bf16  %%zmm8, %%zmm9, %%zmm0
+   vmovups         %%zmm0, (%%r10)
 
 BF16_END_N32:

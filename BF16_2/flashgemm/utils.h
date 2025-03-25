@@ -116,7 +116,7 @@ void show_matrix_fp32(long m, long n, float *a)
 	long i, j;
 	for (i = 0; i < m; i++){
 		for (j = 0; j < n; j++)
-			printf("%-8.2f ", a[i * n + j]);
+			printf("%-10.2f ", a[i * n + j]);
 		printf("\n");
 	}
 		

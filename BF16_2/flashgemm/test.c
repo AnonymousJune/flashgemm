@@ -5,11 +5,11 @@
 #include <string.h>
 #include "mkl.h"
 #include "./src/flashgemm2.c"
-#include "utils.h"
+// #include "utils.h"
 
 using namespace std;
 #define PEAK_GFLOPS 2.6
-#define NUM 32
+#define NUM 1
 
 int GEMM1[30] = {
 		32, 12544, 288, // ID1-10
@@ -56,6 +56,7 @@ int main()
 	int loop = 10, beta = 0;
 	double start, cost;
 	double gflops;
+	bool flag = true;
 
 	FILE *fp;
 	if ((fp = fopen("./bf16_flashgemm.txt", "w")) == NULL)
@@ -65,7 +66,7 @@ int main()
 	}
 
 	int j = 1;
-	for (int j = 0; j < 10; j++)
+	// for (int j = 0; j < 10; j++)
 	{
 		// long M1 = GEMM1[j * 3];
 		// long M2 = GEMM2[j * 3];
@@ -80,8 +81,8 @@ int main()
 		long M3 = 4;
 		long N = 32;
 		long K1 = 32;
-		long K2 = 32;
-		long K3 = 32;
+		long K2 = 12;
+		long K3 = 8;
 
 		double ops = (double)(M1 * K1 + M2 * K2 + M3 * K3) * N * 1.0e-09 * 2;
 
@@ -102,39 +103,47 @@ int main()
 		uint16_t *C_MKL1_f16 = (uint16_t *)malloc(M1 * N * sizeof(uint16_t));
 		uint16_t *C_MKL2_f16 = (uint16_t *)malloc(M2 * N * sizeof(uint16_t));
 
-		random_matrix_bf16(K1, N, B);
-		random_matrix_bf16(M1, K1, A1);
-		random_matrix_bf16(M2, K2, A2);
-		random_matrix_bf16(M3, K3, A3);
+		// random_matrix_bf16(K1, N, B);
+		// random_matrix_bf16(M1, K1, A1);
+		// random_matrix_bf16(M2, K2, A2);
+		// random_matrix_bf16(M3, K3, A3);
 
-		// regular_matrix_bf16(K, N, B);
-		// regular_matrix_bf16(M, K, A);
-		// regular_matrix_f32(M, N, C);
-		// memcpy(C_MKL, C, M * N * sizeof(float));
+		regular1_matrix_bf16(K1, N, B);
+		regular1_matrix_bf16(M1, K1, A1);
+		regular1_matrix_bf16(M2, K2, A2);
+		regular1_matrix_bf16(M3, K3, A3);
 
-		// printf("\nA:\n");
-		// show_matrix_bf16(M, K, A);
-		// printf("\nB:\n");
-		// show_matrix_bf16(K, N, B);
-		// printf("\nC init:\n");
-		// show_matrix_fp32(M, N, C);
+		printf("\nA1:\n");
+		show_matrix_bf16(M1, K1, A1);
+		printf("\nA2:\n");
+		show_matrix_bf16(M2, K2, A2);
+		printf("\nA3:\n");
+		show_matrix_bf16(M3, K3, A3);
+		printf("\nB:\n");
+		show_matrix_bf16(K1, N, B);
 
 		// test result
-		flashgemm_multi_bf16bf16f32_type_a(C, B, N, A1, M1, K1, A2, M2, K2, A3, M3, K3);
+		flashgemm_multi_bf16bf16f32_type_a(C, B, N, 3, A1, M1, K1, A2, M2, K2, A3, M3, K3); // 3 is the number of GEMMs
+
+		cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans, M1, N, K1, 1.0, A1, K1, B, N, 0, C_MKL1_f32, N);
+		printf("\nC_MKL1_f32:\n");
+		show_matrix_fp32(M1, N, C_MKL1_f32);
+		f32_matrix_to_bf16_matrix(C_MKL1_f32, C_MKL1_f16, M1, N);
+
+		cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans, M2, N, K2, 1.0, A2, K1, C_MKL1_f16, N, 0, C_MKL2_f32, N);
+		printf("\nC_MKL2_f32:\n");
+		show_matrix_fp32(M2, N, C_MKL2_f32);
+		f32_matrix_to_bf16_matrix(C_MKL2_f32, C_MKL2_f16, M2, N);
 		
 		cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-													 M1, N, K1, 1.0, A1, K1, B, N, 0, C_MKL1_f32, N);
-		f32_matrix_to_bf16_matrix(C_MKL1_f16, C_MKL1_f32, M1, N);
-		cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-													 M2, N, K2, 1.0, A2, K1, C_MKL1_f16, N, 0, C_MKL2_f32, N);
-		f32_matrix_to_bf16_matrix(C_MKL2_f16, C_MKL2_f32, M2, N);
-		cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans,
 													 M3, N, K3, 1.0, A3, K1, C_MKL2_f16, N, 0, C_MKL3_f32, N);
-		// show_matrix_fp32(M, N, C);
-		// printf("\nC_MKL:\n");
-		// show_matrix_fp32(M, N, C_MKL);
 
-		// bool flag = Check_result(C, C_MKL, M, N);
+		printf("\nC:\n");
+		show_matrix_fp32(M3, N, C);
+		printf("\nC_MKL:\n");
+		show_matrix_fp32(M3, N, C_MKL3_f32);
+
+		flag = Check_result(C, C_MKL3_f32, M3, N);
 
 		// warm up
 		// for (int i = 0; i <= 5; i++)
@@ -150,17 +159,18 @@ int main()
 		// }
 		// cost = (dclock() - start) / loop;
 
-		// if (flag)
-		// {
-		printf("bf16:  M= %-10d N=%-10d K=%-10d flops = %-10.3lf effic= %.3lf %\n",
-					 M, N, K, ops / cost, ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
-		fprintf(fp, "%.3lf\n", ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
-		// }
-		// else
-		// {
-		// 	printf("bf16: id=%-3d M= %-8d N=%-8d K=%-8d error!!!\n", j, M, N, K);
-		// 	fprintf(fp, "error! \n");
-		// }
+		if (flag)
+		{
+			printf("bf16:  N=%-10d M1= %-10d K1=%-10d M2= %-10d K2=%-10d M3= %-10d K3=%-10d flops = %-10.3lf effic= %.3lf %\n",
+						 N, M1, K1, M2, K2, M3, K3, ops / cost, ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
+			fprintf(fp, "%.3lf\n", ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
+		}
+		else
+		{
+			printf("bf16:  N=%-10d M1= %-10d K1=%-10d M2= %-10d K2=%-10d M3= %-10d K3=%-10d error!!!\n",
+						 N, M1, K1, M2, K2, M3, K3);
+			fprintf(fp, "error! \n");
+		}
 
 		free(A1);
 		free(A2);

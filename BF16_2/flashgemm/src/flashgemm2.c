@@ -20,7 +20,7 @@ static bool flashgemm_test_dimention(int M, int N, int K)
 	return flag;
 }
 
-static void pack_A_blocks(uint16_t *A_bf16, float *Ac, int M, int K, int M_Ac, int K_Ac, int GEMM_K, int id, int NUM)
+static void pack_A_blocks(uint16_t *A_bf16, float *Ac, int M, int K, int M_Ac, int K_Ac, int id, int NUM)
 {
 	// Prepare for pack A
 	int Num_K_block = K / GEMM_K;
@@ -125,7 +125,7 @@ void flashgemm_multi_bf16bf16f32_type_a(float *C, uint16_t *B, long N, ...)
 
 		// Prepare for GEMM
 		posix_memalign(&ptrAs[i], 64, ((Ms[i] + 3) / 4) * 4 * ((Ks[i] + 31) / 32) * 32 * sizeof(uint16_t));
-		posix_memalign(&ptrBs[i], 64, NUM * GEMM_K * 32 * sizeof(uint16_t));
+		posix_memalign(&ptrBs[i], 64, NUM * Ks[i] * 32 * sizeof(uint16_t));
 		Acs[i] = (float *)ptrAs[i];
 		Bcs[i] = (uint16_t *)ptrBs[i];
 		K_Acs[i] = ((Ks[i] + 31) / 32) * 32;
@@ -141,42 +141,35 @@ void flashgemm_multi_bf16bf16f32_type_a(float *C, uint16_t *B, long N, ...)
 		// Pack A blocks
 		for (int i = 0; i < num_gemm; i++)
 		{
-			pack_A_blocks(A_bf16s[i], Acs[i], Ms[i], Ks[i], M_Acs[i], K_Acs[i], GEMM_K, id, NUM);
+			pack_A_blocks(A_bf16s[i], Acs[i], Ms[i], Ks[i], M_Acs[i], K_Acs[i], id, NUM);
 		}
 
 #pragma omp barrier // Synchronize threads after packing A blocks
 
-		// Compute kernel for each kk block
-		for (int kk = 0; kk < Ks[0]; kk += GEMM_K)
-		{
-			int kc = (Ks[0] - kk < GEMM_K) ? (Ks[0] - kk) : GEMM_K;
-			int kc_Ac = (Ks[0] - kk < GEMM_K) ? (K_Acs[0] - kk) : GEMM_K;
+			int NB = (id < num_n - 1) ? nb : ((id == num_n - 1 && ne > 0) ? ne : nb);
 
-			uint16_t *temp_A = (uint16_t *)Acs[0] + kk * M_Acs[0];
-
-			NBs = (id < num_n - 1) ? nb : ((id == num_n - 1 && ne > 0) ? ne : nb);
-
-			for (int j = 0; j < NB; j += 32)
+			for (int j = 0; j < NB; j += nr)
 			{
+				int nr = (NB - j < 32) ? (NB - j) : 32;
+				float *temp_C = C + id * nb + j;
 				for (int i = 0; i < num_gemm; i++)
 				{
-					int nr = (NB - j < 32) ? (NB - j) : 32;
-					float *temp_C = C + id * nb + j;
 					uint16_t *temp_B = B + kk * N + id * nb + j;
-					uint16_t *temp_Bc = Bcs[0] + id * GEMM_K * 32;
+					uint16_t *temp_Bc = Bcs[i] + id * GEMM_K * 32;
+					uint16_t *temp_Cc = (i == num_gemm - 1)? NULL : (Bcs[i+1] + id * GEMM_K * 32);
 
 					if (nr == 32)
 					{
-							FLASHGEMM_BF16_KERNELm12xn32(temp_C, temp_A, temp_B, Ms[i], kc, kc_Ac, N, temp_Bc, kk || 0, i == 0, i == num_gemm - 1);
+							FLASHGEMM_BF16_KERNELm12xn32(temp_C, temp_Cc, Acs[i], temp_B, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, kk || 0, i == 0, i == num_gemm - 1);
 					}
 					else if (nr > 16 && nr < 32)
 					{
-						FLASHGEMM_BF16_KERNELm12xn16_edge(temp_C, temp_A, temp_B, Ms[i], kc, kc_Ac, N, temp_Bc, kk || 0, 16, i == 0, i == num_gemm - 1);
-						FLASHGEMM_BF16_KERNELm12xn16_edge(temp_C + 16, temp_A, temp_B + 16, Ms[i], kc, kc_Ac, N, temp_Bc, kk || 0, nr - 16, i == 0, i == num_gemm - 1);
+						FLASHGEMM_BF16_KERNELm12xn16_edge(temp_C, temp_Cc, Acs[i], temp_B, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, kk || 0, 16, i == 0, i == num_gemm - 1);
+						FLASHGEMM_BF16_KERNELm12xn16_edge(temp_C + 16, temp_Cc, Acs[i], temp_B + 16, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, kk || 0, nr - 16, i == 0, i == num_gemm - 1);
 					}
 					else
 					{
-						FLASHGEMM_BF16_KERNELm12xn16_edge(temp_C, temp_A, temp_B, Ms[i], kc, kc_Ac, N, temp_Bc, kk || 0, nr, i == 0, i == num_gemm - 1);
+						FLASHGEMM_BF16_KERNELm12xn16_edge(temp_C, temp_Cc, Acs[i], temp_B, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, kk || 0, nr, i == 0, i == num_gemm - 1);
 					}
 				}
 			}
@@ -193,7 +186,6 @@ void flashgemm_multi_bf16bf16f32_type_a(float *C, uint16_t *B, long N, ...)
 	free(Bcs);
 	free(K_Acs);
 	free(M_Acs);
-	free(NBs);
 
 	va_end(args);
 }

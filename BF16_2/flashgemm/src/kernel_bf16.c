@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, long M, long K, long LK, long LN, uint16_t *Bc, long k_tag, bool is_start_gemm, bool is_end_gemm)
+static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *Cc,uint16_t *A, uint16_t *B, long M, long K, long LK, long LN, uint16_t *Bc, long k_tag, bool is_start_gemm, bool is_end_gemm)
 {
 	asm volatile(
 			".macro bf16_pack_b_n32                                      \n"
@@ -427,6 +427,101 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"    leaq      (%%r13, %%r8, 4), %%rcx                       \n" // C0
 			".endm                                                       \n"
 
+			".macro    bf16_add_c_m12n32_2                               \n"
+			"   vmovups         (%%rcx), %%zmm0                          \n"
+			"   vaddps             %%zmm0, %%zmm8, %%zmm8                \n"
+			"   vmovups         64(%%rcx), %%zmm1                        \n"
+			"   vaddps             %%zmm1, %%zmm9, %%zmm9                \n"
+			"   vmovups         128(%%rcx), %%zmm2                       \n"
+			"   vaddps             %%zmm2, %%zmm10, %%zmm10              \n"
+			"   vmovups         192(%%rcx), %%zmm3                       \n"
+			"   vaddps             %%zmm3, %%zmm11, %%zmm11              \n"
+			"   vmovups         256(%%rcx), %%zmm4                       \n"
+			"   vaddps             %%zmm4, %%zmm12, %%zmm12              \n"
+			"   vmovups         320(%%rcx), %%zmm5                       \n"
+			"   vaddps             %%zmm5, %%zmm13, %%zmm13              \n"
+			"   vmovups         384(%%rcx), %%zmm6                       \n"
+			"   vaddps             %%zmm6, %%zmm14, %%zmm14              \n"
+			"   vmovups         448(%%rcx), %%zmm7                       \n"
+			"   vaddps             %%zmm7, %%zmm15, %%zmm15              \n"
+
+			"   addq           $512, %%rcx                               \n"
+
+			"   vmovups         (%%rcx), %%zmm0                          \n"
+			"   vaddps             %%zmm0, %%zmm16, %%zmm16              \n"
+			"   vmovups         64(%%rcx), %%zmm1                        \n"
+			"   vaddps             %%zmm1, %%zmm17, %%zmm17              \n"
+			"   vmovups         128(%%rcx), %%zmm2                       \n"
+			"   vaddps             %%zmm2, %%zmm18, %%zmm18              \n"
+			"   vmovups         192(%%rcx), %%zmm3                       \n"
+			"   vaddps             %%zmm3, %%zmm19, %%zmm19              \n"
+			"   vmovups         256(%%rcx), %%zmm4                       \n"
+			"   vaddps             %%zmm4, %%zmm20, %%zmm20              \n"
+			"   vmovups         320(%%rcx), %%zmm5                       \n"
+			"   vaddps             %%zmm5, %%zmm21, %%zmm21              \n"
+			"   vmovups         384(%%rcx), %%zmm6                       \n"
+			"   vaddps             %%zmm6, %%zmm22, %%zmm22              \n"
+			"   vmovups         448(%%rcx), %%zmm7                       \n"
+			"   vaddps             %%zmm7, %%zmm23, %%zmm23              \n"
+
+			"   addq           $512, %%rcx                               \n"
+
+			"   vmovups         (%%rcx), %%zmm0                          \n"
+			"   vaddps             %%zmm0, %%zmm24, %%zmm24              \n"
+			"   vmovups         64(%%rcx), %%zmm1                        \n"
+			"   vaddps             %%zmm1, %%zmm25, %%zmm25              \n"
+			"   vmovups         128(%%rcx), %%zmm2                       \n"
+			"   vaddps             %%zmm2, %%zmm26, %%zmm26              \n"
+			"   vmovups         192(%%rcx), %%zmm3                       \n"
+			"   vaddps             %%zmm3, %%zmm27, %%zmm27              \n"
+			"   vmovups         256(%%rcx), %%zmm4                       \n"
+			"   vaddps             %%zmm4, %%zmm28, %%zmm28              \n"
+			"   vmovups         320(%%rcx), %%zmm5                       \n"
+			"   vaddps             %%zmm5, %%zmm29, %%zmm29              \n"
+			"   vmovups         384(%%rcx), %%zmm6                       \n"
+			"   vaddps             %%zmm6, %%zmm30, %%zmm30              \n"
+			"   vmovups         448(%%rcx), %%zmm7                       \n"
+			"   vaddps             %%zmm7, %%zmm31, %%zmm31              \n"
+
+			"   subq           $1024, %%rcx                              \n"
+			".endm                                                       \n"
+
+			".macro    bf16_save_c_m12n32_2                              \n"
+			"   vmovups         %%zmm8, (%%rcx)                          \n"
+			"   vmovups         %%zmm9, 64(%%rcx)                        \n"
+			"   vmovups         %%zmm10, 128(%%rcx)                      \n"
+			"   vmovups         %%zmm11, 192(%%rcx)                      \n"
+			"   vmovups         %%zmm12, 256(%%rcx)                      \n"
+			"   vmovups         %%zmm13, 320(%%rcx)                      \n"
+			"   vmovups         %%zmm14, 384(%%rcx)                      \n"
+			"   vmovups         %%zmm15, 448(%%rcx)                      \n"
+
+			"   addq           $512, %%rcx                               \n"
+
+			"   vmovups         %%zmm16, (%%rcx)                         \n"
+			"   vmovups         %%zmm17, 64(%%rcx)                       \n"
+			"   vmovups         %%zmm18, 128(%%rcx)                      \n"
+			"   vmovups         %%zmm19, 192(%%rcx)                      \n"
+			"   vmovups         %%zmm20, 256(%%rcx)                      \n"
+			"   vmovups         %%zmm21, 320(%%rcx)                      \n"
+			"   vmovups         %%zmm22, 384(%%rcx)                      \n"
+			"   vmovups         %%zmm23, 448(%%rcx)                      \n"
+
+			"   addq           $512, %%rcx                               \n"
+
+			"   vmovups         %%zmm24, (%%rcx)                         \n"
+			"   vmovups         %%zmm25, 64(%%rcx)                       \n"
+			"   vmovups         %%zmm26, 128(%%rcx)                      \n"
+			"   vmovups         %%zmm27, 192(%%rcx)                      \n"
+			"   vmovups         %%zmm28, 256(%%rcx)                      \n"
+			"   vmovups         %%zmm29, 320(%%rcx)                      \n"
+			"   vmovups         %%zmm30, 384(%%rcx)                      \n"
+			"   vmovups         %%zmm31, 448(%%rcx)                      \n"
+
+			"   subq           $12, %%rdi                                \n"
+			"   addq           $512, %%rcx                               \n"
+			".endm                                                       \n"
+
 			//-----------------------------------------------------------------
 
 			".macro    bf16_kernel_m8n32k2_1                             \n"
@@ -623,6 +718,71 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   leaq      (%%r13, %%r8, 4), %%rcx                        \n" // C0
 			".endm                                                       \n"
 
+			".macro    bf16_add_c_m8n32_2                                \n"
+			"   vmovups         (%%rcx), %%zmm0                          \n"
+			"   vaddps             %%zmm0, %%zmm8, %%zmm8                \n"
+			"   vmovups         64(%%rcx), %%zmm1                        \n"
+			"   vaddps             %%zmm1, %%zmm9, %%zmm9                \n"
+			"   vmovups         128(%%rcx), %%zmm2                       \n"
+			"   vaddps             %%zmm2, %%zmm10, %%zmm10              \n"
+			"   vmovups         192(%%rcx), %%zmm3                       \n"
+			"   vaddps             %%zmm3, %%zmm11, %%zmm11              \n"
+			"   vmovups         256(%%rcx), %%zmm4                       \n"
+			"   vaddps             %%zmm4, %%zmm12, %%zmm12              \n"
+			"   vmovups         320(%%rcx), %%zmm5                       \n"
+			"   vaddps             %%zmm5, %%zmm13, %%zmm13              \n"
+			"   vmovups         384(%%rcx), %%zmm6                       \n"
+			"   vaddps             %%zmm6, %%zmm14, %%zmm14              \n"
+			"   vmovups         448(%%rcx), %%zmm7                       \n"
+			"   vaddps             %%zmm7, %%zmm15, %%zmm15              \n"
+
+			"   addq           $512, %%rcx                               \n"
+
+			"   vmovups         (%%rcx), %%zmm0                          \n"
+			"   vaddps             %%zmm0, %%zmm16, %%zmm16              \n"
+			"   vmovups         64(%%rcx), %%zmm1                        \n"
+			"   vaddps             %%zmm1, %%zmm17, %%zmm17              \n"
+			"   vmovups         128(%%rcx), %%zmm2                       \n"
+			"   vaddps             %%zmm2, %%zmm18, %%zmm18              \n"
+			"   vmovups         192(%%rcx), %%zmm3                       \n"
+			"   vaddps             %%zmm3, %%zmm19, %%zmm19              \n"
+			"   vmovups         256(%%rcx), %%zmm4                       \n"
+			"   vaddps             %%zmm4, %%zmm20, %%zmm20              \n"
+			"   vmovups         320(%%rcx), %%zmm5                       \n"
+			"   vaddps             %%zmm5, %%zmm21, %%zmm21              \n"
+			"   vmovups         384(%%rcx), %%zmm6                       \n"
+			"   vaddps             %%zmm6, %%zmm22, %%zmm22              \n"
+			"   vmovups         448(%%rcx), %%zmm7                       \n"
+			"   vaddps             %%zmm7, %%zmm23, %%zmm23              \n"
+
+			"   subq           $512, %%rcx                               \n"
+			".endm                                                       \n"
+
+			".macro    bf16_save_c_m8n32_2                               \n"
+			"   vmovups         %%zmm8, (%%rcx)                          \n"
+			"   vmovups         %%zmm9, 64(%%rcx)                        \n"
+			"   vmovups         %%zmm10, 128(%%rcx)                      \n"
+			"   vmovups         %%zmm11, 192(%%rcx)                      \n"
+			"   vmovups         %%zmm12, 256(%%rcx)                      \n"
+			"   vmovups         %%zmm13, 320(%%rcx)                      \n"
+			"   vmovups         %%zmm14, 384(%%rcx)                      \n"
+			"   vmovups         %%zmm15, 448(%%rcx)                      \n"
+
+			"   addq           $512, %%rcx                               \n"
+
+			"   vmovups         %%zmm16, (%%rcx)                         \n"
+			"   vmovups         %%zmm17, 64(%%rcx)                       \n"
+			"   vmovups         %%zmm18, 128(%%rcx)                      \n"
+			"   vmovups         %%zmm19, 192(%%rcx)                      \n"
+			"   vmovups         %%zmm20, 256(%%rcx)                      \n"
+			"   vmovups         %%zmm21, 320(%%rcx)                      \n"
+			"   vmovups         %%zmm22, 384(%%rcx)                      \n"
+			"   vmovups         %%zmm23, 448(%%rcx)                      \n"
+
+			"   subq           $8, %%rdi                                 \n"
+			"   addq           $512, %%rcx                               \n" // C0
+			".endm                                                       \n"
+
 			//-----------------------------------------------------------------
 
 			".macro    bf16_kernel_m4n32k2_1                             \n"
@@ -713,11 +873,6 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   vaddps             %%zmm6, %%zmm14, %%zmm14              \n"
 			"   vmovups         64(%%r13), %%zmm7                        \n"
 			"   vaddps             %%zmm7, %%zmm15, %%zmm15              \n"
-
-			"   mov               %%rcx, %%r10                           \n" // C0
-			"   leaq             (%%r10, %%r8, 4), %%r11                 \n" // C1
-			"   leaq             (%%r11, %%r8, 4), %%r12                 \n" // C2
-			"   leaq             (%%r12, %%r8, 4), %%r13                 \n" // C3
 			".endm                                                       \n"
 
 			".macro    bf16_save_c_m4n32                                 \n"
@@ -732,6 +887,39 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 
 			"   subq            $4, %%rdi                                \n"
 			"   leaq      (%%r13, %%r8, 4), %%rcx                        \n" // C0
+			".endm                                                       \n"
+
+			".macro    bf16_add_c_m4n32_2                                \n"
+			"   vmovups         (%%rcx), %%zmm0                          \n"
+			"   vaddps             %%zmm0, %%zmm8, %%zmm8                \n"
+			"   vmovups         64(%%rcx), %%zmm1                        \n"
+			"   vaddps             %%zmm1, %%zmm9, %%zmm9                \n"
+			"   vmovups         128(%%rcx), %%zmm2                       \n"
+			"   vaddps             %%zmm2, %%zmm10, %%zmm10              \n"
+			"   vmovups         192(%%rcx), %%zmm3                       \n"
+			"   vaddps             %%zmm3, %%zmm11, %%zmm11              \n"
+			"   vmovups         256(%%rcx), %%zmm4                       \n"
+			"   vaddps             %%zmm4, %%zmm12, %%zmm12              \n"
+			"   vmovups         320(%%rcx), %%zmm5                       \n"
+			"   vaddps             %%zmm5, %%zmm13, %%zmm13              \n"
+			"   vmovups         384(%%rcx), %%zmm6                       \n"
+			"   vaddps             %%zmm6, %%zmm14, %%zmm14              \n"
+			"   vmovups         448(%%rcx), %%zmm7                       \n"
+			"   vaddps             %%zmm7, %%zmm15, %%zmm15              \n"
+			".endm                                                       \n"
+
+			".macro    bf16_save_c_m4n32_2                               \n"
+			"   vmovups         %%zmm8, (%%rcx)                          \n"
+			"   vmovups         %%zmm9, 64(%%rcx)                        \n"
+			"   vmovups         %%zmm10, 128(%%rcx)                      \n"
+			"   vmovups         %%zmm11, 192(%%rcx)                      \n"
+			"   vmovups         %%zmm12, 256(%%rcx)                      \n"
+			"   vmovups         %%zmm13, 320(%%rcx)                      \n"
+			"   vmovups         %%zmm14, 384(%%rcx)                      \n"
+			"   vmovups         %%zmm15, 448(%%rcx)                      \n"
+
+			"   subq            $4, %%rdi                                \n"
+			"   addq            $512, %%rcx                              \n"
 			".endm                                                       \n"
 
 			//-----------------------------------------------------------------
@@ -754,6 +942,11 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 
 			"   prefetcht0         (%%rbx)                               \n"
 			"   mov     %%rdx, %%rsi                                     \n"
+
+			"   mov    %[is_start_gemm], %%r12                           \n"
+			"   mov    %[is_end_gemm], %%r13                             \n"
+			"   cmp    $0, %%r12                                         \n"
+			"   je     BF16_BEGIN_M12N32                                 \n"
 
 			//-----------------------------------------------------------------
 
@@ -792,7 +985,6 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   vpxorq         %%zmm29, %%zmm29, %%zmm29                 \n"
 			"   vpxorq         %%zmm30, %%zmm30, %%zmm30                 \n"
 			"   vpxorq         %%zmm31, %%zmm31, %%zmm31                 \n"
-			"   mov     %%rcx, %%r13                                     \n"
 			"   cmp     $16, %%rdx                                       \n"
 			"   jb      BF16_PACK_MAIN_M12N32K2                          \n"
 			"   subq    $16, %%rdx                                       \n"
@@ -811,8 +1003,6 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   cmp     $16, %%rdx                                       \n"
 			"   jb      BF16_PACK_MAIN_M12N32K2                          \n"
 			"   subq    $16, %%rdx                                       \n"
-			"   cmp     $192, %%rdx                                      \n" // 192/16 = 12 rows of C data
-			"   jbe     BF16_PACK_K_PREFETCH_C_M12N32                    \n" // prefeth C before loop end
 			"   jmp     BF16_PACK_MAIN_M12N32K16                         \n"
 
 			"BF16_PACK_MAIN_M12N32K2:                                    \n"
@@ -821,12 +1011,6 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   je      BF16_PACK_SAVEC_M12N32                           \n"
 			"   bf16_kernel_m12n32k2_pack                                \n"
 			"   jmp     BF16_PACK_MAIN_M12N32K2                          \n"
-
-			"BF16_PACK_K_PREFETCH_C_M12N32:                              \n"
-			"   prefetcht2         (%%r13)                               \n"
-			"   prefetcht2         64(%%r13)                             \n"
-			"   leaq     (%%r13, %%r8, 4), %%r13                         \n"
-			"   jmp BF16_PACK_MAIN_M12N32K16                             \n"
 
 			"BF16_PACK_SAVEC_M12N32:                                     \n"
 			"    bf16_kernel_m12n32k2_pack_end                           \n"
@@ -868,7 +1052,6 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   vpxorq         %%zmm29, %%zmm29, %%zmm29                 \n"
 			"   vpxorq         %%zmm30, %%zmm30, %%zmm30                 \n"
 			"   vpxorq         %%zmm31, %%zmm31, %%zmm31                 \n"
-			"   mov     %%rcx, %%r13                                     \n"
 			"   cmp     $16, %%rdx                                       \n"
 			"   jb      BF16_MAIN_M12N32K2                               \n"
 			"   subq    $16, %%rdx                                       \n"
@@ -887,15 +1070,7 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   cmp     $16, %%rdx                                       \n"
 			"   jb      BF16_MAIN_M12N32K2                               \n"
 			"   subq  $16, %%rdx                                         \n"
-			"   cmp   $192, %%rdx                                        \n" // 192/16 = 12 rows of C data
-			"   jbe   BF16_K_PREFETCH_C_M12N32                           \n"
 			"   jmp   BF16_MAIN_K_M12N32K16                              \n"
-
-			"BF16_K_PREFETCH_C_M12N32:                                   \n"
-			"   prefetcht2         (%%r13)                               \n"
-			"   prefetcht2         64(%%r13)                             \n"
-			"   leaq     (%%r13, %%r8, 4), %%r13                         \n"
-			"   jmp BF16_MAIN_K_M12N32K16                                \n"
 
 			"BF16_MAIN_M12N32K2:                                         \n"
 			"   bf16_kernel_m12n32k2_1                                   \n"
@@ -909,6 +1084,8 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   jmp     BF16_MAIN_M12N32K2                               \n"
 
 			"BF16_BEGIN_SAVE_M12N32:                                     \n"
+			"   cmp      $0, %%r13                                       \n"
+			"   je       BF16_BEGIN_SAVE_M12N32_2                        \n"
 			"   mov      %%rcx, %%r10                                    \n" // C0
 			"   leaq     (%%r10, %%r8, 4), %%r11                         \n" // C1
 			"   leaq     (%%r11, %%r8, 4), %%r12                         \n" // C2
@@ -919,6 +1096,18 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 
 			"BF16_SAVE_C_M12N32:                                         \n"
 			"   bf16_save_c_m12n32                                       \n"
+			"   imul     $24, %%r15, %%r11                               \n" // temp use %%r11
+			"   add      %%r11, %%r9                                     \n"
+			"   movq     %%r9, %%rax                                     \n"
+			"   jmp     BF16_BEGIN_M12N32                                \n"
+
+			"BF16_BEGIN_SAVE_M12N32_2:                                   \n"
+			"   cmp      $0, %[k_tag]                                    \n"
+			"   je       BF16_SAVE_C_M12N32_2                            \n"
+			"   bf16_add_c_m12n32_2                                      \n"
+
+			"BF16_SAVE_C_M12N32_2:                                       \n"
+			"   bf16_save_c_m12n32_2                                     \n"
 			"   imul     $24, %%r15, %%r11                               \n" // temp use %%r11
 			"   add      %%r11, %%r9                                     \n"
 			"   movq     %%r9, %%rax                                     \n"
@@ -952,7 +1141,6 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   vpxorq         %%zmm21, %%zmm21, %%zmm21                 \n"
 			"   vpxorq         %%zmm22, %%zmm22, %%zmm22                 \n"
 			"   vpxorq         %%zmm23, %%zmm23, %%zmm23                 \n"
-			"   mov     %%rcx, %%r13                                     \n"
 			"   cmpq    $16, %%rdx                                       \n"
 			"   jb      BF16_MAIN_M8N32K2                                \n"
 			"   subq    $16, %%rdx                                       \n"
@@ -971,15 +1159,7 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   cmpq    $16, %%rdx                                       \n"
 			"   jb      BF16_MAIN_M8N32K2                                \n"
 			"   subq  $16, %%rdx                                         \n"
-			"   cmp   $128, %%rdx                                        \n" // 128/16 = 8 rows of C data
-			"   jbe   BF16_K_PREFETCH_C_M8N32                            \n"
 			"   jmp   BF16_MAIN_K_M8N32K16                               \n"
-
-			"BF16_K_PREFETCH_C_M8N32:                                    \n"
-			"   prefetcht2         (%%r13)                               \n"
-			"   prefetcht2         64(%%r13)                             \n"
-			"   leaq     (%%r13, %%r8, 4), %%r13                         \n"
-			"   jmp BF16_MAIN_K_M8N32K16                                 \n"
 
 			"BF16_MAIN_M8N32K2:                                          \n"
 			"   bf16_kernel_m8n32k2_1                                    \n"
@@ -993,16 +1173,30 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   jmp     BF16_MAIN_M8N32K2                                \n"
 
 			"BF16_BEGIN_SAVE_M8N32:                                      \n"
+			"   cmp      $0, %%r13                                       \n"
+			"   je       BF16_BEGIN_SAVE_M8N32_2                         \n"
 			"   mov      %%rcx, %%r10                                    \n" // C0
 			"   leaq     (%%r10, %%r8, 4), %%r11                         \n" // C1
 			"   leaq     (%%r11, %%r8, 4), %%r12                         \n" // C2
 			"   leaq     (%%r12, %%r8, 4), %%r13                         \n" // C3
 			"   cmp      $0, %[k_tag]                                    \n"
-			"   je       BF16_SAVE_C_M8N32                               \n" // when beta==0&&kk==0, no need to add
+			"   je       BF16_SAVE_C_M8N32                               \n" // when beta==0 && kk==0, no need to add
 			"   bf16_add_c_m8n32                                         \n"
 
 			"BF16_SAVE_C_M8N32:                                          \n"
 			"   bf16_save_c_m8n32                                        \n"
+			"   imul     $16, %%r15, %%r11                               \n" // temp use %%r11
+			"   add      %%r11, %%r9                                     \n"
+			"   movq     %%r9, %%rax                                     \n"
+			"   jmp      BF16_BEGIN_M8N32                                \n"
+
+			"BF16_BEGIN_SAVE_M8N32_2:                                    \n"
+			"   cmp      $0, %[k_tag]                                    \n"
+			"   je       BF16_SAVE_C_M8N32_2                             \n" // when beta==0 && kk==0, no need to add
+			"   bf16_add_c_m8n32_2                                       \n"
+
+			"BF16_SAVE_C_M8N32_2:                                        \n"
+			"   bf16_save_c_m8n32_2                                      \n"
 			"   imul     $16, %%r15, %%r11                               \n" // temp use %%r11
 			"   add      %%r11, %%r9                                     \n"
 			"   movq     %%r9, %%rax                                     \n"
@@ -1013,13 +1207,10 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"BF16_BEGIN_M4N32:                                           \n"
 			"   cmpq    $0, %%rdi                                        \n"
 			"   je      BF16_END_N32                                     \n"
-
 			"   mov     %%r14, %%rbx                                     \n" // Bc
 			"   mov     %%rsi, %%rdx                                     \n" // K
-
 			"   vmovups        (%%rbx), %%zmm4                           \n" // B0-15
 			"   vmovups     64(%%rbx), %%zmm5                            \n" // B16-31
-
 			"   vbroadcastss    (%%rax), %%zmm0                          \n" // A0
 			"   vbroadcastss    4(%%rax), %%zmm1                         \n" // A1
 			"   vpxorq         %%zmm8, %%zmm8, %%zmm8                    \n"
@@ -1030,8 +1221,6 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   vpxorq         %%zmm13, %%zmm13, %%zmm13                 \n"
 			"   vpxorq         %%zmm14, %%zmm14, %%zmm14                 \n"
 			"   vpxorq         %%zmm15, %%zmm15, %%zmm15                 \n"
-
-			"   mov     %%rcx, %%r13                                     \n"
 			"   cmpq    $16, %%rdx                                       \n"
 			"   jb      BF16_MAIN_M4N32K2                                \n"
 			"   subq  $16, %%rdx                                         \n"
@@ -1050,15 +1239,7 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   cmpq    $16, %%rdx                                       \n"
 			"   jb      BF16_MAIN_M4N32K2                                \n"
 			"   subq  $16, %%rdx                                         \n"
-			"   cmp   $64, %%rdx                                         \n" // 64/16 = 4 rows of C data
-			"   jbe   BF16_K_PREFETCH_C_M4N32                            \n"
 			"   jmp   BF16_MAIN_K_M4N32K16                               \n"
-
-			"BF16_K_PREFETCH_C_M4N32:                                    \n"
-			"   prefetcht2         (%%r13)                               \n"
-			"   prefetcht2         64(%%r13)                             \n"
-			"   leaq     (%%r13, %%r8, 4), %%r13                         \n"
-			"   jmp BF16_MAIN_K_M4N32K16                                 \n"
 
 			"BF16_MAIN_M4N32K2:                                          \n"
 			"   bf16_kernel_m4n32k2_1                                    \n"
@@ -1072,6 +1253,8 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"   jmp     BF16_MAIN_M4N32K2                                \n"
 
 			"BF16_BEGIN_SAVE_M4N32:                                      \n"
+			"   cmp      $0, %%r13                                       \n"
+			"   je       BF16_BEGIN_SAVE_M4N32_2                         \n"
 			"   mov      %%rcx, %%r10                                    \n" // C0
 			"   leaq     (%%r10, %%r8, 4), %%r11                         \n" // C1
 			"   leaq     (%%r11, %%r8, 4), %%r12                         \n" // C2
@@ -1104,12 +1287,44 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 			"BF16_SAVE_C_M1N32:                                          \n"
 			"   vmovups         %%zmm8, (%%r10)                          \n"
 			"   vmovups         %%zmm9, 64(%%r10)                        \n"
+			"   jmp      BF16_END_N32                                    \n"
+
+			"BF16_BEGIN_SAVE_M4N32_2:                                    \n"
+			"   cmp      $0, %[k_tag]                                    \n"
+			"   je       BF16_SAVE_C_M4N32_2                             \n"
+			"   bf16_add_c_m4n32                                         \n"
+
+			"BF16_SAVE_C_M4N32_2:                                        \n"
+			"   cmpq     $3, %%rdi                                       \n"
+			"   je       BF16_SAVE_C_M3N32_2                             \n"
+			"   cmpq     $2, %%rdi                                       \n"
+			"   je       BF16_SAVE_C_M2N32_2                             \n"
+			"   cmpq     $1, %%rdi                                       \n"
+			"   je       BF16_SAVE_C_M1N32_2                             \n"
+			"   bf16_save_c_m4n32_2                                      \n"
+			"   imul     $8, %%r15, %%r11                                \n" // temp use %%r11
+			"   add      %%r11, %%r9                                     \n"
+			"   movq     %%r9, %%rax                                     \n"
+			"   jmp      BF16_BEGIN_M4N32                                \n"
+
+			"BF16_SAVE_C_M3N32:                                          \n"
+			"   vmovups         %%zmm12, 256(%%rcx)                      \n"
+			"   vmovups         %%zmm13, 320(%%rcx)                      \n"
+
+			"BF16_SAVE_C_M2N32:                                          \n"
+			"   vmovups         %%zmm10, 128(%%rcx)                      \n"
+			"   vmovups         %%zmm11, 196(%%rcx)                      \n"
+
+			"BF16_SAVE_C_M1N32:                                          \n"
+			"   vmovups         %%zmm8, (%%rcx)                          \n"
+			"   vmovups         %%zmm9, 64(%%rcx)                        \n"
 
 			"BF16_END_N32:                                               \n"
 
 			:
 			:
 			[C] "m"(C),
+			[Cc] "m"(Cc),
 			[A] "m"(A),
 			[B] "m"(B),
 			[M] "m"(M),
@@ -1128,7 +1343,7 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *A, uint16_t *B, lon
 				"zmm30", "zmm31", "memory", "xmm0", "xmm1", "xmm2", "xmm3", "xmm6", "xmm7");
 }
 
-static void FLASHGEMM_BF16_KERNELm12xn16_edge(float *C, uint16_t *A, uint16_t *B, long M, long K, long LK, long LN, uint16_t *Bc, long k_tag, long nr, bool is_start_gemm, bool is_end_gemm)
+static void FLASHGEMM_BF16_KERNELm12xn16_edge(float *C, uint16_t *Cc, uint16_t *A, uint16_t *B, long M, long K, long LK, long LN, uint16_t *Bc, long k_tag, long nr, bool is_start_gemm, bool is_end_gemm)
 {
 	asm volatile(
 			".macro bf16_pack_b_n16                                      \n"
@@ -1946,6 +2161,7 @@ static void FLASHGEMM_BF16_KERNELm12xn16_edge(float *C, uint16_t *A, uint16_t *B
 			:
 			:
 			[C] "m"(C),
+			[Cc] "m"(Cc),
 			[A] "m"(A),
 			[B] "m"(B),
 			[M] "m"(M),
@@ -1954,7 +2170,9 @@ static void FLASHGEMM_BF16_KERNELm12xn16_edge(float *C, uint16_t *A, uint16_t *B
 			[LN] "m"(LN),
 			[Bc] "m"(Bc),
 			[k_tag] "m"(k_tag),
-			[nr] "m"(nr)
+			[nr] "m"(nr),
+			[is_start_gemm] "m"(is_start_gemm),
+			[is_end_gemm] "m"(is_end_gemm)
 			: "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "rbp", "r8", "r9", "r10", "r11", "r12",
 				"r13", "r14", "r15", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5",
 				"zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",

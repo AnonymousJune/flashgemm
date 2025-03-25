@@ -4,7 +4,7 @@
 #include <immintrin.h>
 #include <string.h>
 #include "mkl.h"
-#include "./src/flashgemm.c"
+#include "./src/flashgemm2.c"
 #include "utils.h"
 
 using namespace std;
@@ -64,22 +64,26 @@ int main()
 		exit(0);
 	}
 
-	// int j = 1;
+	int j = 1;
 	for (int j = 0; j < 10; j++)
 	{
-		long M1 = GEMM1[j * 3];
-		long M2 = GEMM2[j * 3];
-		long M3 = GEMM3[j * 3];
-		long N = GEMM1[j * 3 + 1];
-		long K1 = GEMM1[j * 3 + 2];
-		long K2 = GEMM2[j * 3 + 2];
-		long K3 = GEMM3[j * 3 + 2];
+		// long M1 = GEMM1[j * 3];
+		// long M2 = GEMM2[j * 3];
+		// long M3 = GEMM3[j * 3];
+		// long N = GEMM1[j * 3 + 1];
+		// long K1 = GEMM1[j * 3 + 2];
+		// long K2 = GEMM2[j * 3 + 2];
+		// long K3 = GEMM3[j * 3 + 2];
 
-		// long M = 12;
-		// long N = 48;
-		// long K = 16;
+		long M1 = 12;
+		long M2 = 8;
+		long M3 = 4;
+		long N = 32;
+		long K1 = 32;
+		long K2 = 32;
+		long K3 = 32;
 
-		double ops = (double)M * N * K * 1.0e-09 * 2;
+		double ops = (double)(M1 * K1 + M2 * K2 + M3 * K3) * N * 1.0e-09 * 2;
 
 		void *ptrA1, *ptrA2, *ptrA3, *ptrB;
 		posix_memalign(&ptrA1, 64, M1 * K1 * sizeof(uint16_t));
@@ -102,8 +106,6 @@ int main()
 		random_matrix_bf16(M1, K1, A1);
 		random_matrix_bf16(M2, K2, A2);
 		random_matrix_bf16(M3, K3, A3);
-		random_matrix_f32(M3, N, C);
-		memcpy(C_MKL, C, M3 * N * sizeof(float));
 
 		// regular_matrix_bf16(K, N, B);
 		// regular_matrix_bf16(M, K, A);
@@ -160,10 +162,16 @@ int main()
 		// 	fprintf(fp, "error! \n");
 		// }
 
-		free(ptrA);
-		free(ptrB);
+		free(A1);
+		free(A2);
+		free(A3);
+		free(B);
 		free(C);
-		free(C_MKL);
+		free(C_MKL1_f32);
+		free(C_MKL2_f32);
+		free(C_MKL3_f32);
+		free(C_MKL1_f16);
+		free(C_MKL2_f16);
 	}
 
 	return 0;

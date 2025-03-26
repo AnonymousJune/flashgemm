@@ -1,13 +1,14 @@
 #include <string.h>
 
-static void NPACK_m4xk(float *A, float *Ac, int K, int LK)
+static void NPACK_m4xk(float *A, float *Ac, long K, long LK)
 {
     asm volatile(
-        "   movl %[LK], %%r8d    \n"
-        "   movl %[LK], %%r15d    \n"
+        "BEGIN_NPACK_m4xk:      \n"
+        "   mov %[LK], %%r8    \n"
+        "   mov %[LK], %%r15    \n"
 
         "   mov %[Ac], %%r9    \n"
-        "   movl %[K], %%r10d   \n"
+        "   mov %[K], %%r10   \n"
         "   mov %[A], %%r11    \n"
         "   mov %[A], %%r12    \n"
         "   mov %[A], %%r13    \n"
@@ -26,9 +27,9 @@ static void NPACK_m4xk(float *A, float *Ac, int K, int LK)
         "   vmovups (%%r12), %%zmm3       \n"
         "   vmovups (%%r13), %%zmm4       \n"
         "   vmovups (%%r14), %%zmm5       \n"
-        "   jmp NPACK                   \n"
+        "   jmp NPACK_4                   \n"
 
-        "NPACK_Pre:              \n"
+        "NPACK_Pre_4:              \n"
         "   add $64, %%r11      \n"
         "   add $64, %%r12      \n"
         "   add $64, %%r13      \n"
@@ -38,8 +39,8 @@ static void NPACK_m4xk(float *A, float *Ac, int K, int LK)
         "   vmovups (%%r12), %%zmm3       \n"
         "   vmovups (%%r13), %%zmm4       \n"
         "   vmovups (%%r14), %%zmm5       \n"
-        "NPACK:                 \n"
-
+        
+        "NPACK_4:                 \n"
         "   movl    $0xaa, %%eax       \n"
         "   kmovd   %%eax, %%k1            \n"
         "   vunpcklps %%zmm3, %%zmm2, %%zmm0    \n"
@@ -100,10 +101,11 @@ static void NPACK_m4xk(float *A, float *Ac, int K, int LK)
         "   vmovups %%xmm29, 176(%%r9)         \n"
         "   vmovups %%xmm30, 240(%%r9)         \n"
 
-        "   je  NPACK_END           \n"
-        "   jmp NPACK_Pre           \n"
+        "   cmp    $0, %%r10       \n"
+        "   je  NPACK_END_4           \n"
+        "   jmp NPACK_Pre_4           \n"
 
-        "NPACK_END:                         \n"
+        "NPACK_END_4:                         \n"
         :
 
         :
@@ -111,18 +113,18 @@ static void NPACK_m4xk(float *A, float *Ac, int K, int LK)
         [Ac] "m"(Ac),
         [K] "m"(K),
         [LK] "m"(LK)
-
         : "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13", "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31", "memory", "k0", "k1", "k2", "k3", "k4");
 }
 
-static void NPACK_m8xk(float *A, float *Ac, int K, int LK)
+static void NPACK_m8xk(float *A, float *Ac, long K, long LK)
 {
     asm volatile(
-        "   movl %[LK], %%r8d    \n"
-        "   movl %[LK], %%r15d    \n"
+        "BEGIN_NPACK_m8xk:      \n"
+        "   mov %[LK], %%r8    \n"
+        "   mov %[LK], %%r15    \n"
 
         "   mov %[Ac], %%r9    \n"
-        "   movl %[K], %%r10d   \n"
+        "   mov %[K], %%r10   \n"
         "   mov %[A], %%r11    \n"
         "   mov %[A], %%r12    \n"
         "   mov %[A], %%r13    \n"
@@ -301,7 +303,8 @@ static void NPACK_m8xk(float *A, float *Ac, int K, int LK)
         "   vmovups %%ymm29, 224(%%r9)         \n"
         "   vextractf64x4 $0x1, %%zmm29,  %%ymm31      \n"
         "   vmovups %%ymm31, 480(%%r9)            \n"
-
+        
+        "   cmp    $0, %%r10       \n"
         "   je  NPACK_END_8           \n"
         "   jmp NPACK_Pre_8           \n"
 
@@ -317,14 +320,15 @@ static void NPACK_m8xk(float *A, float *Ac, int K, int LK)
         : "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13", "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31", "memory", "k0", "k1", "k2", "k3", "k4");
 }
 
-static void NPACK_m12xk(float *A, float *Ac, int K, int LK)
+static void NPACK_m12xk(float *A, float *Ac, long K, long LK)
 {
     asm volatile(
-        "   movl %[LK], %%r8d    \n"
-        "   movl %[LK], %%r15d    \n"
+        "BEGIN_NPACK_m12xk:      \n"
+        "   mov %[LK], %%r8    \n"
+        "   mov %[LK], %%r15    \n"
 
         "   mov %[Ac], %%r9    \n"
-        "   movl %[K], %%r10d   \n"
+        "   mov %[K], %%r10   \n"
         "   mov %[A], %%r11    \n"
         "   mov %[A], %%r12    \n"
         "   mov %[A], %%r13    \n"
@@ -366,7 +370,7 @@ static void NPACK_m12xk(float *A, float *Ac, int K, int LK)
         "   vmovups (%%rdx), %%zmm8       \n"
         "   vmovups (%%rdi), %%zmm9       \n"
 
-        "   mov %%r15, %%rsi              \n"
+        "   mov %%r15, %%rsi              \n" // %%rsi ???
 
         "   jmp NPACK_12                   \n"
 
@@ -527,7 +531,7 @@ static void NPACK_m12xk(float *A, float *Ac, int K, int LK)
         "   add %%r8, %%rdx     \n"
         "   add %%r8, %%rdi     \n"
 
-        "   vmovups (%%rbx), %%zmm2       \n"
+        "   vmovups (%%rbx), %%zmm2       \n" // TODO
         "   vmovups (%%rcx), %%zmm3       \n"
         "   vmovups (%%rdx), %%zmm4       \n"
         "   vmovups (%%rdi), %%zmm5       \n"
@@ -593,6 +597,7 @@ static void NPACK_m12xk(float *A, float *Ac, int K, int LK)
         "   vmovups %%xmm29, 560(%%r9)         \n"
         "   vmovups %%xmm30, 752(%%r9)         \n"
 
+        "   cmp    $0, %%r10       \n"
         "   je  NPACK_END_12           \n"
         "   jmp NPACK_Pre_12           \n"
 
@@ -608,7 +613,7 @@ static void NPACK_m12xk(float *A, float *Ac, int K, int LK)
         : "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13", "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31", "memory", "k0", "k1", "k2", "k3", "k4");
 }
 
-static void FLASHGEMM_NPACK(float *A, float *Ac, int M, int K, int LK)
+static int FLASHGEMM_NPACK(float *A, float *Ac, long M, long K, long LK)
 {
     float *temp_A = A;
     float *temp_Ac = Ac;
@@ -616,7 +621,7 @@ static void FLASHGEMM_NPACK(float *A, float *Ac, int M, int K, int LK)
     if (M == 12)
     {
         NPACK_m12xk(temp_A, temp_Ac, K, LK);
-        return;
+        return 12;
     }
     if (M >= 8)
     {
@@ -638,4 +643,6 @@ static void FLASHGEMM_NPACK(float *A, float *Ac, int M, int K, int LK)
         temp_A = temp_A + 4 * LK;
         temp_Ac = temp_Ac + 4 * K;
     }
+    return 0;
 }
+

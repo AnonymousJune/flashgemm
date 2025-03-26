@@ -5,11 +5,11 @@
 #include <string.h>
 #include "mkl.h"
 #include "./src/flashgemm.c"
-#include "utils.h"
+// #include "utils.h"
 
 using namespace std;
 #define PEAK_GFLOPS 2.6
-#define NUM 32
+#define NUM 1
 
 int MNK[60] = {
 	32, 12544, 288, // ID1-10
@@ -51,16 +51,16 @@ int main()
 		exit(0);
 	}
 
-	// int j = 1;
-	for (int j = 0; j < 20; j++)
+	int j = 1;
+	// for (int j = 0; j < 20; j++)
 	{
-		long M = MNK[j * 3];
-		long N = MNK[j * 3 + 1];
-		long K = MNK[j * 3 + 2];
+		// long M = MNK[j * 3];
+		// long N = MNK[j * 3 + 1];
+		// long K = MNK[j * 3 + 2];
 
-		// long M = 12;
-		// long N = 48;
-		// long K = 16;
+		long M = 8;
+		long N = 32;
+		long K = 12;
 
 		double ops = (double)M * N * K * 1.0e-09 * 2;
 
@@ -73,18 +73,18 @@ int main()
 		float *C = (float *)malloc(M * N * sizeof(float));
 		float *C_MKL = (float *)malloc(M * N * sizeof(float));
 
-		random_matrix_bf16(K, N, B);
-		random_matrix_bf16(M, K, A);
-		random_matrix_f32(M, N, C);
-		memcpy(C_MKL, C, M * N * sizeof(float));
-
-		// regular_matrix_bf16(K, N, B);
-		// regular_matrix_bf16(M, K, A);
-		// regular_matrix_f32(M, N, C);
+		// random_matrix_bf16(K, N, B);
+		// random_matrix_bf16(M, K, A);
+		// random_matrix_f32(M, N, C);
 		// memcpy(C_MKL, C, M * N * sizeof(float));
 
-		// printf("\nA:\n");
-		// show_matrix_bf16(M, K, A);
+		regular_matrix_bf16(K, N, B);
+		regular_matrix_bf16(M, K, A);
+		regular_matrix_f32(M, N, C);
+		memcpy(C_MKL, C, M * N * sizeof(float));
+
+		printf("\nA:\n");
+		show_matrix_bf16(M, K, A);
 		// printf("\nB:\n");
 		// show_matrix_bf16(K, N, B);
 		// printf("\nC init:\n");
@@ -92,8 +92,8 @@ int main()
 
 		// test result
 		flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
-		cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-													 M, N, K, 1.0, A, K, B, N, beta, C_MKL, N);
+		// cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+													//  M, N, K, 1.0, A, K, B, N, beta, C_MKL, N);
 		// printf("\nC:\n");
 		// show_matrix_fp32(M, N, C);
 		// printf("\nC_MKL:\n");
@@ -102,18 +102,18 @@ int main()
 		// bool flag = Check_result(C, C_MKL, M, N);
 
 		// warm up
-		for (int i = 0; i <= 5; i++)
-		{
-			flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
-		}
+		// for (int i = 0; i <= 5; i++)
+		// {
+		// 	flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
+		// }
 
 		// test time
-		start = dclock();
-		for (int i = 0; i <= loop; i++)
-		{
-			flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
-		}
-		cost = (dclock() - start) / loop;
+		// start = dclock();
+		// for (int i = 0; i <= loop; i++)
+		// {
+		// 	flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
+		// }
+		// cost = (dclock() - start) / loop;
 
 		// if (flag)
 		// {

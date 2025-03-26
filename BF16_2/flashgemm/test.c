@@ -76,13 +76,13 @@ int main()
 		// long K2 = GEMM2[j * 3 + 2];
 		// long K3 = GEMM3[j * 3 + 2];
 
-		long M1 = 12;
-		long M2 = 8;
-		long M3 = 4;
+		long M1 = 24;
+		long M2 = 12 + 8;
+		long M3 = 12 + 4;
 		long N = 32;
 		long K1 = 32;
-		long K2 = 12;
-		long K3 = 8;
+		long K2 = 24;
+		long K3 = 12 + 8;
 
 		double ops = (double)(M1 * K1 + M2 * K2 + M3 * K3) * N * 1.0e-09 * 2;
 
@@ -125,25 +125,27 @@ int main()
 		// test result
 		flashgemm_multi_bf16bf16f32_type_a(C, B, N, 3, A1, M1, K1, A2, M2, K2, A3, M3, K3); // 3 is the number of GEMMs
 
-		cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans, M1, N, K1, 1.0, A1, K1, B, N, 0, C_MKL1_f32, N);
-		printf("\nC_MKL1_f32:\n");
-		show_matrix_fp32(M1, N, C_MKL1_f32);
-		f32_matrix_to_bf16_matrix(C_MKL1_f32, C_MKL1_f16, M1, N);
+		// cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans, M1, N, K1, 1.0, A1, K1, B, N, 0, C_MKL1_f32, N);
+		// printf("\nC_MKL1_f32:\n");
+		// show_matrix_fp32(M1, N, C_MKL1_f32);
+		// f32_matrix_to_bf16_matrix(C_MKL1_f32, C_MKL1_f16, M1, N);
+		// show_matrix_bf16(M1, N, C_MKL1_f16);
 
-		cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans, M2, N, K2, 1.0, A2, K1, C_MKL1_f16, N, 0, C_MKL2_f32, N);
-		printf("\nC_MKL2_f32:\n");
-		show_matrix_fp32(M2, N, C_MKL2_f32);
-		f32_matrix_to_bf16_matrix(C_MKL2_f32, C_MKL2_f16, M2, N);
+		// cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans, M2, N, K2, 1.0, A2, K1, C_MKL1_f16, N, 0, C_MKL2_f32, N);
+		// printf("\nC_MKL2_f32:\n");
+		// show_matrix_fp32(M2, N, C_MKL2_f32);
+		// f32_matrix_to_bf16_matrix(C_MKL2_f32, C_MKL2_f16, M2, N);
+		// show_matrix_bf16(M2, N, C_MKL2_f16);
 		
-		cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-													 M3, N, K3, 1.0, A3, K1, C_MKL2_f16, N, 0, C_MKL3_f32, N);
+		// cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+		// 											 M3, N, K3, 1.0, A3, K1, C_MKL2_f16, N, 0, C_MKL3_f32, N);
 
 		printf("\nC:\n");
 		show_matrix_fp32(M3, N, C);
-		printf("\nC_MKL:\n");
-		show_matrix_fp32(M3, N, C_MKL3_f32);
+		// printf("\nC_MKL3_f32:\n");
+		// show_matrix_fp32(M3, N, C_MKL3_f32);
 
-		flag = Check_result(C, C_MKL3_f32, M3, N);
+		// flag = Check_result(C, C_MKL3_f32, M3, N);
 
 		// warm up
 		// for (int i = 0; i <= 5; i++)

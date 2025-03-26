@@ -38,7 +38,7 @@ void flashgemm_multi_bf16bf16f32_type_a(float *C, uint16_t *B, long N, int num_g
 	int M_Acs[num_gemm];
 
 	int NUM = flashgemm_thread_num;
-	int nb = (ceil(N / NUM) + 15) / 16 * 16;
+	int nb = ((N % NUM == 0) ? N / NUM : ceil(N / NUM) + 15) / 16 * 16;
 	int ne = N % nb;
 	int num_n = N / nb + ((ne == 0) ? 0 : 1);
 
@@ -85,14 +85,14 @@ void flashgemm_multi_bf16bf16f32_type_a(float *C, uint16_t *B, long N, int num_g
 				int size_block_m = 12;
 
 				float *AA = (float *)A_bf16s[i] + start_M * Ks[i] / 2;
-				float *AAc = Acs[i] + start_M * Ks[i] / 2;
+				float *AAc = Acs[i] + start_M * K_Acs[i] / 2;
 
 				if (j == Num_blocks - 1 && Ms[i] % 12 != 0)
 				{
 					size_block_m = Ms[i] % 12;
 				}
 
-				FLASHGEMM_NPACK(AA, AAc, size_block_m, Ks[i] / 2, Ks[i] / 2);
+				FLASHGEMM_NPACK(AA, AAc, size_block_m, K_Acs[i] / 2, Ks[i] / 2);
 			}
 
 			// printf("Ac[%d]:\n", i);
@@ -117,7 +117,6 @@ void flashgemm_multi_bf16bf16f32_type_a(float *C, uint16_t *B, long N, int num_g
 				if (nr == 32)
 				{
 					FLASHGEMM_BF16_KERNELm12xn32(temp_C, temp_Cc, temp_Ac, temp_B, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, i == 0, i == num_gemm - 1);
-					// printf("tempC:%x, tempB:%x, tempAc:%x, tempB:%x, Ms[i]:%d, Ks[i]:%d, K_Acs[i]:%d, N:%d, tempBc:%x, i==0:%d, i==num_gemm-1:%d\n", temp_C, temp_Cc, temp_Ac, temp_B, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, i == 0, i == num_gemm - 1);
 				}
 				else if (nr > 16 && nr < 32)
 				{

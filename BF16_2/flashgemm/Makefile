@@ -1,6 +1,6 @@
 # source /home/wangpy/zjw/intel/oneapi/setvars.sh
 MKLROOT		= /home/wangpy/zjw/intel/oneapi/mkl/2025.0
-LDFLAGS		= -m64 -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lmkl_blacs_openmpi_ilp64 -lpthread -lm -ldl
+LDFLAGS		= # -m64 -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lmkl_blacs_openmpi_ilp64 -lpthread -lm -ldl
 INCFLAGS	= -I$(MKLROOT)/include
 
 OTHER_LIBS  = -lm -fopenmp  -lmpi_cxx -lmpi

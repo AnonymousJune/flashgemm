@@ -1,5 +1,6 @@
 #include "./flashgemm.h"
-# include <math.h>
+#include "../utils.h"
+#include <math.h>
 
 int flashgemm_thread_num = 1;
 
@@ -44,7 +45,7 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 	float *A = (float *)A_bf16;
 	void *ptrA, *ptrB;
 	int K_Ac = ((K + 31) / 32) * 32; // for edge process K%32!=0
-	int M_Ac = ((M + 3) / 4) * 4;		 // for edge process M%4!=0
+	int M_Ac = ((M + 3) / 4) * 4;	 // for edge process M%4!=0
 	posix_memalign(&ptrA, 64, M_Ac * K_Ac * sizeof(uint16_t));
 	posix_memalign(&ptrB, 64, NUM * GEMM_K * 32 * sizeof(uint16_t));
 	float *Ac = (float *)ptrA;
@@ -55,7 +56,7 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 	// prepare to block by dimention N
 	int nb, ne, num_n;
 
-	nb = (ceil(N / NUM) + 15) / 16 * 16;
+	nb = ((N % NUM == 0) ? N / NUM : ceil(N / NUM) + 15) / 16 * 16;
 	ne = N % nb;
 	num_n = N / nb + ((ne == 0) ? 0 : 1);
 
@@ -69,13 +70,13 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 	int Num_blocks0 = Num_K_block * Num_M_block;
 	if (Edge_M > 0)
 	{
-		Num_blocks0 = Num_blocks0 + Num_K_block;
-		Num_M_block = Num_M_block + 1;
+		Num_blocks0 += Num_K_block; // 0
+		Num_M_block += 1;			// 1
 	}
 	int Num_blocks = Num_blocks0;
 	if (Edge_K > 0)
 	{
-		Num_blocks = Num_blocks0 + Num_M_block;
+		Num_blocks = Num_blocks0 + Num_M_block; // 1
 	}
 
 #pragma omp parallel num_threads(NUM)
@@ -85,28 +86,13 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 		int id = omp_get_thread_num();
 		uint16_t *temp_Bc = Bc + id * GEMM_K * 32;
 
-		int NB;
-		if (id < num_n - 1)
-		{
-			NB = nb;
-		}
-		else if (id == num_n - 1)
-		{
-			if (ne > 0)
-				NB = ne;
-			else
-				NB = nb;
-		}
-		else
-		{
-			NB = 0;
-		}
+		int NB = (id < num_n - 1) ? nb : ((id == num_n - 1 && ne > 0) ? ne : nb);
 		// printf("id: %d, NB: %d\n", id, NB);
 
 		for (i = id; i < Num_blocks; i = i + NUM)
 		{
 			int start_M = (i % Num_M_block) * 12;
-			int start_K = (i / Num_M_block) * GEMM_K / 2; // TODO
+			int start_K = (i / Num_M_block) * GEMM_K / 2;
 			size_block_m = 12;
 
 			float *AA = A + start_M * K / 2 + start_K;
@@ -129,6 +115,8 @@ void flashgemm_single_bf16bf16f32_MlN(float *C, uint16_t *A_bf16, uint16_t *B_bf
 			}
 		}
 
+		printf("Ac:\n");
+		show_matrix_bf16(M_Ac, K_Ac, (uint16_t *)Ac);
 #pragma omp barrier
 
 		for (kk = 0; kk < K; kk = kk + kc)

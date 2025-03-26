@@ -38,3 +38,8 @@ display $zmm7.v32_bfloat16
 
 display {$zmm8.v16_float,$zmm10.v16_float,$zmm12.v16_float,$zmm14.v16_float}
 display {$zmm16.v16_float,$zmm13.v18_float,$zmm20.v16_float,$zmm22.v16_float}
+
+display K
+display LK
+display &K
+display &LK

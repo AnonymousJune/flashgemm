@@ -22,19 +22,17 @@ break BF16_BEGIN_SAVE_M4N32
 break BF16_SAVE_C_M4N32
 break BF16_SAVE_C_M4N32_2
 break BF16_END_N32
-# display {$zmm0.v32_bfloat16,$zmm1.v32_bfloat16,$zmm2.v32_bfloat16,$zmm3.v32_bfloat16}
-# display {$zmm4.v32_bfloat16,$zmm5.v32_bfloat16,$zmm6.v32_bfloat16,$zmm7.v32_bfloat16}
+break BEGIN_NPACK_m12xk
+break NPACK_Pre_12
+break NPACK_12
+break BEGIN_NPACK_m8xk
+break NPACK_Pre_8
+break NPACK_8
+break BEGIN_NPACK_m4xk
+break NPACK_Pre_4
+break NPACK_4
 
-
-# display $zmm0.v32_bfloat16
-# display $zmm1.v32_bfloat16
-# display $zmm2.v32_bfloat16
-# display $zmm3.v32_bfloat16
-
-# display $zmm4.v32_bfloat16
-# display $zmm5.v32_bfloat16
-# display $zmm6.v32_bfloat16
-# display $zmm7.v32_bfloat16
-
-# display {$zmm8.v16_float,$zmm10.v16_float,$zmm12.v16_float,$zmm14.v16_float}
-# display {$zmm16.v16_float,$zmm13.v18_float,$zmm20.v16_float,$zmm22.v16_float}
+display K
+display LK
+display &K
+display &LK

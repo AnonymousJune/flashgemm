@@ -608,7 +608,7 @@ static void NPACK_m12xk(float *A, float *Ac, int K, int LK)
         : "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13", "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29", "zmm30", "zmm31", "memory", "k0", "k1", "k2", "k3", "k4");
 }
 
-static void FLASHGEMM_NPACK(float *A, float *Ac, int M, int K, int LK)
+static int FLASHGEMM_NPACK(float *A, float *Ac, int M, int K, int LK)
 {
     float *temp_A = A;
     float *temp_Ac = Ac;
@@ -616,7 +616,7 @@ static void FLASHGEMM_NPACK(float *A, float *Ac, int M, int K, int LK)
     if (M == 12)
     {
         NPACK_m12xk(temp_A, temp_Ac, K, LK);
-        return;
+        return 12;
     }
     if (M >= 8)
     {
@@ -638,4 +638,5 @@ static void FLASHGEMM_NPACK(float *A, float *Ac, int M, int K, int LK)
         temp_A = temp_A + 4 * LK;
         temp_Ac = temp_Ac + 4 * K;
     }
+    return 0;
 }

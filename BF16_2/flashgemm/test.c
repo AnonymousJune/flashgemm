@@ -9,7 +9,7 @@
 
 using namespace std;
 #define PEAK_GFLOPS 2.6
-#define NUM 1
+#define NUM 32
 
 int GEMM1[30] = {
 		32, 12544, 288, // ID1-10
@@ -65,24 +65,24 @@ int main()
 		exit(0);
 	}
 
-	int j = 1;
-	// for (int j = 0; j < 10; j++)
+	// int j = 1;
+	for (int j = 0; j < 10; j++)
 	{
-		// long M1 = GEMM1[j * 3];
-		// long M2 = GEMM2[j * 3];
-		// long M3 = GEMM3[j * 3];
-		// long N = GEMM1[j * 3 + 1];
-		// long K1 = GEMM1[j * 3 + 2];
-		// long K2 = GEMM2[j * 3 + 2];
-		// long K3 = GEMM3[j * 3 + 2];
+		long M1 = GEMM1[j * 3];
+		long M2 = GEMM2[j * 3];
+		long M3 = GEMM3[j * 3];
+		long N = GEMM1[j * 3 + 1];
+		long K1 = GEMM1[j * 3 + 2];
+		long K2 = GEMM2[j * 3 + 2];
+		long K3 = GEMM3[j * 3 + 2];
 
-		long M1 = 24;
-		long M2 = 12 + 8;
-		long M3 = 12 + 4;
-		long N = 32;
-		long K1 = 32;
-		long K2 = 24;
-		long K3 = 12 + 8;
+		// long M1 = 24;
+		// long M2 = 12 + 8;
+		// long M3 = 12 + 4;
+		// long N = 32;
+		// long K1 = 32;
+		// long K2 = 24;
+		// long K3 = 12 + 8;
 
 		double ops = (double)(M1 * K1 + M2 * K2 + M3 * K3) * N * 1.0e-09 * 2;
 
@@ -103,24 +103,24 @@ int main()
 		uint16_t *C_MKL1_f16 = (uint16_t *)malloc(M1 * N * sizeof(uint16_t));
 		uint16_t *C_MKL2_f16 = (uint16_t *)malloc(M2 * N * sizeof(uint16_t));
 
-		// random_matrix_bf16(K1, N, B);
-		// random_matrix_bf16(M1, K1, A1);
-		// random_matrix_bf16(M2, K2, A2);
-		// random_matrix_bf16(M3, K3, A3);
+		random_matrix_bf16(K1, N, B);
+		random_matrix_bf16(M1, K1, A1);
+		random_matrix_bf16(M2, K2, A2);
+		random_matrix_bf16(M3, K3, A3);
 
-		regular1_matrix_bf16(K1, N, B);
-		regular1_matrix_bf16(M1, K1, A1);
-		regular1_matrix_bf16(M2, K2, A2);
-		regular1_matrix_bf16(M3, K3, A3);
+		// regular1_matrix_bf16(K1, N, B);
+		// regular1_matrix_bf16(M1, K1, A1);
+		// regular1_matrix_bf16(M2, K2, A2);
+		// regular1_matrix_bf16(M3, K3, A3);
 
-		printf("\nA1:\n");
-		show_matrix_bf16(M1, K1, A1);
-		printf("\nA2:\n");
-		show_matrix_bf16(M2, K2, A2);
-		printf("\nA3:\n");
-		show_matrix_bf16(M3, K3, A3);
-		printf("\nB:\n");
-		show_matrix_bf16(K1, N, B);
+		// printf("\nA1:\n");
+		// show_matrix_bf16(M1, K1, A1);
+		// printf("\nA2:\n");
+		// show_matrix_bf16(M2, K2, A2);
+		// printf("\nA3:\n");
+		// show_matrix_bf16(M3, K3, A3);
+		// printf("\nB:\n");
+		// show_matrix_bf16(K1, N, B);
 
 		// test result
 		flashgemm_multi_bf16bf16f32_type_a(C, B, N, 3, A1, M1, K1, A2, M2, K2, A3, M3, K3); // 3 is the number of GEMMs
@@ -140,26 +140,26 @@ int main()
 		// cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans,
 		// 											 M3, N, K3, 1.0, A3, K1, C_MKL2_f16, N, 0, C_MKL3_f32, N);
 
-		printf("\nC:\n");
-		show_matrix_fp32(M3, N, C);
+		// printf("\nC:\n");
+		// show_matrix_fp32(M3, N, C);
 		// printf("\nC_MKL3_f32:\n");
 		// show_matrix_fp32(M3, N, C_MKL3_f32);
 
 		// flag = Check_result(C, C_MKL3_f32, M3, N);
 
 		// warm up
-		// for (int i = 0; i <= 5; i++)
-		// {
-		// 	flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
-		// }
+		for (int i = 0; i <= 5; i++)
+		{
+			flashgemm_multi_bf16bf16f32_type_a(C, B, N, 3, A1, M1, K1, A2, M2, K2, A3, M3, K3); // 3 is the number of GEMMs
+		}
 
-		// // test time
-		// start = dclock();
-		// for (int i = 0; i <= loop; i++)
-		// {
-		// 	flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
-		// }
-		// cost = (dclock() - start) / loop;
+		// test time
+		start = dclock();
+		for (int i = 0; i <= loop; i++)
+		{
+			flashgemm_multi_bf16bf16f32_type_a(C, B, N, 3, A1, M1, K1, A2, M2, K2, A3, M3, K3); // 3 is the number of GEMMs
+		}
+		cost = (dclock() - start) / loop;
 
 		if (flag)
 		{

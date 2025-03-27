@@ -1,3 +1,5 @@
+
+
 break GEMM_BF16_N32
 break BF16_BEGIN_PACK_N32
 break BF16_PACK_MAIN_M12N32K16
@@ -22,17 +24,3 @@ break BF16_BEGIN_SAVE_M4N32
 break BF16_SAVE_C_M4N32
 break BF16_SAVE_C_M4N32_2
 break BF16_END_N32
-break BEGIN_NPACK_m12xk
-break NPACK_Pre_12
-break NPACK_12
-break BEGIN_NPACK_m8xk
-break NPACK_Pre_8
-break NPACK_8
-break BEGIN_NPACK_m4xk
-break NPACK_Pre_4
-break NPACK_4
-
-display K
-display LK
-display &K
-display &LK

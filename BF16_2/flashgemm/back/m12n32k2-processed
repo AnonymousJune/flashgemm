@@ -686,9 +686,8 @@
 "   mov     %%rdx, %%rsi                                     \n"
 
 "   mov    %[is_start_gemm], %%r12                           \n"
-"   mov    %[is_end_gemm], %%r13                             \n"
-"   test    $1, %%r12                                        \n"
-"   jz    BF16_BEGIN_M12N32                                  \n"
+"   test   $1, %%r12                                         \n"
+"   jz     BF16_BEGIN_M12N32                                 \n"
 
 //-----------------------------------------------------------------
 
@@ -828,6 +827,7 @@
 "   jmp     BF16_MAIN_M12N32K2                               \n"
 
 "BF16_BEGIN_SAVE_M12N32:                                     \n"
+"   mov    %[is_end_gemm], %%r13                             \n"
 "   test      $1, %%r13                                      \n"
 "   jz       BF16_SAVE_C_M12N32_2                            \n"
 "   mov      %%rcx, %%r10                                    \n"// C0
@@ -909,6 +909,7 @@
 "   jmp     BF16_MAIN_M8N32K2                                \n"
 
 "BF16_BEGIN_SAVE_M8N32:                                      \n"
+"   mov    %[is_end_gemm], %%r13                             \n"
 "   test      $1, %%r13                                      \n"
 "   jz       BF16_SAVE_C_M8N32_2                             \n"
 "   mov      %%rcx, %%r10                                    \n"// C0
@@ -981,12 +982,13 @@
 "   jmp     BF16_MAIN_M4N32K2                                \n"
 
 "BF16_BEGIN_SAVE_M4N32:                                      \n"
-"   test      $1, %%r13                                      \n"
+"   mov    %[is_end_gemm], %%r13                             \n"
+"   test     $1, %%r13                                       \n"
 "   jz       BF16_SAVE_C_M4N32_2                             \n"
 "   mov      %%rcx, %%r10                                    \n"// C0
 "   leaq     (%%r10, %%r8, 4), %%r11                         \n"// C1
 "   leaq     (%%r11, %%r8, 4), %%r12                         \n"// C2
-"   leaq     (%%r12, %%r8, 4), %%r13                         \n"// C3                                     
+"   leaq     (%%r12, %%r8, 4), %%r13                         \n"// C3
 
 "BF16_SAVE_C_M4N32:                                          \n"
 "   cmpq     $3, %%rdi                                       \n"

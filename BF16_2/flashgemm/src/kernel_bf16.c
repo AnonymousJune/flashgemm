@@ -691,9 +691,8 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *Cc, uint16_t *A, ui
 			"   mov     %%rdx, %%rsi                                     \n"
 
 			"   mov    %[is_start_gemm], %%r12                           \n"
-			"   mov    %[is_end_gemm], %%r13                             \n"
-			"   test    $1, %%r12                                        \n"
-			"   jz    BF16_BEGIN_M12N32                                  \n"
+			"   test   $1, %%r12                                         \n"
+			"   jz     BF16_BEGIN_M12N32                                 \n"
 
 			//-----------------------------------------------------------------
 
@@ -831,6 +830,7 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *Cc, uint16_t *A, ui
 			"   jmp     BF16_MAIN_M12N32K2                               \n"
 
 			"BF16_BEGIN_SAVE_M12N32:                                     \n"
+			"   mov    %[is_end_gemm], %%r13                             \n"
 			"   test      $1, %%r13                                      \n"
 			"   jz       BF16_SAVE_C_M12N32_2                            \n"
 			"   mov      %%rcx, %%r10                                    \n" // C0
@@ -912,6 +912,7 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *Cc, uint16_t *A, ui
 			"   jmp     BF16_MAIN_M8N32K2                                \n"
 
 			"BF16_BEGIN_SAVE_M8N32:                                      \n"
+			"   mov    %[is_end_gemm], %%r13                             \n"
 			"   test      $1, %%r13                                      \n"
 			"   jz       BF16_SAVE_C_M8N32_2                             \n"
 			"   mov      %%rcx, %%r10                                    \n" // C0
@@ -984,7 +985,8 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *Cc, uint16_t *A, ui
 			"   jmp     BF16_MAIN_M4N32K2                                \n"
 
 			"BF16_BEGIN_SAVE_M4N32:                                      \n"
-			"   test      $1, %%r13                                      \n"
+			"   mov    %[is_end_gemm], %%r13                             \n"
+			"   test     $1, %%r13                                       \n"
 			"   jz       BF16_SAVE_C_M4N32_2                             \n"
 			"   mov      %%rcx, %%r10                                    \n" // C0
 			"   leaq     (%%r10, %%r8, 4), %%r11                         \n" // C1

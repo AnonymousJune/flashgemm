@@ -686,9 +686,8 @@ GEMM_BF16_N32:
    mov     %%rdx, %%rsi
 
    mov    %[is_start_gemm], %%r12
-   mov    %[is_end_gemm], %%r13
-   test    $1, %%r12
-   jz    BF16_BEGIN_M12N32                                       
+   test   $1, %%r12
+   jz     BF16_BEGIN_M12N32                                       
 
 //-----------------------------------------------------------------
 
@@ -828,6 +827,7 @@ BF16_MAIN_M12N32K2:
    jmp     BF16_MAIN_M12N32K2
 
 BF16_BEGIN_SAVE_M12N32:
+   mov    %[is_end_gemm], %%r13
    test      $1, %%r13
    jz       BF16_SAVE_C_M12N32_2                                         
    mov      %%rcx, %%r10                                     // C0
@@ -908,7 +908,8 @@ BF16_MAIN_M8N32K2:
    je      BF16_BEGIN_SAVE_M8N32
    jmp     BF16_MAIN_M8N32K2
 
-BF16_BEGIN_SAVE_M8N32:  
+BF16_BEGIN_SAVE_M8N32:
+   mov    %[is_end_gemm], %%r13
    test      $1, %%r13
    jz       BF16_SAVE_C_M8N32_2                       
    mov      %%rcx, %%r10                                     // C0
@@ -981,12 +982,13 @@ BF16_MAIN_M4N32K2:
    jmp     BF16_MAIN_M4N32K2
 
 BF16_BEGIN_SAVE_M4N32: 
-   test      $1, %%r13
+   mov    %[is_end_gemm], %%r13
+   test     $1, %%r13
    jz       BF16_SAVE_C_M4N32_2                                           
    mov      %%rcx, %%r10                                     // C0
    leaq     (%%r10, %%r8, 4), %%r11                          // C1
    leaq     (%%r11, %%r8, 4), %%r12                          // C2
-   leaq     (%%r12, %%r8, 4), %%r13                          // C3                                     
+   leaq     (%%r12, %%r8, 4), %%r13                          // C3
 
 BF16_SAVE_C_M4N32:
    cmpq     $3, %%rdi

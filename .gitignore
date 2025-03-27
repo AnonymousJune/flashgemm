@@ -1,0 +1,9 @@
+# 忽略node_modules目录
+.vscode/
+ 
+# 忽略Logs
+*.txt
+*.o
+*.out
+testMKL
+matmul

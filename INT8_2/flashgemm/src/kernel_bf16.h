@@ -1056,7 +1056,8 @@ static void FLASHGEMM_BF16_KERNELm12xn32(float *C, uint16_t *Cc, uint16_t *A, ui
 				"zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
 				"zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21",
 				"zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
-				"zmm30", "zmm31", "memory", "xmm0", "xmm1", "xmm2", "xmm3", "xmm6", "xmm7");
+				"zmm30", "zmm31", "memory", "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7",
+				"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "k1");
 }
 
 static void FLASHGEMM_BF16_KERNELm12xn16_edge(float *C, uint16_t *Cc, uint16_t *A, uint16_t *B, long M, long K, long LK, long LN, uint16_t *Bc, long nr, bool is_start_gemm, bool is_end_gemm)

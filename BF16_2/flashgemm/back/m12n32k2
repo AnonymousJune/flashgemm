@@ -176,9 +176,7 @@
 
    vbroadcastss    36(%%rax), %%zmm1                        
    vdpbf16ps        %%zmm3, %%zmm4, %%zmm22                 
-   vdpbf16ps        %%zmm3, %%zmm5, %%zmm23                 
-
-   prefetcht0         64(%%rbx)                             
+   vdpbf16ps        %%zmm3, %%zmm5, %%zmm23                                             
 
    vbroadcastss    40(%%rax), %%zmm2                        
    vdpbf16ps        %%zmm0, %%zmm4, %%zmm24                 
@@ -235,9 +233,7 @@
 
    vbroadcastss    36(%%rax), %%zmm1                        
    vdpbf16ps        %%zmm3, %%zmm6, %%zmm22                 
-   vdpbf16ps        %%zmm3, %%zmm7, %%zmm23                 
-
-   prefetcht0         64(%%rbx)                             
+   vdpbf16ps        %%zmm3, %%zmm7, %%zmm23                                              
 
    vbroadcastss    40(%%rax), %%zmm2                        
    vdpbf16ps        %%zmm0, %%zmm6, %%zmm24                 
@@ -320,10 +316,10 @@
    vmovups         %%zmm14, (%%r13)                         
    vmovups         %%zmm15, 64(%%r13)                       
 
-    leaq  (%%r13, %%r8, 4), %%r10                            // C0
-    leaq     (%%r10, %%r8, 4), %%r11                         // C1
-    leaq     (%%r11, %%r8, 4), %%r12                         // C2
-    leaq     (%%r12, %%r8, 4), %%r13                         // C3
+   leaq  (%%r13, %%r8, 4), %%r10                            // C0
+   leaq     (%%r10, %%r8, 4), %%r11                         // C1
+   leaq     (%%r11, %%r8, 4), %%r12                         // C2
+   leaq     (%%r12, %%r8, 4), %%r13                         // C3
 
    vmovups         %%zmm16, (%%r10)                         
    vmovups         %%zmm17, 64(%%r10)                       
@@ -334,10 +330,10 @@
    vmovups         %%zmm22, (%%r13)                         
    vmovups         %%zmm23, 64(%%r13)                       
 
-    leaq  (%%r13, %%r8, 4), %%r10                            // C0
-    leaq     (%%r10, %%r8, 4), %%r11                         // C1
-    leaq     (%%r11, %%r8, 4), %%r12                         // C2
-    leaq     (%%r12, %%r8, 4), %%r13                         // C3
+   leaq  (%%r13, %%r8, 4), %%r10                            // C0
+   leaq     (%%r10, %%r8, 4), %%r11                         // C1
+   leaq     (%%r11, %%r8, 4), %%r12                         // C2
+   leaq     (%%r12, %%r8, 4), %%r13                         // C3
 
    vmovups         %%zmm24, (%%r10)                         
    vmovups         %%zmm25, 64(%%r10)                       
@@ -400,8 +396,7 @@
    vdpbf16ps        %%zmm1, %%zmm5, %%zmm11                 
 
    prefetcht0      256(%%rax)
-   addq             $128, %%rbx
-   prefetcht0       64(%%rbx)                      
+   addq             $128, %%rbx                     
 
    vbroadcastss    16(%%rax), %%zmm0                        
    vdpbf16ps        %%zmm2, %%zmm4, %%zmm12                 
@@ -442,7 +437,6 @@
 
    prefetcht0         256(%%rax)
    addq              $128, %%rbx                            
-   prefetcht0         64(%%rbx)
 
    vbroadcastss    16(%%rax), %%zmm0                        
    vdpbf16ps        %%zmm2, %%zmm6, %%zmm12
@@ -569,7 +563,6 @@
    vdpbf16ps        %%zmm0, %%zmm4, %%zmm8                  
    vdpbf16ps        %%zmm0, %%zmm5, %%zmm9
    addq             $128, %%rbx
-   prefetcht0       64(%%rbx)
    vmovdqu16        (%%rbx), %%zmm6                  
 
    vbroadcastss    12(%%rax), %%zmm3                        
@@ -594,7 +587,6 @@
    vdpbf16ps        %%zmm0, %%zmm6, %%zmm8                  
    vdpbf16ps        %%zmm0, %%zmm7, %%zmm9
    addq             $128, %%rbx                            
-   prefetcht0       64(%%rbx)
    vmovdqu16        (%%rbx), %%zmm4                  
 
    vbroadcastss     12(%%rax), %%zmm3                        
@@ -798,7 +790,7 @@ BF16_BEGIN_M12N32:
    jb      BF16_MAIN_M12N32K2
    subq    $16, %%rdx
 
-BF16_MAIN_K_M12N32K16:   // loop K+=4
+BF16_MAIN_M12N32K16:   // loop K+=4
    bf16_kernel_m12n32k2_1
    bf16_kernel_m12n32k2_2
    bf16_kernel_m12n32k2_1
@@ -812,7 +804,7 @@ BF16_MAIN_K_M12N32K16:   // loop K+=4
    cmp     $16, %%rdx
    jb      BF16_MAIN_M12N32K2
    subq  $16, %%rdx               
-   jmp   BF16_MAIN_K_M12N32K16
+   jmp   BF16_MAIN_M12N32K16
                                
 
 BF16_MAIN_M12N32K2:
@@ -833,14 +825,14 @@ BF16_BEGIN_SAVE_M12N32:
    mov      %%rcx, %%r10                                     // C0
    leaq     (%%r10, %%r8, 4), %%r11                          // C1
    leaq     (%%r11, %%r8, 4), %%r12                          // C2
-   leaq     (%%r12, %%r8, 4), %%r13                          // C3                                       
+   leaq     (%%r12, %%r8, 4), %%r13                          // C3
 
 BF16_SAVE_C_M12N32:                                                
    bf16_save_c_m12n32
    imul     $24, %%r15, %%r11 // temp use %%r11
    add      %%r11, %%r9
    movq     %%r9, %%rax
-   jmp     BF16_BEGIN_M12N32
+   jmp      BF16_BEGIN_M12N32
 
 BF16_SAVE_C_M12N32_2:
    bf16_save_c_m12n32_2

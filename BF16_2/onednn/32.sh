@@ -1,5 +1,5 @@
 export LD_LIBRARY_PATH=/home/wangpy/zjw/install/oneDNN/lib:$LD_LIBRARY_PATH
-export ONEDNN_MAX_CPU_ISA=avx512_core
+export ONEDNN_MAX_CPU_ISA=AVX512_CORE_BF16
 export ONEDNN_CPU_ISA_HINTS=no_hints
 
 export GOMP_CPU_AFFINITY="0-31"

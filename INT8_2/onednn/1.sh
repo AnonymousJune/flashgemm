@@ -1,7 +1,8 @@
+export ONEDNN_MAX_CPU_ISA=avx512_core
 export ONEDNN_CPU_ISA_HINTS=no_hints
-export ONEDNN_MAX_CPU_ISA=AVX512_CORE_AMX
-export GOMP_CPU_AFFINITY="0-31"
-export OMP_NUM_THREADS=32
+
+export GOMP_CPU_AFFINITY="23"
+export OMP_NUM_THREADS=1
 
 export KMP_HW_SUBSET=1T
 export OMP_PROC_BIND=spread

@@ -178,8 +178,6 @@
 "   vdpbf16ps        %%zmm3, %%zmm4, %%zmm22                 \n"
 "   vdpbf16ps        %%zmm3, %%zmm5, %%zmm23                 \n"
 
-"   prefetcht0         64(%%rbx)                             \n"
-
 "   vbroadcastss    40(%%rax), %%zmm2                        \n"
 "   vdpbf16ps        %%zmm0, %%zmm4, %%zmm24                 \n"
 "   vdpbf16ps        %%zmm0, %%zmm5, %%zmm25                 \n"
@@ -236,8 +234,6 @@
 "   vbroadcastss    36(%%rax), %%zmm1                        \n"
 "   vdpbf16ps        %%zmm3, %%zmm6, %%zmm22                 \n"
 "   vdpbf16ps        %%zmm3, %%zmm7, %%zmm23                 \n"
-
-"   prefetcht0         64(%%rbx)                             \n"
 
 "   vbroadcastss    40(%%rax), %%zmm2                        \n"
 "   vdpbf16ps        %%zmm0, %%zmm6, %%zmm24                 \n"
@@ -320,10 +316,10 @@
 "   vmovups         %%zmm14, (%%r13)                         \n"
 "   vmovups         %%zmm15, 64(%%r13)                       \n"
 
-"    leaq  (%%r13, %%r8, 4), %%r10                           \n"// C0
-"    leaq     (%%r10, %%r8, 4), %%r11                        \n"// C1
-"    leaq     (%%r11, %%r8, 4), %%r12                        \n"// C2
-"    leaq     (%%r12, %%r8, 4), %%r13                        \n"// C3
+"   leaq  (%%r13, %%r8, 4), %%r10                            \n"// C0
+"   leaq     (%%r10, %%r8, 4), %%r11                         \n"// C1
+"   leaq     (%%r11, %%r8, 4), %%r12                         \n"// C2
+"   leaq     (%%r12, %%r8, 4), %%r13                         \n"// C3
 
 "   vmovups         %%zmm16, (%%r10)                         \n"
 "   vmovups         %%zmm17, 64(%%r10)                       \n"
@@ -334,10 +330,10 @@
 "   vmovups         %%zmm22, (%%r13)                         \n"
 "   vmovups         %%zmm23, 64(%%r13)                       \n"
 
-"    leaq  (%%r13, %%r8, 4), %%r10                           \n"// C0
-"    leaq     (%%r10, %%r8, 4), %%r11                        \n"// C1
-"    leaq     (%%r11, %%r8, 4), %%r12                        \n"// C2
-"    leaq     (%%r12, %%r8, 4), %%r13                        \n"// C3
+"   leaq  (%%r13, %%r8, 4), %%r10                            \n"// C0
+"   leaq     (%%r10, %%r8, 4), %%r11                         \n"// C1
+"   leaq     (%%r11, %%r8, 4), %%r12                         \n"// C2
+"   leaq     (%%r12, %%r8, 4), %%r13                         \n"// C3
 
 "   vmovups         %%zmm24, (%%r10)                         \n"
 "   vmovups         %%zmm25, 64(%%r10)                       \n"
@@ -401,7 +397,6 @@
 
 "   prefetcht0      256(%%rax)                               \n"
 "   addq             $128, %%rbx                             \n"
-"   prefetcht0       64(%%rbx)                               \n"
 
 "   vbroadcastss    16(%%rax), %%zmm0                        \n"
 "   vdpbf16ps        %%zmm2, %%zmm4, %%zmm12                 \n"
@@ -442,7 +437,6 @@
 
 "   prefetcht0         256(%%rax)                            \n"
 "   addq              $128, %%rbx                            \n"
-"   prefetcht0         64(%%rbx)                             \n"
 
 "   vbroadcastss    16(%%rax), %%zmm0                        \n"
 "   vdpbf16ps        %%zmm2, %%zmm6, %%zmm12                 \n"
@@ -569,7 +563,6 @@
 "   vdpbf16ps        %%zmm0, %%zmm4, %%zmm8                  \n"
 "   vdpbf16ps        %%zmm0, %%zmm5, %%zmm9                  \n"
 "   addq             $128, %%rbx                             \n"
-"   prefetcht0       64(%%rbx)                               \n"
 "   vmovdqu16        (%%rbx), %%zmm6                         \n"
 
 "   vbroadcastss    12(%%rax), %%zmm3                        \n"
@@ -594,7 +587,6 @@
 "   vdpbf16ps        %%zmm0, %%zmm6, %%zmm8                  \n"
 "   vdpbf16ps        %%zmm0, %%zmm7, %%zmm9                  \n"
 "   addq             $128, %%rbx                             \n"
-"   prefetcht0       64(%%rbx)                               \n"
 "   vmovdqu16        (%%rbx), %%zmm4                         \n"
 
 "   vbroadcastss     12(%%rax), %%zmm3                       \n"

@@ -90,7 +90,7 @@ int main()
 	float alpha = 1.0, beta = 0.0;
 
 	FILE *fp;
-	if ((fp = fopen("../result/results/blis.txt", "w")) == NULL)
+	if ((fp = fopen("../result/blis.txt", "w")) == NULL)
 	{
 		puts("Fail to open file!");
 		exit(0);

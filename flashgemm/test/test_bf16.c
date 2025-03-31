@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <immintrin.h>
 #include <string.h>
-#include "mkl.h"
-#include "./src/flashgemm.c"
+// #include "mkl.h"
+#include "../src/flashgemm.c"
 // #include "utils.h"
 
 using namespace std;
@@ -66,66 +66,31 @@ int main()
 		uint16_t *B = (uint16_t *)ptrB;
 
 		float *C = (float *)malloc(M * N * sizeof(float));
-		float *C_MKL = (float *)malloc(M * N * sizeof(float));
 
-		// random_matrix_bf16(K, N, B);
-		// random_matrix_bf16(M, K, A);
-		// random_matrix_f32(M, N, C);
-		// memcpy(C_MKL, C, M * N * sizeof(float));
-
-		regular_matrix_bf16(K, N, B);
-		regular_matrix_bf16(M, K, A);
-		regular_matrix_f32(M, N, C);
-		memcpy(C_MKL, C, M * N * sizeof(float));
-
-		printf("\nA:\n");
-		show_matrix_bf16(M, K, A);
-		// printf("\nB:\n");
-		// show_matrix_bf16(K, N, B);
-		// printf("\nC init:\n");
-		// show_matrix_fp32(M, N, C);
-
-		// test result
-		flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
-		// cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-		//  M, N, K, 1.0, A, K, B, N, beta, C_MKL, N);
-		// printf("\nC:\n");
-		// show_matrix_fp32(M, N, C);
-		// printf("\nC_MKL:\n");
-		// show_matrix_fp32(M, N, C_MKL);
-
-		// bool flag = Check_result(C, C_MKL, M, N);
+		random_matrix_bf16(K, N, B);
+		random_matrix_bf16(M, K, A);
 
 		// warm up
-		// for (int i = 0; i <= 5; i++)
-		// {
-		// 	flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
-		// }
+		for (int i = 0; i <= 5; i++)
+		{
+			flashgemm_multi_bf16bf16f32(C, B, N, 1, A, M, K);
+		}
 
 		// test time
-		// start = dclock();
-		// for (int i = 0; i <= loop; i++)
-		// {
-		// 	flashgemm_single_bf16bf16f32(C, A, B, M, N, K, beta);
-		// }
-		// cost = (dclock() - start) / loop;
+		start = dclock();
+		for (int i = 0; i <= loop; i++)
+		{
+			flashgemm_multi_bf16bf16f32(C, B, N, 1, A, M, K);
+		}
+		cost = (dclock() - start) / loop;
 
-		// if (flag)
-		// {
 		printf("bf16:  M= %-10d N=%-10d K=%-10d flops = %-10.3lf effic= %.3lf %\n",
 					 M, N, K, ops / cost, ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
 		fprintf(fp, "%.3lf\n", ops / cost);
-		// }
-		// else
-		// {
-		// 	printf("bf16: id=%-3d M= %-8d N=%-8d K=%-8d error!!!\n", j, M, N, K);
-		// 	fprintf(fp, "error! \n");
-		// }
 
 		free(ptrA);
 		free(ptrB);
 		free(C);
-		free(C_MKL);
 	}
 
 	return 0;

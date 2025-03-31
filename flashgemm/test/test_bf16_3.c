@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <immintrin.h>
 #include <string.h>
-#include "mkl.h"
-#include "./src/flashgemm2.c"
+// #include "mkl.h"
+#include "../src/flashgemm.c"
 // #include "utils.h"
 
 using namespace std;
@@ -123,7 +123,7 @@ int main()
 		// show_matrix_bf16(K1, N, B);
 
 		// test result
-		flashgemm_multi_bf16bf16f32_type_a(C, B, N, 3, A1, M1, K1, A2, M2, K2, A3, M3, K3); // 3 is the number of GEMMs
+		flashgemm_multi_bf16bf16f32(C, B, N, 3, A1, M1, K1, A2, M2, K2, A3, M3, K3); // 3 is the number of GEMMs
 
 		// cblas_gemm_bf16bf16f32(CblasRowMajor, CblasNoTrans, CblasNoTrans, M1, N, K1, 1.0, A1, K1, B, N, 0, C_MKL1_f32, N);
 		// printf("\nC_MKL1_f32:\n");
@@ -150,14 +150,14 @@ int main()
 		// warm up
 		for (int i = 0; i <= 5; i++)
 		{
-			flashgemm_multi_bf16bf16f32_type_a(C, B, N, 3, A1, M1, K1, A2, M2, K2, A3, M3, K3); // 3 is the number of GEMMs
+			flashgemm_multi_bf16bf16f32(C, B, N, 3, A1, M1, K1, A2, M2, K2, A3, M3, K3); // 3 is the number of GEMMs
 		}
 
 		// test time
 		start = dclock();
 		for (int i = 0; i <= loop; i++)
 		{
-			flashgemm_multi_bf16bf16f32_type_a(C, B, N, 3, A1, M1, K1, A2, M2, K2, A3, M3, K3); // 3 is the number of GEMMs
+			flashgemm_multi_bf16bf16f32(C, B, N, 3, A1, M1, K1, A2, M2, K2, A3, M3, K3); // 3 is the number of GEMMs
 		}
 		cost = (dclock() - start) / loop;
 

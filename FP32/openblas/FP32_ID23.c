@@ -88,7 +88,7 @@ int main()
 	int flag = 0;
 
 	FILE *fp;
-	if ((fp = fopen("../result/results/openblas.txt", "w")) == NULL)
+	if ((fp = fopen("../result/openblas.txt", "w")) == NULL)
 	{
 		puts("Fail to open file!");
 		exit(0);

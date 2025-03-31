@@ -5,8 +5,8 @@ CXX = g++
 CXXFLAGS = -std=c++11 -O2 -g
 
 # oneDNN库路径（如安装在其他路径，请修改）
-DNNL_LIB = /home/wangpy/zjw/install/oneDNN_debug/lib
-DNNL_INCLUDE = /home/wangpy/zjw/install/oneDNN_debug/include
+DNNL_LIB = /home/wangpy/zjw/install/oneDNN/lib
+DNNL_INCLUDE = /home/wangpy/zjw/install/oneDNN/include
 
 # 源文件
 SRC = matmul.cpp

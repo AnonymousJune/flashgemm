@@ -79,7 +79,7 @@ int main()
 	int sizea, sizeb, sizec;
 
 	FILE *fp;
-	if ((fp = fopen("../result/results/mkl.txt", "w")) == NULL)
+	if ((fp = fopen("../result/mkl.txt", "w")) == NULL)
 	{
 		puts("Fail to open file!");
 		exit(0);

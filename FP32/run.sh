@@ -1,5 +1,5 @@
-sudo cpupower -c all frequency-set -u 3.8GHz
-sudo cpupower -c all frequency-set -d 3.8GHz
+# sudo cpupower -c all frequency-set -u 3.8GHz
+# sudo cpupower -c all frequency-set -d 3.8GHz
 
 find . -type f -name "*.txt" -exec rm -f {} +
 

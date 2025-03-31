@@ -110,7 +110,7 @@ void matmul_example(dnnl::engine::kind engine_kind)
     dnnl::stream engine_stream(engine);
 
     FILE *fp;
-    if ((fp = fopen("../result/results/onednn.txt", "w")) == NULL)
+    if ((fp = fopen("../result/onednn.txt", "w")) == NULL)
     {
         puts("Fail to open file!");
         exit(0);

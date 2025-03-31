@@ -1,29 +1,30 @@
-BINARY_NAME = gemm
-CC          = /home/wangpy/zjw/intel/oneapi/2025.0/bin/dpcpp
-CFLAGS      = -O2 -g -march=native -fno-strict-aliasing -mavx512f -mavx512vnni -mavx -mavxvnni
-GDB_FLAGS   = -gdwarf-5 -gstrict-dwarf
-FLASHGEMM_DIR = /home/wangpy/zjw/install/flashgemm
+# 路径配置
+BLIS_PREFIX = /home/wangpy/zjw/install/OpenBLAS
+BLIS_INC    = $(BLIS_PREFIX)/include
+BLIS_LIB    = $(BLIS_PREFIX)/lib/libopenblas.a
 
-MKLPATH     = /home/wangpy/zjw/intel/oneapi/mkl/2025.0
-LDFLAGS     = -L$(MKLPATH)/lib/intel64 
-INCFLAGS    = -I$(MKLPATH)/include -I$(FLASHGEMM_DIR)/include
+OTHER_LIBS  = -lm -fopenmp -lpthread
 
-OTHER_FLGAS = -qmkl=parallel
-OTHER_LIBS  = $(FLASHGEMM_DIR)/lib/libflashgemm.a
+CC          = gcc
+CFLAGS      = -O2 -g -fopenmp -mavx512f -I$(BLIS_INC)
+LINKER      = $(CC)
 
-SRC         = $(wildcard *.c)
-OBJ         = $(SRC:.c=.o)
+# 自动获取所有 .c 文件并生成对应的目标文件和可执行文件名
+SRCS        = $(wildcard *.c)         # 当前目录下所有 .c 文件
+OBJS        = $(SRCS:.c=.o)           # 生成对应 .o 文件
+TARGETS     = $(SRCS:.c=.out)         # 生成与 .c 同名的 .out 文件
 
-# Target to build the binary
-build: $(BINARY_NAME)
+# 默认目标：编译所有源文件
+all: $(TARGETS)
 
-$(BINARY_NAME): $(OBJ)
-	$(CC) $(LDFLAGS) $(OBJ) $(OTHER_LIBS) $(OTHER_FLGAS) -o $@
-
-# Pattern rule to compile source files to object files
+# 编译规则：.c -> .o
 %.o: %.c
-	$(CC) $(CFLAGS) $(GDB_FLAGS) $(INCFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -fopenmp -c $< -o $@
 
-# Clean up generated files
-clean:
-	rm -f $(BINARY_NAME) $(OBJ)
+# 链接规则：.o -> .out（每个 .o 生成独立的 .out 文件）
+%.out: %.o
+	$(LINKER) $^ $(BLIS_LIB) $(OTHER_LIBS) -o $@
+
+# 清理规则
+clean: 
+	rm -f *.o *.out

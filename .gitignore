@@ -2,8 +2,8 @@
 .vscode/
  
 # 忽略Logs
-# *.txt
-# *.o
-# *.out
-# testMKL
-# matmul
+*.txt
+*.o
+*.out
+testMKL
+matmul

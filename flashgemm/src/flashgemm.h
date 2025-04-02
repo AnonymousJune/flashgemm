@@ -7,6 +7,7 @@ extern "C" {
 
 #include <omp.h>
 #include "./PACK_x86.h"
+#include "./kernel_f32.h"
 #include "./kernel_bf16.h"
 #include "./kernel_int8.h"
 
@@ -16,6 +17,8 @@ extern "C" {
 extern int flashgemm_thread_num; // init here is wrong
 
 void flashgemm_set_thread_num(int num);
+
+void flashgemm_multi_f32f32f32(float *C, float *B, long N, int num_gemm, ...);
 
 void flashgemm_multi_bf16bf16f32(float *C, uint16_t *B, long N, int num_gemm, ...);
 

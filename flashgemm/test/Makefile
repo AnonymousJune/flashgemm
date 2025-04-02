@@ -9,7 +9,8 @@ CFLAGS      = -O2 -g -w -fopenmp -mavx512f # -DMKL_ILP64 -m64 $(INCFLAGS)
 GDB_FLAGS   = # -gdwarf-5 -gstrict-dwarf
 LINKER      = $(CC)
 
-SRCS        = $(wildcard *.c)
+# SRCS        = $(wildcard *.c)
+SRCS        = test_f32.c
 OBJS        = $(SRCS:.c=.o)
 TARGETS     = $(SRCS:.c=.out)
 

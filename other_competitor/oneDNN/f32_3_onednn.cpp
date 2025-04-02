@@ -116,7 +116,7 @@ void matmul_example(dnnl::engine::kind engine_kind)
     dnnl::stream engine_stream(engine);
 
     FILE *fp;
-    if ((fp = fopen("../result/bf16_3_onednn.txt", "w")) == NULL)
+    if ((fp = fopen("../result/f32_3_onednn.txt", "w")) == NULL)
     {
         puts("Fail to open file!");
         exit(0);
@@ -140,12 +140,12 @@ void matmul_example(dnnl::engine::kind engine_kind)
         memory::dims C3_dims = {M3, N};
 
         // Allocate buffers.
-        std::vector<uint16_t> A1_data(product(A1_dims));
-        std::vector<uint16_t> A2_data(product(A2_dims));
-        std::vector<uint16_t> A3_data(product(A3_dims));
-        std::vector<uint16_t> B_data(product(B_dims));
-        std::vector<uint16_t> C1_data(product(C1_dims));
-        std::vector<uint16_t> C2_data(product(C2_dims));
+        std::vector<float> A1_data(product(A1_dims));
+        std::vector<float> A2_data(product(A2_dims));
+        std::vector<float> A3_data(product(A3_dims));
+        std::vector<float> B_data(product(B_dims));
+        std::vector<float> C1_data(product(C1_dims));
+        std::vector<float> C2_data(product(C2_dims));
         std::vector<float> C3_data(product(C3_dims));
 
         // Randomly initialize src and weights between -1 and 1.
@@ -159,12 +159,12 @@ void matmul_example(dnnl::engine::kind engine_kind)
                       { return static_cast<float>(std::rand()) / RAND_MAX * 2.0f - 1.0f; });
 
         // Create memory descriptors and memory objects for src, weights, and dst.
-        auto A1_md = memory::desc(A1_dims, dt::bf16, tag::ab);
-        auto A2_md = memory::desc(A2_dims, dt::bf16, tag::ab);
-        auto A3_md = memory::desc(A3_dims, dt::bf16, tag::ab);
-        auto B_md = memory::desc(B_dims, dt::bf16, tag::ab);
-        auto C1_md = memory::desc(C1_dims, dt::bf16, tag::ab);
-        auto C2_md = memory::desc(C2_dims, dt::bf16, tag::ab);
+        auto A1_md = memory::desc(A1_dims, dt::f32, tag::ab);
+        auto A2_md = memory::desc(A2_dims, dt::f32, tag::ab);
+        auto A3_md = memory::desc(A3_dims, dt::f32, tag::ab);
+        auto B_md = memory::desc(B_dims, dt::f32, tag::ab);
+        auto C1_md = memory::desc(C1_dims, dt::f32, tag::ab);
+        auto C2_md = memory::desc(C2_dims, dt::f32, tag::ab);
         auto C3_md = memory::desc(C3_dims, dt::f32, tag::ab);
 
         auto A1_mem = memory(A1_md, engine);
@@ -240,7 +240,7 @@ void matmul_example(dnnl::engine::kind engine_kind)
         // Read data from memory object's handle.
         read_from_dnnl_memory(C3_data.data(), C3_mem);
 
-        printf("onednn_bf16_3:  N=%-10d M1= %-10d K1=%-10d M2= %-10d K2=%-10d M3= %-10d K3=%-10d flops = %-10.3lf effic= %.3lf %\n",
+        printf("onednn_f32_3:  N=%-10d M1= %-10d K1=%-10d M2= %-10d K2=%-10d M3= %-10d K3=%-10d flops = %-10.3lf effic= %.3lf %\n",
                N, M1, K1, M2, K2, M3, K3, ops / cost, ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
         fprintf(fp, "%.3lf\n", ops / cost);
     }

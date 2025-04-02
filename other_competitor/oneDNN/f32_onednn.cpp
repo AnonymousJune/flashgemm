@@ -103,7 +103,7 @@ void matmul_example(dnnl::engine::kind engine_kind)
     dnnl::stream engine_stream(engine);
 
     FILE *fp;
-    if ((fp = fopen("../result/bf16_onednn.txt", "w")) == NULL)
+    if ((fp = fopen("../result/f32_onednn.txt", "w")) == NULL)
     {
         puts("Fail to open file!");
         exit(0);
@@ -122,8 +122,8 @@ void matmul_example(dnnl::engine::kind engine_kind)
         memory::dims dst_dims = {M, N};
 
         // Allocate buffers.
-        std::vector<uint16_t> src_data(product(src_dims));
-        std::vector<uint16_t> weights_data(product(weights_dims));
+        std::vector<float> src_data(product(src_dims));
+        std::vector<float> weights_data(product(weights_dims));
         std::vector<float> dst_data(product(dst_dims));
 
         // Randomly initialize src and weights between -1 and 1.
@@ -138,8 +138,8 @@ void matmul_example(dnnl::engine::kind engine_kind)
                       });
 
         // Create memory descriptors and memory objects for src, weights, and dst.
-        auto src_md = memory::desc(src_dims, dt::bf16, tag::ab);
-        auto weights_md = memory::desc(weights_dims, dt::bf16, tag::ab);
+        auto src_md = memory::desc(src_dims, dt::f32, tag::ab);
+        auto weights_md = memory::desc(weights_dims, dt::f32, tag::ab);
         auto dst_md = memory::desc(dst_dims, dt::f32, tag::ab);
 
         auto src_mem = memory(src_md, engine);
@@ -193,7 +193,7 @@ void matmul_example(dnnl::engine::kind engine_kind)
         // Read data from memory object's handle.
         read_from_dnnl_memory(dst_data.data(), dst_mem);
 
-        printf("oneDNN_bf16:  M= %-10d N=%-10d K=%-10d flops = %-10.3lf effic= %.3lf "
+        printf("oneDNN_f32:  M= %-10d N=%-10d K=%-10d flops = %-10.3lf effic= %.3lf "
                "%\n",
                M, N, K, ops / cost, ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
         fprintf(fp, "%.3lf\n", ops / cost);

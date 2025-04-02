@@ -7,6 +7,8 @@ export OMP_NUM_THREADS=1
 export KMP_HW_SUBSET=1T
 export OMP_PROC_BIND=spread
 export OMP_PLACES=threads
+numactl --membind 0 --cpunodebind 0 ./f32_3_onednn.out
+numactl --membind 0 --cpunodebind 0 ./f32_onednn.out
 numactl --membind 0 --cpunodebind 0 ./bf16_3_onednn.out
 numactl --membind 0 --cpunodebind 0 ./bf16_onednn.out
 numactl --membind 0 --cpunodebind 0 ./int8_3_onednn.out

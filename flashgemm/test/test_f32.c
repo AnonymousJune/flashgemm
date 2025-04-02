@@ -44,7 +44,7 @@ int main()
 	double gflops;
 
 	FILE *fp;
-	if ((fp = fopen("../result/bf16_flashgemm.txt", "w")) == NULL)
+	if ((fp = fopen("../result/f32_flashgemm.txt", "w")) == NULL)
 	{
 		puts("Fail to open file!");
 		exit(0);

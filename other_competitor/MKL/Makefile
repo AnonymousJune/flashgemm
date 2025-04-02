@@ -1,26 +1,22 @@
-# source /home/wangpy/zjw/intel/oneapi/setvars.sh
-MKLROOT		= /home/wangpy/zjw/intel/oneapi/mkl/2025.0
-LDFLAGS		= -m64 -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lmkl_blacs_openmpi_ilp64 -lpthread -lm -ldl
-INCFLAGS	= -I$(MKLROOT)/include
+CC          = /home/wangpy/zjw/intel/oneapi/2025.0/bin/dpcpp
+CFLAGS      = -O2 -g
+MKLPATH     = /home/wangpy/zjw/oneapi/mkl/2025.0
+LDFLAGS     = -L$(MKLPATH)/lib/intel64
+INCFLAGS    = -I$(MKLPATH)/include
+OTHER_FLGAS = -qmkl=parallel
 
-OTHER_LIBS  = -lm -fopenmp -lmpi_cxx -lmpi
+# 自动获取所有.c文件
+SRC := $(wildcard *.c)
+# 生成对应的目标列表（文件名去后缀）
+EXECS := $(SRC:.c=)
 
-CC          = g++
-CFLAGS      = -O2 -g -w -fopenmp -mavx512f -DMKL_ILP64 -m64 $(INCFLAGS)
-GDB_FLAGS   = -gdwarf-5 -gstrict-dwarf
-LINKER      = $(CC)
+# 默认构建所有可执行文件
+all: $(EXECS)
 
-SRCS        = $(wildcard *.c)
-OBJS        = $(SRCS:.c=.o)
-TARGETS     = $(SRCS:.c=.out)
+# 模式规则：每个.c生成同名可执行文件
+%: %.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $(INCFLAGS) $(OTHER_FLGAS) $^ -o $@
 
-%.o: %.c
-	$(CC) $(CFLAGS) $(GDB_FLAGS) -fopenmp -c $< -o $@
-
-%.out: %.o
-	$(LINKER) $< $(GDB_FLAGS) -o $@ $(LDFLAGS) $(OTHER_LIBS)
-
-all: $(TARGETS)
-
+# 清理所有生成的可执行文件
 clean:
-	rm -rf *.o *.out
+	rm -f $(EXECS)

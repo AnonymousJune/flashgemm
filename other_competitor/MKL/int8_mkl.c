@@ -57,7 +57,7 @@ int main()
 		exit(0);
 	}
 
-	for (j = 0; j < 10; j++)
+	for (j = 0; j < 20; j++)
 	{
 		long M = GEMM[j * 3];
 		long N = GEMM[j * 3 + 1];

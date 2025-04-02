@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <stdlib.h>
-#include "mkl.h"
+#include "blis.h"
 #include <omp.h>
 #include <math.h>
 #include "utils.h"
@@ -47,7 +47,7 @@ int GEMM3[30] = {
 
 int main()
 {
-	mkl_set_num_threads(NUM);
+	bli_thread_set_num_threads(NUM);
 	omp_set_num_threads(NUM);
 
 	int i, j, k, jj, pc;
@@ -58,10 +58,9 @@ int main()
 	long lda, ldb, ldc;
 	int flag = 0;
 	float alpha = 1.0, beta = 0.0;
-	int sizea, sizeb, sizec;
 
 	FILE *fp;
-	if ((fp = fopen("../result/f32_3_mkl.txt", "w")) == NULL)
+	if ((fp = fopen("../result/f32_3_blis-gemmfip.txt", "w")) == NULL)
 	{
 		puts("Fail to open file!");
 		exit(0);
@@ -98,30 +97,24 @@ int main()
 		random_matrix_f32(M2, K2, A2);
 		random_matrix_f32(M3, K3, A3);
 
-		for (i = 0; i < 3; i++)
+		for (i = 0; i < loop; i++)
 		{
-			// GEMM 1
-			cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M1, N, K1, 1.0, A1, K1, B, N, 0, C1, N);
-			// GEMM 2
-			cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M2, N, K2, 1.0, A2, K2, C1, N, 0, C2, N);
-			// GEMM 3
-			cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M3, N, K3, 1.0, A3, K3, C2, N, 0, C3, N);
+			bli_sgemm(BLIS_NO_TRANSPOSE, BLIS_NO_TRANSPOSE, M1, N, K1, &alpha, A1, K1, 1, B, N, 1, &beta, C1, N, 1);
+			bli_sgemm(BLIS_NO_TRANSPOSE, BLIS_NO_TRANSPOSE, M2, N, K2, &alpha, A2, K2, 1, C1, N, 1, &beta, C2, N, 1);
+			bli_sgemm(BLIS_NO_TRANSPOSE, BLIS_NO_TRANSPOSE, M3, N, K3, &alpha, A3, K3, 1, C2, N, 1, &beta, C3, N, 1);
 		}
 
 		start = dclock();
 		for (i = 0; i < loop; i++)
 		{
-			// GEMM 1
-			cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M1, N, K1, 1.0, A1, K1, B, N, 0, C1, N);
-			// GEMM 2
-			cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M2, N, K2, 1.0, A2, K2, C1, N, 0, C2, N);
-			// GEMM 3
-			cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M3, N, K3, 1.0, A3, K3, C2, N, 0, C3, N);
+			bli_sgemm(BLIS_NO_TRANSPOSE, BLIS_NO_TRANSPOSE, M1, N, K1, &alpha, A1, K1, 1, B, N, 1, &beta, C1, N, 1);
+			bli_sgemm(BLIS_NO_TRANSPOSE, BLIS_NO_TRANSPOSE, M2, N, K2, &alpha, A2, K2, 1, C1, N, 1, &beta, C2, N, 1);
+			bli_sgemm(BLIS_NO_TRANSPOSE, BLIS_NO_TRANSPOSE, M3, N, K3, &alpha, A3, K3, 1, C2, N, 1, &beta, C3, N, 1);
 		}
 		cost = (dclock() - start) / loop;
 
-		printf("f32_3_mkl:  N=%-10d M1= %-10d K1=%-10d M2= %-10d K2=%-10d M3= %-10d K3=%-10d flops = %-10.3lf effic= %.3lf %\n",
-					 N, M1, K1, M2, K2, M3, K3, ops / cost, ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
+		printf("blis_3_f32:  N=%-10d M1= %-10d K1=%-10d M2= %-10d K2=%-10d M3= %-10d K3=%-10d flops = %-10.3lf effic= %.3lf %\n",
+					 N, M1, K1, M2, K2, M3, K3, ops / cost, ops / cost / (PEAK_GFLOPS * 32 * 2) * 100 / NUM);
 		fprintf(fp, "%.3lf\n", ops / cost);
 
 		free(A1);

@@ -59,11 +59,11 @@ int main()
 	bool flag = true;
 
 	FILE *fp;
-	if ((fp = fopen("../result/f32_3_flashgemm.txt", "w")) == NULL)
-	{
-		puts("Fail to open file!");
-		exit(0);
-	}
+	// if ((fp = fopen("../result/f32_3_flashgemm.txt", "w")) == NULL)
+	// {
+	// 	puts("Fail to open file!");
+	// 	exit(0);
+	// }
 
 	int j = 1;
 	// for (int j = 0; j < 10; j++)
@@ -158,13 +158,13 @@ int main()
 		{
 			printf("f32:  N=%-10d M1= %-10d K1=%-10d M2= %-10d K2=%-10d M3= %-10d K3=%-10d flops = %-10.3lf effic= %.3lf %\n",
 						 N, M1, K1, M2, K2, M3, K3, ops / cost, ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
-			fprintf(fp, "%.3lf\n", ops / cost);
+			// fprintf(fp, "%.3lf\n", ops / cost);
 		}
 		else
 		{
 			printf("f32:  N=%-10d M1= %-10d K1=%-10d M2= %-10d K2=%-10d M3= %-10d K3=%-10d error!!!\n",
 						 N, M1, K1, M2, K2, M3, K3);
-			fprintf(fp, "error! \n");
+			// fprintf(fp, "error! \n");
 		}
 
 		free(A1);

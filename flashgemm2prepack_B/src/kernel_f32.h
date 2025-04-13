@@ -1,80 +1,68 @@
 #include <stdint.h>
 
-static void FLASHGEMM_F32_KERNELm12xn32_NOPACKA(float *C, float *Cc, float *A, float *B, long M, long K, long LK, long LN, float *Bc, bool is_start_gemm, bool is_end_gemm)
+static void FLASHGEMM_F32_KERNELm12xn32(float *C, float *Cc, float *A, float *B, long M, long K, long LK, long LN, float *Bc, bool is_start_gemm, bool is_end_gemm)
 {
 	asm volatile(
 			".macro    f32_kernel_m12n32_pack_1                          \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n" // A2
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    8(%%rax), %%zmm2                         \n" // A2
 			"   vfmadd231ps        %%zmm0, %%zmm4, %%zmm8                \n" // A0*(B0-15)
 			"   vfmadd231ps        %%zmm0, %%zmm5, %%zmm9                \n" // A0*(B16-31)
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n" // A3
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    12(%%rax), %%zmm3                        \n" // A3
 			"   vfmadd231ps        %%zmm1, %%zmm4, %%zmm10               \n" // A1*(B0-15)
 			"   vfmadd231ps        %%zmm1, %%zmm5, %%zmm11               \n" // A1*(B16-31)
 
 			"   prefetcht0         256(%%rax)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n" // A4
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    16(%%rax), %%zmm0                        \n" // A4
 			"   vfmadd231ps        %%zmm2, %%zmm4, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm5, %%zmm13               \n"
 
 			"   prefetcht2         128(%%rbx)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // A5
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    20(%%rax), %%zmm1                        \n" // A5
 			"   vfmadd231ps        %%zmm3, %%zmm4, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm5, %%zmm15               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n" // A6
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    24(%%rax), %%zmm2                        \n" // A6
 			"   vfmadd231ps        %%zmm0, %%zmm4, %%zmm16               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm5, %%zmm17               \n"
 
 			"   prefetcht2         192(%%rbx)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n" // A7
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    28(%%rax), %%zmm3                        \n" // A7
 			"   vfmadd231ps        %%zmm1, %%zmm4, %%zmm18               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm5, %%zmm19               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n" // A8
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    32(%%rax), %%zmm0                        \n" // A8
 			"   vfmadd231ps        %%zmm2, %%zmm4, %%zmm20               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm5, %%zmm21               \n"
 
 			"    leaq      (%%rbx, %%r8, 4), %%rbx                       \n" // B
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // A9
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    36(%%rax), %%zmm1                        \n" // A9
 			"   vfmadd231ps        %%zmm3, %%zmm4, %%zmm22               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm5, %%zmm23               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n" // A10
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    40(%%rax), %%zmm2                        \n" // A10
 			"   vfmadd231ps        %%zmm0, %%zmm4, %%zmm24               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm5, %%zmm25               \n"
 
 			"   prefetcht0         384(%%rax)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n" // A11
-			"   addq             $4, %%r9                                \n"
-			"   movq             %%r9, %%rax                             \n"
+			"   vbroadcastss    44(%%rax), %%zmm3                        \n" // A11
 			"   vfmadd231ps        %%zmm1, %%zmm4, %%zmm26               \n"
 			"   vmovups         (%%rbx), %%zmm6                          \n" // next B0
+			"    addq              $48, %%rax                            \n" // 下一组A(已读12个)
 			"   vfmadd231ps        %%zmm1, %%zmm5, %%zmm27               \n"
 
 			"   vbroadcastss    (%%rax), %%zmm0                          \n" // next A0
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
 			"   vfmadd231ps        %%zmm2, %%zmm4, %%zmm28               \n"
 			"   vmovups         64(%%rbx), %%zmm7                        \n" // next B1
 			"   vfmadd231ps        %%zmm2, %%zmm5, %%zmm29               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // next A1
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    4(%%rax), %%zmm1                         \n" // next A1
 			"   vfmadd231ps        %%zmm3, %%zmm4, %%zmm30               \n"
 			"   vmovups         %%zmm4, (%%rbp)                          \n" // pack B0 to Bc
 			"   vfmadd231ps        %%zmm3, %%zmm5, %%zmm31               \n"
@@ -85,216 +73,188 @@ static void FLASHGEMM_F32_KERNELm12xn32_NOPACKA(float *C, float *Cc, float *A, f
 
 			".macro    f32_kernel_m12n32_pack_2                          \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n" // next A2
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    8(%%rax), %%zmm2                         \n" // next A2
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm8                \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm9                \n"
 
 			"   prefetcht0         256(%%rax)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n" // next A3
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    12(%%rax), %%zmm3                        \n" // next A3
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm10               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm11               \n"
 
 			"   prefetcht2         128(%%rbx)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n" // next A4
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    16(%%rax), %%zmm0                        \n" // next A4
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm13               \n"
 
 			"   prefetcht2         192(%%rbx)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // next A5
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    20(%%rax), %%zmm1                        \n" // next A5
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm15               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n" // next A6
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    24(%%rax), %%zmm2                        \n" // next A6
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm16               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm17               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n" // next A7
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    28(%%rax), %%zmm3                        \n" // next A7
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm18               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm19               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n" // next A8
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    32(%%rax), %%zmm0                        \n" // next A8
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm20               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm21               \n"
 
 			"    leaq      (%%rbx, %%r8, 4), %%rbx                       \n" // B
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // next A9
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    36(%%rax), %%zmm1                        \n" // next A9
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm22               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm23               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n" // next A10
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    40(%%rax), %%zmm2                        \n" // next A10
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm24               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm25               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n" // next A11
-			"   addq             $4, %%r9                                \n"
-			"   movq             %%r9, %%rax                             \n"
+			"   vbroadcastss    44(%%rax), %%zmm3                        \n" // next A11
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm26               \n"
 			"   vmovups         (%%rbx), %%zmm4                          \n" // next next B0
+			"    addq              $48, %%rax                            \n" // 下一组A(已读12个)
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm27               \n"
 
 			"   vbroadcastss    (%%rax), %%zmm0                          \n" // next next A0
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm28               \n"
 			"   vmovups         64(%%rbx), %%zmm5                        \n" // next next B1
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm29               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // next next A1
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    4(%%rax), %%zmm1                         \n" // next next A1
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm30               \n"
 			"   vmovups         %%zmm6, (%%rbp)                          \n" // pack B0 to Bc
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm31               \n"
 			"   vmovups         %%zmm7, 64(%%rbp)                        \n" // pack B1 to Bc
-			"   addq              $128, %%rbp                            \n"
+			"    addq              $128, %%rbp                           \n"
 
 			".endm                                                       \n"
 
 			".macro    f32_kernel_m12n32_pack_1_end                      \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n" // A2
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    8(%%rax), %%zmm2                         \n" // A2
 			"   vfmadd231ps        %%zmm0, %%zmm4, %%zmm8                \n" // A0*(B0-15)
 			"   vfmadd231ps        %%zmm0, %%zmm5, %%zmm9                \n" // A0*(B16-31)
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n" // A3
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    12(%%rax), %%zmm3                        \n" // A3
 			"   vfmadd231ps        %%zmm1, %%zmm4, %%zmm10               \n" // A1*(B0-15)
 			"   vfmadd231ps        %%zmm1, %%zmm5, %%zmm11               \n" // A1*(B16-31)
 
 			"   prefetcht0         256(%%rax)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n" // A4
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    16(%%rax), %%zmm0                        \n" // A4
 			"   vfmadd231ps        %%zmm2, %%zmm4, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm5, %%zmm13               \n"
 
 			"   prefetcht2         128(%%rbx)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // A5
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    20(%%rax), %%zmm1                        \n" // A5
 			"   vfmadd231ps        %%zmm3, %%zmm4, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm5, %%zmm15               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n" // A6
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    24(%%rax), %%zmm2                        \n" // A6
 			"   vfmadd231ps        %%zmm0, %%zmm4, %%zmm16               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm5, %%zmm17               \n"
 
 			"   prefetcht2         192(%%rbx)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n" // A7
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    28(%%rax), %%zmm3                        \n" // A7
 			"   vfmadd231ps        %%zmm1, %%zmm4, %%zmm18               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm5, %%zmm19               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n" // A8
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    32(%%rax), %%zmm0                        \n" // A8
 			"   vfmadd231ps        %%zmm2, %%zmm4, %%zmm20               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm5, %%zmm21               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // A9
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    36(%%rax), %%zmm1                        \n" // A9
 			"   vfmadd231ps        %%zmm3, %%zmm4, %%zmm22               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm5, %%zmm23               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n" // A10
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    40(%%rax), %%zmm2                        \n" // A10
 			"   vfmadd231ps        %%zmm0, %%zmm4, %%zmm24               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm5, %%zmm25               \n"
 
 			"   prefetcht0         384(%%rax)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n" // A11
+			"   vbroadcastss    44(%%rax), %%zmm3                        \n" // A11
 			"   vfmadd231ps        %%zmm1, %%zmm4, %%zmm26               \n"
+			"    addq              $48, %%rax                            \n" // 下一组A(已读12个)
 			"   vfmadd231ps        %%zmm1, %%zmm5, %%zmm27               \n"
 
+			"   vbroadcastss    (%%rax), %%zmm0                          \n" // next A0
 			"   vfmadd231ps        %%zmm2, %%zmm4, %%zmm28               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm5, %%zmm29               \n"
 
-			"   vmovups         %%zmm4, (%%rbp)                          \n" // pack B0 to Bc
-			"   vmovups         %%zmm5, 64(%%rbp)                        \n" // pack B1 to Bc
-
+			"   vbroadcastss    4(%%rax), %%zmm1                         \n" // next A1
 			"   vfmadd231ps        %%zmm3, %%zmm4, %%zmm30               \n"
+			"   vmovups         %%zmm4, (%%rbp)                          \n" // pack B0 to Bc
 			"   vfmadd231ps        %%zmm3, %%zmm5, %%zmm31               \n"
-
-			"   addq              $128, %%rbp                            \n"
+			"   vmovups         %%zmm5, 64(%%rbp)                        \n" // pack B1 to Bc
+			"    addq              $128, %%rbp                           \n"
 
 			".endm                                                       \n"
 
 			".macro    f32_kernel_m12n32_pack_2_end                      \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n" // next A2
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    8(%%rax), %%zmm2                         \n" // next A2
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm8                \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm9                \n"
 
 			"   prefetcht0         256(%%rax)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n" // next A3
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    12(%%rax), %%zmm3                        \n" // next A3
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm10               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm11               \n"
 
 			"   prefetcht2         128(%%rbx)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n" // next A4
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    16(%%rax), %%zmm0                        \n" // next A4
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm13               \n"
 
 			"   prefetcht2         192(%%rbx)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // next A5
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    20(%%rax), %%zmm1                        \n" // next A5
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm15               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n" // next A6
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    24(%%rax), %%zmm2                        \n" // next A6
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm16               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm17               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n" // next A7
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    28(%%rax), %%zmm3                        \n" // next A7
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm18               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm19               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n" // next A8
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    32(%%rax), %%zmm0                        \n" // next A8
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm20               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm21               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // next A9
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    36(%%rax), %%zmm1                        \n" // next A9
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm22               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm23               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n" // next A10
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    40(%%rax), %%zmm2                        \n" // next A10
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm24               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm25               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n" // next A11
-			"   addq            $4, %%rax                                \n"
-			"   movq            %%rax, %%r9                              \n"
+			"   vbroadcastss    44(%%rax), %%zmm3                        \n" // next A11
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm26               \n"
+			"    addq              $48, %%rax                            \n" // 下一组A(已读12个)
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm27               \n"
 
+			"   vbroadcastss    (%%rax), %%zmm0                          \n" // next next A0
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm28               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm29               \n"
 
+			"   vbroadcastss    4(%%rax), %%zmm1                         \n" // next next A1
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm30               \n"
 			"   vmovups         %%zmm6, (%%rbp)                          \n" // pack B0 to Bc
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm31               \n"
@@ -306,195 +266,162 @@ static void FLASHGEMM_F32_KERNELm12xn32_NOPACKA(float *C, float *Cc, float *A, f
 			// ---------------------------------------------------------------
 
 			".macro    f32_kernel_m12n32_1                               \n"
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    8(%%rax), %%zmm2                         \n"
 			"   vfmadd231ps        %%zmm0, %%zmm4, %%zmm8                \n"
 			"   vfmadd231ps        %%zmm0, %%zmm5, %%zmm9                \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    12(%%rax), %%zmm3                        \n"
+
 			"   vfmadd231ps        %%zmm1, %%zmm4, %%zmm10               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm5, %%zmm11               \n"
 
 			"   prefetcht0         256(%%rax)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    16(%%rax), %%zmm0                        \n"
 			"   vfmadd231ps        %%zmm2, %%zmm4, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm5, %%zmm13               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    20(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm4, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm5, %%zmm15               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    24(%%rax), %%zmm2                        \n"
 			"   vfmadd231ps        %%zmm0, %%zmm4, %%zmm16               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm5, %%zmm17               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    28(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm4, %%zmm18               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm5, %%zmm19               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    32(%%rax), %%zmm0                        \n"
 			"   vfmadd231ps        %%zmm2, %%zmm4, %%zmm20               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm5, %%zmm21               \n"
 
 			"    addq              $128, %%rbx                           \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    36(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm4, %%zmm22               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm5, %%zmm23               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    40(%%rax), %%zmm2                        \n"
 			"   vfmadd231ps        %%zmm0, %%zmm4, %%zmm24               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm5, %%zmm25               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   addq             $4, %%r9                                \n"
-			"   movq             %%r9, %%rax                             \n"
+			"   vbroadcastss    44(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm4, %%zmm26               \n"
 			"   vmovdqu16         (%%rbx), %%zmm6                        \n"
+			"    addq              $48, %%rax                            \n"
 			"   vfmadd231ps        %%zmm1, %%zmm5, %%zmm27               \n"
 
 			"   vbroadcastss    (%%rax), %%zmm0                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
 			"   vfmadd231ps        %%zmm2, %%zmm4, %%zmm28               \n"
 			"   vmovdqu16         64(%%rbx), %%zmm7                      \n"
 			"   vfmadd231ps        %%zmm2, %%zmm5, %%zmm29               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    4(%%rax), %%zmm1                         \n"
 			"   vfmadd231ps        %%zmm3, %%zmm4, %%zmm30               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm5, %%zmm31               \n"
 			".endm                                                       \n"
 
 			".macro    f32_kernel_m12n32_2                               \n"
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    8(%%rax), %%zmm2                         \n"
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm8                \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm9                \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    12(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm10               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm11               \n"
 
 			"   prefetcht0         256(%%rax)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    16(%%rax), %%zmm0                        \n"
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm13               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    20(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm15               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    24(%%rax), %%zmm2                        \n"
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm16               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm17               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    28(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm18               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm19               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    32(%%rax), %%zmm0                        \n"
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm20               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm21               \n"
 
 			"   addq              $128, %%rbx                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    36(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm22               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm23               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    40(%%rax), %%zmm2                        \n"
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm24               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm25               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   addq             $4, %%r9                                \n"
-			"   movq             %%r9, %%rax                             \n"
+			"   vbroadcastss    44(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm26               \n"
 			"   vmovdqu16         (%%rbx), %%zmm4                        \n"
+			"    addq              $48, %%rax                            \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm27               \n"
 
 			"   vbroadcastss    (%%rax), %%zmm0                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm28               \n"
 			"   vmovdqu16         64(%%rbx), %%zmm5                      \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm29               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    4(%%rax), %%zmm1                         \n"
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm30               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm31               \n"
 			".endm                                                       \n"
 
 			".macro    f32_kernel_m12n32_end                             \n"
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    8(%%rax), %%zmm2                         \n"
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm8                \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm9                \n"
+			"   vbroadcastss    12(%%rax), %%zmm3                        \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm10               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm11               \n"
 
 			"   prefetcht0         256(%%rax)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    16(%%rax), %%zmm0                        \n"
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm13               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    20(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm15               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    24(%%rax), %%zmm2                        \n"
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm16               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm17               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    28(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm18               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm19               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    32(%%rax), %%zmm0                        \n"
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm20               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm21               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    36(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm22               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm23               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    40(%%rax), %%zmm2                        \n"
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm24               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm25               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   addq             $4, %%rax                               \n"
-			"   movq             %%rax, %%r9                             \n"
+			"   vbroadcastss    44(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm26               \n"
+			"   addq               $48, %%rax                            \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm27               \n"
 
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm28               \n"
@@ -585,134 +512,114 @@ static void FLASHGEMM_F32_KERNELm12xn32_NOPACKA(float *C, float *Cc, float *A, f
 			//-----------------------------------------------------------------
 
 			".macro    f32_kernel_m8n32_1                                \n"
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    8(%%rax), %%zmm2                         \n"
 			"   vfmadd231ps        %%zmm0, %%zmm4, %%zmm8                \n"
 			"   vfmadd231ps        %%zmm0, %%zmm5, %%zmm9                \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    12(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm4, %%zmm10               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm5, %%zmm11               \n"
 
 			"   prefetcht0      256(%%rax)                               \n"
 			"   addq             $128, %%rbx                             \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    16(%%rax), %%zmm0                        \n"
 			"   vfmadd231ps        %%zmm2, %%zmm4, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm5, %%zmm13               \n"
 			"   vmovdqu16        (%%rbx), %%zmm6                         \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    20(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm4, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm5, %%zmm15               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    24(%%rax), %%zmm2                        \n"
 			"   vfmadd231ps        %%zmm0, %%zmm4, %%zmm16               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm5, %%zmm17               \n"
 			"   vmovdqu16        64(%%rbx), %%zmm7                       \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   addq             $4, %%r9                                \n"
-			"   movq             %%r9, %%rax                             \n"
+			"   vbroadcastss    28(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm4, %%zmm18               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm5, %%zmm19               \n"
 
+			"   addq              $32, %%rax                             \n"
 			"   vbroadcastss     (%%rax), %%zmm0                         \n"
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
 			"   vfmadd231ps        %%zmm2, %%zmm4, %%zmm20               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm5, %%zmm21               \n"
 
-			"   vbroadcastss     (%%rax), %%zmm1                         \n"
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
+			"   vbroadcastss     4(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm4, %%zmm22               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm5, %%zmm23               \n"
 			".endm                                                       \n"
 
 			".macro    f32_kernel_m8n32_2                                \n"
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    8(%%rax), %%zmm2                         \n"
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm8                \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm9                \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    12(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm10               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm11               \n"
 
 			"   prefetcht0         256(%%rax)                            \n"
 			"   addq              $128, %%rbx                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    16(%%rax), %%zmm0                        \n"
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm13               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    20(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm15               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    24(%%rax), %%zmm2                        \n"
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm16               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm17               \n"
 			"   vmovdqu16       (%%rbx), %%zmm4                          \n"
 
-			"   vbroadcastss     (%%rax), %%zmm3                         \n"
-			"   addq             $4, %%r9                                \n"
-			"   movq             %%r9, %%rax                             \n"
+			"   vbroadcastss    28(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm18               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm19               \n"
 			"   vmovdqu16       64(%%rbx), %%zmm5                        \n"
 
+			"   addq             $32, %%rax                              \n"
+
 			"   vbroadcastss    (%%rax), %%zmm0                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm20               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm21               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    4(%%rax), %%zmm1                         \n"
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm22               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm23               \n"
 			".endm                                                       \n"
 
 			".macro    f32_kernel_m8n32_end                              \n"
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    8(%%rax), %%zmm2                         \n"
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm8                \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm9                \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    12(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm10               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm11               \n"
 
 			"   prefetcht0         256(%%rax)                            \n"
 
-			"   vbroadcastss    (%%rax), %%zmm0                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    16(%%rax), %%zmm0                        \n"
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm13               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm1                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    20(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm15               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    24(%%rax), %%zmm2                        \n"
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm16               \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm17               \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   addq             $4, %%rax                               \n"
-			"   movq             %%rax, %%r9                             \n"
+			"   vbroadcastss    28(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm18               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm19               \n"
+
+			"   addq             $32, %%rax                              \n"
 
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm20               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm21               \n"
@@ -777,78 +684,70 @@ static void FLASHGEMM_F32_KERNELm12xn32_NOPACKA(float *C, float *Cc, float *A, f
 			//-----------------------------------------------------------------
 
 			".macro    f32_kernel_m4n32_1                                \n"
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq            (%%rax, %%r15, 4), %%rax                 \n"
+			"   vbroadcastss    8(%%rax), %%zmm2                         \n"
 			"   vfmadd231ps        %%zmm0, %%zmm4, %%zmm8                \n"
 			"   vfmadd231ps        %%zmm0, %%zmm5, %%zmm9                \n"
 			"   addq             $128, %%rbx                             \n"
 			"   vmovdqu16        (%%rbx), %%zmm6                         \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   addq             $4, %%r9                                \n"
-			"   movq             %%r9, %%rax                             \n"
+			"   vbroadcastss    12(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm4, %%zmm10               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm5, %%zmm11               \n"
 			"   vmovdqu16        64(%%rbx), %%zmm7                       \n"
 
 			"   prefetcht0      256(%%rax)                               \n"
+			"   addq              $16, %%rax                             \n"
 
 			"   vbroadcastss     (%%rax), %%zmm0                         \n"
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
 			"   vfmadd231ps        %%zmm2, %%zmm4, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm5, %%zmm13               \n"
 
-			"   vbroadcastss     (%%rax), %%zmm1                         \n"
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
+			"   vbroadcastss     4(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm4, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm5, %%zmm15               \n"
 			".endm                                                       \n"
 
 			".macro    f32_kernel_m4n32_2                                \n"
-			"   vbroadcastss     (%%rax), %%zmm2                         \n"
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
+			"   vbroadcastss     8(%%rax), %%zmm2                        \n"
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm8                \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm9                \n"
 			"   addq             $128, %%rbx                             \n"
 			"   vmovdqu16        (%%rbx), %%zmm4                         \n"
 
-			"   vbroadcastss     (%%rax), %%zmm3                         \n"
-			"   addq             $4, %%r9                                \n"
-			"   movq             %%r9, %%rax                             \n"
+			"   vbroadcastss     12(%%rax), %%zmm3                       \n"
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm10               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm11               \n"
 			"   vmovdqu16        64(%%rbx), %%zmm5                       \n"
 
 			"   prefetcht0         256(%%rax)                            \n"
+			"   addq             $16, %%rax                              \n"
 
 			"   vbroadcastss     (%%rax), %%zmm0                         \n"
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm13               \n"
 
-			"   vbroadcastss     (%%rax), %%zmm1                         \n"
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
+			"   vbroadcastss     4(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm15               \n"
 			".endm                                                       \n"
 
 			".macro    f32_kernel_m4n32_end                              \n"
-			"   vbroadcastss    (%%rax), %%zmm2                          \n"
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
+			"   vbroadcastss    8(%%rax), %%zmm2                         \n"
 			"   vfmadd231ps        %%zmm0, %%zmm6, %%zmm8                \n"
 			"   vfmadd231ps        %%zmm0, %%zmm7, %%zmm9                \n"
 
-			"   vbroadcastss    (%%rax), %%zmm3                          \n"
-			"   addq             $4, %%rax                               \n"
-			"   movq             %%rax, %%r9                             \n"
+			"   vbroadcastss    12(%%rax), %%zmm3                        \n"
 			"   vfmadd231ps        %%zmm1, %%zmm6, %%zmm10               \n"
 			"   vfmadd231ps        %%zmm1, %%zmm7, %%zmm11               \n"
 
 			"   prefetcht0         256(%%rax)                            \n"
 
+			"   addq             $16, %%rax                              \n"
+			"   vbroadcastss     (%%rax), %%zmm0                         \n"
 			"   vfmadd231ps        %%zmm2, %%zmm6, %%zmm12               \n"
 			"   vfmadd231ps        %%zmm2, %%zmm7, %%zmm13               \n"
 
+			"   vbroadcastss     4(%%rax), %%zmm1                        \n"
 			"   vfmadd231ps        %%zmm3, %%zmm6, %%zmm14               \n"
 			"   vfmadd231ps        %%zmm3, %%zmm7, %%zmm15               \n"
 			".endm                                                       \n"
@@ -928,10 +827,8 @@ static void FLASHGEMM_F32_KERNELm12xn32_NOPACKA(float *C, float *Cc, float *A, f
 			"   vpxorq         %%zmm17, %%zmm17, %%zmm17                 \n"
 			"   vpxorq         %%zmm18, %%zmm18, %%zmm18                 \n"
 			"   vpxorq         %%zmm19, %%zmm19, %%zmm19                 \n"
-			"   vbroadcastss   (%%rax), %%zmm0                           \n" // A0
-			"   leaq           (%%rax, %%r15, 4), %%rax                  \n"
-			"   vbroadcastss   (%%rax), %%zmm1                           \n" // A1
-			"   leaq           (%%rax, %%r15, 4), %%rax                  \n"
+			"   vbroadcastss    (%%rax), %%zmm0                          \n" // A0
+			"   vbroadcastss    4(%%rax), %%zmm1                         \n" // A1
 			"   vpxorq         %%zmm20, %%zmm20, %%zmm20                 \n"
 			"   vpxorq         %%zmm21, %%zmm21, %%zmm21                 \n"
 			"   vpxorq         %%zmm22, %%zmm22, %%zmm22                 \n"
@@ -1006,9 +903,7 @@ static void FLASHGEMM_F32_KERNELm12xn32_NOPACKA(float *C, float *Cc, float *A, f
 			"   vpxorq         %%zmm18, %%zmm18, %%zmm18                 \n"
 			"   vpxorq         %%zmm19, %%zmm19, %%zmm19                 \n"
 			"   vbroadcastss    (%%rax), %%zmm0                          \n" // A0
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // A1
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
+			"   vbroadcastss    4(%%rax), %%zmm1                         \n" // A1
 			"   vpxorq         %%zmm20, %%zmm20, %%zmm20                 \n"
 			"   vpxorq         %%zmm21, %%zmm21, %%zmm21                 \n"
 			"   vpxorq         %%zmm22, %%zmm22, %%zmm22                 \n"
@@ -1094,9 +989,7 @@ static void FLASHGEMM_F32_KERNELm12xn32_NOPACKA(float *C, float *Cc, float *A, f
 			"   vpxorq         %%zmm14, %%zmm14, %%zmm14                 \n"
 			"   vpxorq         %%zmm15, %%zmm15, %%zmm15                 \n"
 			"   vbroadcastss    (%%rax), %%zmm0                          \n" // A0
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // A1
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
+			"   vbroadcastss    4(%%rax), %%zmm1                         \n" // A1
 			"   vpxorq         %%zmm16, %%zmm16, %%zmm16                 \n"
 			"   vpxorq         %%zmm17, %%zmm17, %%zmm17                 \n"
 			"   vpxorq         %%zmm18, %%zmm18, %%zmm18                 \n"
@@ -1169,9 +1062,7 @@ static void FLASHGEMM_F32_KERNELm12xn32_NOPACKA(float *C, float *Cc, float *A, f
 			"   vmovups        (%%rbx), %%zmm4                           \n" // B0-15
 			"   vmovups     64(%%rbx), %%zmm5                            \n" // B16-31
 			"   vbroadcastss    (%%rax), %%zmm0                          \n" // A0
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
-			"   vbroadcastss    (%%rax), %%zmm1                          \n" // A1
-			"   leaq             (%%rax, %%r15, 4), %%rax                \n"
+			"   vbroadcastss    4(%%rax), %%zmm1                         \n" // A1
 			"   vpxorq         %%zmm8, %%zmm8, %%zmm8                    \n"
 			"   vpxorq         %%zmm9, %%zmm9, %%zmm9                    \n"
 			"   vpxorq         %%zmm10, %%zmm10, %%zmm10                 \n"
@@ -1295,7 +1186,7 @@ static void FLASHGEMM_F32_KERNELm12xn32_NOPACKA(float *C, float *Cc, float *A, f
 				"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "k1");
 }
 
-static void FLASHGEMM_F32_KERNELm12xn16_edge_NOPACKA(float *C, float *Cc, float *A, float *B, long M, long K, long LK, long LN, float *Bc, long nr, bool is_start_gemm, bool is_end_gemm)
+static void FLASHGEMM_F32_KERNELm12xn16_edge(float *C, float *Cc, float *A, float *B, long M, long K, long LK, long LN, float *Bc, long nr, bool is_start_gemm, bool is_end_gemm)
 {
 	// asm volatile(
 

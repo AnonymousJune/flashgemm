@@ -120,21 +120,22 @@ int main()
 		printf("\nB:\n");
 		show_matrix_fp32(K1, N, B);
 
+		cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M1, N, K1, 1, A1, K1, B, N, 0, C_MKL1_f32, N);
+		cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M2, N, K2, 1, A2, K2, C_MKL1_f32, N, 0, C_MKL2_f32, N);
+		cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M3, N, K3, 1, A3, K3, C_MKL2_f32, N, 0, C_MKL3_f32, N);
+
 		// test result
 		flashgemm_multi_f32f32f32(C, B, N, 3, A1, M1, K1, A2, M2, K2, A3, M3, K3); // 3 is the number of GEMMs
-
-		cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M1, N, K1, 1.0, A1, K1, B, N, 0, C_MKL1_f32, N);
+		
 		printf("\nC_MKL1_f32:\n");
 		show_matrix_fp32(M1, N, C_MKL1_f32);
 
-		cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M2, N, K2, 1.0, A2, K1, C_MKL1_f32, N, 0, C_MKL2_f32, N);
 		printf("\nC_MKL2_f32:\n");
 		show_matrix_fp32(M2, N, C_MKL2_f32);
-		
-		cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M3, N, K3, 1.0, A3, K1, C_MKL2_f32, N, 0, C_MKL3_f32, N);
 
 		printf("\nC:\n");
 		show_matrix_fp32(M3, N, C);
+
 		printf("\nC_MKL3_f32:\n");
 		show_matrix_fp32(M3, N, C_MKL3_f32);
 
@@ -158,13 +159,11 @@ int main()
 		{
 			printf("f32:  N=%-10d M1= %-10d K1=%-10d M2= %-10d K2=%-10d M3= %-10d K3=%-10d flops = %-10.3lf effic= %.3lf %\n",
 						 N, M1, K1, M2, K2, M3, K3, ops / cost, ops / cost / (PEAK_GFLOPS * 32 * 2 * 2) * 100 / NUM);
-			fprintf(fp, "%.3lf\n", ops / cost);
 		}
 		else
 		{
 			printf("f32:  N=%-10d M1= %-10d K1=%-10d M2= %-10d K2=%-10d M3= %-10d K3=%-10d error!!!\n",
 						 N, M1, K1, M2, K2, M3, K3);
-			fprintf(fp, "error! \n");
 		}
 
 		free(A1);

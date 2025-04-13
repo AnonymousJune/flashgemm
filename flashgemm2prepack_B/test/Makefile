@@ -1,7 +1,6 @@
-# source /home/wangpy/zjw/intel/oneapi/setvars.sh
 MKLROOT		= /home/wangpy/zjw/intel/oneapi/mkl/2025.0
-LDFLAGS		= -m64 -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl #-lmkl_blacs_openmpi_ilp64
-INCFLAGS	= -I$(MKLROOT)/include
+LDFLAGS		= # -m64 -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lmkl_blacs_openmpi_ilp64 -lpthread -lm -ldl
+INCFLAGS	= # -I$(MKLROOT)/include
 
 OTHER_LIBS  = -lm -fopenmp # -lmpi_cxx -lmpi
 
@@ -10,8 +9,8 @@ CFLAGS      = -O2 -g -w -fopenmp -mavx512f # -DMKL_ILP64 -m64 $(INCFLAGS)
 GDB_FLAGS   = # -gdwarf-5 -gstrict-dwarf
 LINKER      = $(CC)
 
-# SRCS        = $(wildcard *.c)
-SRCS        = test_f32_3.c
+SRCS        = $(wildcard *.c)
+# SRCS        = test_f32.c
 OBJS        = $(SRCS:.c=.o)
 TARGETS     = $(SRCS:.c=.out)
 

@@ -1,5 +1,5 @@
 # 路径配置
-BLIS_PREFIX = /home/wangpy/zjw/install/OpenBLAS
+BLIS_PREFIX = /home/wangpy/zjw/install/OpenBLAS-avx
 BLIS_INC    = $(BLIS_PREFIX)/include
 BLIS_LIB    = $(BLIS_PREFIX)/lib/libopenblas.a
 

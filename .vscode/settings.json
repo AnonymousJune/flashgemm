@@ -8,6 +8,7 @@
     "stddef.h": "c",
     "stdlib.h": "c",
     "utils.h": "c",
-    "math.h": "c"
+    "math.h": "c",
+    "random": "c"
   }
 }

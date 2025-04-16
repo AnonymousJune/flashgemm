@@ -7,6 +7,7 @@ extern "C" {
 
 #include <omp.h>
 #include "./PACK_x86.h"
+#include "./PACK_B_f32.h"
 #include "./kernel_f32.h"
 #include "./kernel_bf16.h"
 #include "./kernel_int8.h"

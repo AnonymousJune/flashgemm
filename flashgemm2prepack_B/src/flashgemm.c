@@ -33,7 +33,6 @@ void flashgemm_multi_f32f32f32(float *C, float *B, long N, int num_gemm, ...)
 	void *ptrAs[num_gemm];
 	void *ptrBs[num_gemm];
 	float *Acs[num_gemm];
-	float *Bcs[num_gemm];
 	int K_Acs[num_gemm];
 	int M_Acs[num_gemm];
 
@@ -61,17 +60,24 @@ void flashgemm_multi_f32f32f32(float *C, float *B, long N, int num_gemm, ...)
 
 		// Prepare for GEMM
 		posix_memalign(&ptrAs[i], 64, M_Acs[i] * K_Acs[i] * sizeof(float));
-		posix_memalign(&ptrBs[i], 64, NUM * K_Acs[i] * 32 * sizeof(float));
 		Acs[i] = (float *)ptrAs[i];
-		Bcs[i] = (float *)ptrBs[i];
 	}
-
 	va_end(args);
+
+	void *ptrBc0;
+	posix_memalign(&ptrBc0, 64, N * Ks[0] * sizeof(float));
+	float *Bc0 = (float *)ptrBc0;
 
 #pragma omp parallel num_threads(NUM)
 	{
 		int id = omp_get_thread_num();
 		int nr;
+
+		void *ptrBc, *ptrCc;
+		posix_memalign(&ptrBc, 64, K_Acs[0] * 32 * sizeof(float));
+		posix_memalign(&ptrCc, 64, K_Acs[0] * 32 * sizeof(float));
+		float *Bc = (float *)ptrBc;
+		float *Cc = (float *)ptrCc;
 
 		// Pack A blocks
 		for (int i = 0; i < num_gemm; i++)
@@ -96,45 +102,54 @@ void flashgemm_multi_f32f32f32(float *C, float *B, long N, int num_gemm, ...)
 			}
 		}
 
-#pragma omp barrier // Synchronize threads after packing A blocks
+		// Pack B blocks
+		int NB = (id < num_n - 1) ? nb : ((id == num_n - 1 && ne > 0) ? ne : nb); // 还没有处理边界，N只能整除32
+		NPACK_B_K16N32(NB, N, Ks[0], B + id * nb, Bc0 + id * nb * Ks[0]);
 
-		int NB = (id < num_n - 1) ? nb : ((id == num_n - 1 && ne > 0) ? ne : nb);
+#pragma omp barrier // Synchronize threads after packing
 
 		for (int j = 0; j < NB; j += nr)
 		{
 			nr = (NB - j < 32) ? (NB - j) : 32;
 			float *temp_C = C + id * nb + j;
 			float *temp_B = B + id * nb + j;
-			for (int i = 0; i < num_gemm; i++)
+
+			// GEMM 1
+			float *temp_Bc = Bc0 + (id * nb + j) * Ks[0];
+			FLASHGEMM_F32_KERNELm12xn32(temp_C, Cc, Acs[0], temp_B, Ms[0], Ks[0], K_Acs[0], N, temp_Bc, false, 0 == num_gemm - 1);
+
+			// GEMM 2,3,...
+			for (int i = 1; i < num_gemm; i++)
 			{
 				float *temp_Ac = (float *)Acs[i];
-				float *temp_Bc = Bcs[i] + id * K_Acs[i] * 32;
-				float *temp_Cc = (i == num_gemm - 1) ? NULL : (Bcs[i + 1] + id * K_Acs[i + 1] * 32);
+				float *temp_Bc = (i % 2 == 0) ? Bc : Cc;
+				float *temp_Cc = (i % 2 == 0) ? Cc : Bc;
 
 				if (nr == 32)
 				{
-					FLASHGEMM_F32_KERNELm12xn32(temp_C, temp_Cc, temp_Ac, temp_B, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, i == 0, i == num_gemm - 1);
+					FLASHGEMM_F32_KERNELm12xn32(temp_C, temp_Cc, Acs[i], temp_B, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, i == 0, i == num_gemm - 1);
 				}
 				else if (nr > 16 && nr < 32)
 				{
-					FLASHGEMM_F32_KERNELm12xn16_edge(temp_C, temp_Cc, temp_Ac, temp_B, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, 16, i == 0, i == num_gemm - 1);
-					FLASHGEMM_F32_KERNELm12xn16_edge(temp_C + 16, temp_Cc, temp_Ac, temp_B + 16, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, nr - 16, i == 0, i == num_gemm - 1);
+					FLASHGEMM_F32_KERNELm12xn16_edge(temp_C, temp_Cc, Acs[i], temp_B, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, 16, i == 0, i == num_gemm - 1);
+					FLASHGEMM_F32_KERNELm12xn16_edge(temp_C + 16, temp_Cc, Acs[i], temp_B + 16, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, nr - 16, i == 0, i == num_gemm - 1);
 				}
 				else
 				{
-					FLASHGEMM_F32_KERNELm12xn16_edge(temp_C, temp_Cc, temp_Ac, temp_B, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, nr, i == 0, i == num_gemm - 1);
+					FLASHGEMM_F32_KERNELm12xn16_edge(temp_C, temp_Cc, Acs[i], temp_B, Ms[i], Ks[i], K_Acs[i], N, temp_Bc, nr, i == 0, i == num_gemm - 1);
 				}
 			}
 		}
+		free(ptrBc);
+		free(ptrCc);
 	}
 	// Free allocated memory
 	for (int i = 0; i < num_gemm; i++)
 	{
 		free(Acs[i]);
-		free(Bcs[i]);
 	}
+	free(Bc0);
 }
-
 
 void flashgemm_multi_bf16bf16f32(float *C, uint16_t *B, long N, int num_gemm, ...)
 {
@@ -321,7 +336,7 @@ void flashgemm_multi_int8uint8int32(int *C, uint8_t *B, long N, int num_gemm, ..
 					size_block_m = Ms[i] % 12;
 				}
 
-				FLASHGEMM_NPACK((float*)AA, (float*)AAc, size_block_m, K_Acs[i] / 4, Ks[i] / 4);
+				FLASHGEMM_NPACK((float *)AA, (float *)AAc, size_block_m, K_Acs[i] / 4, Ks[i] / 4);
 			}
 		}
 

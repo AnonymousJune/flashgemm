@@ -101,6 +101,14 @@ void regular_matrix_f32(int m, int n, float *a)
     int i, j;
     for (i = 0; i < m; i++)
         for (j = 0; j < n; j++)
+            a[i * n + j] = (i + j * 0.01);
+}
+
+void regular1_matrix_f32(int m, int n, float *a)
+{
+    int i, j;
+    for (i = 0; i < m; i++)
+        for (j = 0; j < n; j++)
             a[i * n + j] = (1.0);
 }
 

@@ -1,12 +1,11 @@
 BEGIN_NPACK_B_matrix:
-   mov %[N], %%rsi
    mov %[LN], %%rdi
-   mov %[K], %%rdx
+   mov %[K], %%r8
    mov %[B], %%rbx
    mov %[Bc], %%rbp
 
-   mov  %%rdx, %%r8 
-   imul $128, %%r8  // Bc+=4(size_of_float)*K*32(nr)
+   mov  %%r8, %%rsi 
+   imul $128, %%rsi  // Bc+=4(size_of_float)*K*32(nr)
 
    mov  %%rdi, %%r9
    imul $32, %%r9   // B+=4(size_of_float)*LN*8(loop_k)
@@ -14,7 +13,7 @@ BEGIN_NPACK_B_matrix:
    mov  %%rbp, %%r10
    mov  %%rbx, %%r11
 
-   mov %%rsi, %%rcx
+   mov %[N], %%rcx
 
 
 NPACK_B_N32:
@@ -65,21 +64,21 @@ NPACK_B_N32:
    vmovups %%zmm15, 960(%%rbp)
 
    addq $128, %%rbx  // 4*32
-   addq %%r8, %%rbp
+   addq %%rsi, %%rbp
 
    subq $32, %%rcx
    cmp  $0, %%rcx
    jg   NPACK_B_N32
 
 NPACK_B_K8:
-   subq $8, %%rdx
-   cmp  $0, %%rdx
+   subq $8, %%r8
+   cmp  $0, %%r8
    je   NPACK_B_END
    addq %%r9, %%r11
    mov  %%r11, %%rbx
    addq $1024, %%r10 // K(8)*nr(32)*size_of_float(4)
    mov  %%r10, %%rbp
-   mov  %%rsi, %%rcx
+   mov  %[N], %%rcx
    jmp  NPACK_B_N32
 
-NPACK_B_END:         
+NPACK_B_END:        

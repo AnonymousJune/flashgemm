@@ -1,12 +1,11 @@
 "BEGIN_NPACK_B_matrix:                                       \n"
-"   mov %[N], %%rsi                                          \n"
 "   mov %[LN], %%rdi                                         \n"
-"   mov %[K], %%rdx                                          \n"
+"   mov %[K], %%r8                                           \n"
 "   mov %[B], %%rbx                                          \n"
 "   mov %[Bc], %%rbp                                         \n"
 
-"   mov  %%rdx, %%r8                                         \n"
-"   imul $128, %%r8                                          \n"// Bc+=4(size_of_float)*K*32(nr)
+"   mov  %%r8, %%rsi                                         \n"
+"   imul $128, %%rsi                                         \n"// Bc+=4(size_of_float)*K*32(nr)
 
 "   mov  %%rdi, %%r9                                         \n"
 "   imul $32, %%r9                                           \n"// B+=4(size_of_float)*LN*8(loop_k)
@@ -14,7 +13,7 @@
 "   mov  %%rbp, %%r10                                        \n"
 "   mov  %%rbx, %%r11                                        \n"
 
-"   mov %%rsi, %%rcx                                         \n"
+"   mov %[N], %%rcx                                          \n"
 
 
 "NPACK_B_N32:                                                \n"
@@ -65,21 +64,21 @@
 "   vmovups %%zmm15, 960(%%rbp)                              \n"
 
 "   addq $128, %%rbx                                         \n"// 4*32
-"   addq %%r8, %%rbp                                         \n"
+"   addq %%rsi, %%rbp                                        \n"
 
 "   subq $32, %%rcx                                          \n"
 "   cmp  $0, %%rcx                                           \n"
 "   jg   NPACK_B_N32                                         \n"
 
 "NPACK_B_K8:                                                 \n"
-"   subq $8, %%rdx                                           \n"
-"   cmp  $0, %%rdx                                           \n"
+"   subq $8, %%r8                                            \n"
+"   cmp  $0, %%r8                                            \n"
 "   je   NPACK_B_END                                         \n"
 "   addq %%r9, %%r11                                         \n"
 "   mov  %%r11, %%rbx                                        \n"
 "   addq $1024, %%r10                                        \n"// K(8)*nr(32)*size_of_float(4)
 "   mov  %%r10, %%rbp                                        \n"
-"   mov  %%rsi, %%rcx                                        \n"
+"   mov  %[N], %%rcx                                         \n"
 "   jmp  NPACK_B_N32                                         \n"
 
 "NPACK_B_END:                                                \n"

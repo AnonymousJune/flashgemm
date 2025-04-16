@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) 启动test_f32.out的调试",
+            "name": "(gdb) 启动test_f32_3.out的调试",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/test_f32.out", // 程序可执行文件的完整路径
+            "program": "${fileDirname}/test_f32_3.out", // 程序可执行文件的完整路径
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
